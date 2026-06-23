@@ -112,6 +112,9 @@
   margin-top: 12px; padding: 10px 14px; border-radius: 10px; font-size: 0.9rem; color: #cfcfe6;
   background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.06);
 }
+.order-items { margin: 12px 0 0; padding-left: 20px; display: grid; gap: 4px; font-size: 0.9rem; color: #d6d6ec; }
+.order-items li { list-style: disc; }
+.order-files { display: flex; gap: 8px; flex-wrap: wrap; }
 .order-card__foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
 .btn--sm { padding: 8px 14px; font-size: 0.85rem; }
 .order-file-pending { color: var(--orange); font-size: 0.84rem; }

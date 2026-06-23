@@ -68,10 +68,10 @@ const DEFAULT_CONTENT = {
     desc: "Descoperă gama noastră de produse blank premium, perfecte pentru personalizare.",
     cta: "Vezi toate produsele",
     items: [
-      { img: "assets/img/prod-tricou.jpg", name: "Tricouri", desc: "De la XS la 5XL" },
-      { img: "assets/img/prod-hanorac.jpg", name: "Hanorace", desc: "Model unisex" },
-      { img: "assets/img/prod-geanta.jpg", name: "Genți", desc: "Bumbac premium" },
-      { img: "assets/img/prod-sapca.jpg", name: "Șepci", desc: "Diverse modele" },
+      { img: "assets/img/prod-tricou.jpg", name: "Tricouri", desc: "De la XS la 5XL", price: 35 },
+      { img: "assets/img/prod-hanorac.jpg", name: "Hanorace", desc: "Model unisex", price: 90 },
+      { img: "assets/img/prod-geanta.jpg", name: "Genți", desc: "Bumbac premium", price: 25 },
+      { img: "assets/img/prod-sapca.jpg", name: "Șepci", desc: "Diverse modele", price: 30 },
     ],
   },
   trust: [
@@ -224,52 +224,60 @@ async function handleOrders(request, env, segs) {
   // segs: ["orders"] | ["orders", id] | ["orders", id, "file"]
   const id = segs[1];
 
-  // POST /api/orders  — public (plasare comandă)
+  // POST /api/orders — plasare comandă (necesită cont)
   if (!id && request.method === "POST") {
     if (!env.CONTENT) return err("Stocare neconfigurată.", 503);
+    const cust = await getCustomer(request, env);
+    if (!cust) return err("Trebuie să fii autentificat pentru a comanda.", 401);
+
+    const oid = genId();
+    let f = {}, items = [], fileList = [];
     const ct = request.headers.get("Content-Type") || "";
-    let f = {}, file = null;
     if (ct.includes("multipart/form-data")) {
       const form = await request.formData();
       form.forEach((v, k) => { if (typeof v === "string") f[k] = v; });
-      const up = form.get("file");
-      if (up && typeof up !== "string" && up.size > 0) file = up;
+      try { items = JSON.parse(f.items || "[]"); } catch { items = []; }
+      fileList = form.getAll("file").filter((x) => x && typeof x !== "string" && x.size > 0);
     } else {
       f = await request.json().catch(() => ({}));
+      items = Array.isArray(f.items) ? f.items : [];
     }
-    if (!f.name || !f.name.trim()) return err("Numele este obligatoriu.");
-    if (!f.phone && !f.email) return err("Adaugă un telefon sau un email.");
 
-    const content = await getContent(env);
-    const ppm = Number((content.order && content.order.pricePerMeter) || 25);
-    const length = Math.max(0, Number(f.length) || 0);
-    const width = Math.max(0, Number(f.width) || 0);
+    if (!Array.isArray(items) || !items.length) return err("Coșul este gol.");
+    const cleanItems = items.slice(0, 100).map((it) => {
+      const o = {
+        type: it.type === "dtf" ? "dtf" : "product",
+        name: String(it.name || "").slice(0, 140),
+        qty: Math.max(1, Math.min(999, Math.round(Number(it.qty) || 1))),
+        price: Math.max(0, Number(it.price) || 0),
+      };
+      if (o.type === "dtf") { o.width = Math.max(0, Number(it.width) || 0); o.length = Math.max(0, Number(it.length) || 0); }
+      return o;
+    });
+    const total = Number(cleanItems.reduce((s, it) => s + it.price * it.qty, 0).toFixed(2));
 
+    const storedFiles = [];
+    let fi = 0;
+    for (const file of fileList) {
+      if (file.size > MAX_FILE_BYTES) return err("Fișier prea mare (max " + MAX_FILE_MB + " MB).");
+      const key = FILE_PREFIX + oid + ":" + fi;
+      await env.CONTENT.put(key, await file.arrayBuffer());
+      storedFiles.push({ name: file.name, size: file.size, type: file.type || "application/octet-stream", key });
+      fi++;
+    }
+
+    const user = await env.CONTENT.get(USER_PREFIX + cust.sub, "json");
     const order = {
-      id: genId(),
-      createdAt: new Date().toISOString(),
-      status: "Nouă",
-      name: String(f.name).slice(0, 120),
-      phone: String(f.phone || "").slice(0, 40),
-      email: String(f.email || "").slice(0, 120),
-      width, length,
-      price: Number((length * ppm).toFixed(2)),
-      message: String(f.message || "").slice(0, 2000),
-      file: null,
+      id: oid, createdAt: new Date().toISOString(), status: "Nouă",
+      userId: cust.sub,
+      name: (user && user.name) || cust.name || "",
+      email: cust.sub,
+      phone: (user && user.phone) || "",
+      note: String(f.note || "").slice(0, 2000),
+      items: cleanItems, total, files: storedFiles,
     };
-
-    if (file) {
-      if (file.size > MAX_FILE_BYTES) {
-        return err("Fișier prea mare (max " + MAX_FILE_MB + " MB). Trimite-l separat pe email.");
-      }
-      const meta = { name: file.name, size: file.size, type: file.type || "application/octet-stream" };
-      const fileKey = FILE_PREFIX + order.id;
-      await env.CONTENT.put(fileKey, await file.arrayBuffer());
-      order.file = { ...meta, key: fileKey };
-    }
-
-    await env.CONTENT.put(ORDER_PREFIX + order.id, JSON.stringify(order));
-    return json({ ok: true, id: order.id });
+    await env.CONTENT.put(ORDER_PREFIX + oid, JSON.stringify(order));
+    return json({ ok: true, id: oid });
   }
 
   // de aici încolo — doar admin
@@ -280,16 +288,21 @@ async function handleOrders(request, env, segs) {
     return json({ orders: await listOrders(env), statuses: STATUSES });
   }
 
-  // GET /api/orders/:id/file — descărcare fișier
+  // GET /api/orders/:id/file?i=<index> — descărcare fișier design
   if (id && segs[2] === "file" && request.method === "GET") {
     const o = await env.CONTENT.get(ORDER_PREFIX + id, "json");
-    if (!o || !o.file || !o.file.key) return err("Fișier inexistent.", 404);
-    const buf = await env.CONTENT.get(o.file.key, "arrayBuffer");
+    if (!o) return err("Comandă inexistentă.", 404);
+    const i = parseInt(new URL(request.url).searchParams.get("i") || "0", 10) || 0;
+    let f = null;
+    if (Array.isArray(o.files) && o.files[i]) f = o.files[i];
+    else if (o.file && i === 0) f = o.file; // compat comenzi vechi
+    if (!f || !f.key) return err("Fișier inexistent.", 404);
+    const buf = await env.CONTENT.get(f.key, "arrayBuffer");
     if (!buf) return err("Fișier inexistent.", 404);
     return new Response(buf, {
       headers: {
-        "Content-Type": o.file.type || "application/octet-stream",
-        "Content-Disposition": `attachment; filename="${sanitize(o.file.name)}"`,
+        "Content-Type": f.type || "application/octet-stream",
+        "Content-Disposition": `attachment; filename="${sanitize(f.name)}"`,
         "Cache-Control": "no-store",
       },
     });
@@ -309,7 +322,10 @@ async function handleOrders(request, env, segs) {
   // DELETE /api/orders/:id
   if (id && request.method === "DELETE") {
     const o = await env.CONTENT.get(ORDER_PREFIX + id, "json");
-    if (o && o.file && o.file.key) await env.CONTENT.delete(o.file.key);
+    if (o) {
+      if (Array.isArray(o.files)) { for (const f of o.files) { if (f.key) await env.CONTENT.delete(f.key); } }
+      if (o.file && o.file.key) await env.CONTENT.delete(o.file.key);
+    }
     await env.CONTENT.delete(ORDER_PREFIX + id);
     return json({ ok: true });
   }
