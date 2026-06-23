@@ -15,6 +15,7 @@ const KV_KEY = "home";
 const ORDER_PREFIX = "order:";
 const FILE_PREFIX = "orderfile:";
 const MEDIA_PREFIX = "media:";
+const USER_PREFIX = "user:";
 const MAX_FILE_MB = 20;
 const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
 const MAX_IMG_MB = 5;
@@ -144,11 +145,45 @@ function timingSafeEqual(a, b) {
   for (let i = 0; i < a.length; i++) out |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return out === 0;
 }
+function bearer(request) {
+  return (request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
+}
 async function requireAuth(request, env) {
   if (!env.JWT_SECRET) return false;
-  const token = (request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
-  return token ? !!(await verifyJWT(token, env.JWT_SECRET)) : false;
+  const token = bearer(request);
+  if (!token) return false;
+  const p = await verifyJWT(token, env.JWT_SECRET);
+  return !!(p && p.role === "admin");
 }
+async function getCustomer(request, env) {
+  if (!env.JWT_SECRET) return null;
+  const token = bearer(request);
+  if (!token) return null;
+  const p = await verifyJWT(token, env.JWT_SECRET);
+  return p && p.role === "customer" ? p : null;
+}
+
+// ---- Parole (PBKDF2-SHA256) ----
+function bytesToB64(bytes) {
+  let s = "";
+  for (const b of bytes) s += String.fromCharCode(b);
+  return btoa(s);
+}
+function b64ToBytes(s) {
+  return Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+}
+async function hashPassword(password, saltB64) {
+  const salt = saltB64 ? b64ToBytes(saltB64) : crypto.getRandomValues(new Uint8Array(16));
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" }, key, 256);
+  return { salt: bytesToB64(salt), hash: bytesToB64(new Uint8Array(bits)) };
+}
+async function verifyPassword(password, saltB64, hashB64) {
+  const { hash } = await hashPassword(password, saltB64);
+  return timingSafeEqual(hash, hashB64);
+}
+function normEmail(e) { return String(e || "").trim().toLowerCase(); }
+function validEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
 
 // ---- Content ----
 async function getContent(env) {
@@ -282,6 +317,54 @@ async function handleOrders(request, env, segs) {
   return err("Endpoint inexistent.", 404);
 }
 
+async function handleAuth(request, env, segs) {
+  const action = segs[1];
+  if (action === "register" && request.method === "POST") {
+    if (!env.CONTENT || !env.JWT_SECRET) return err("Conturi neconfigurate.", 503);
+    const b = await request.json().catch(() => ({}));
+    const email = normEmail(b.email);
+    if (!validEmail(email)) return err("Email invalid.");
+    if (!b.password || String(b.password).length < 6) return err("Parola trebuie să aibă minim 6 caractere.");
+    if (!b.name || !b.name.trim()) return err("Numele este obligatoriu.");
+    if (await env.CONTENT.get(USER_PREFIX + email)) return err("Există deja un cont cu acest email.", 409);
+    const { salt, hash } = await hashPassword(String(b.password));
+    const user = {
+      id: genId(), email, name: String(b.name).slice(0, 120),
+      phone: String(b.phone || "").slice(0, 40), salt, hash, createdAt: new Date().toISOString(),
+    };
+    await env.CONTENT.put(USER_PREFIX + email, JSON.stringify(user));
+    const token = await signJWT({ role: "customer", sub: email, name: user.name, email }, env.JWT_SECRET);
+    return json({ ok: true, token, user: { email, name: user.name, phone: user.phone } });
+  }
+
+  if (action === "login" && request.method === "POST") {
+    if (!env.CONTENT || !env.JWT_SECRET) return err("Conturi neconfigurate.", 503);
+    const b = await request.json().catch(() => ({}));
+    const email = normEmail(b.email);
+    const user = await env.CONTENT.get(USER_PREFIX + email, "json");
+    if (!user || !(await verifyPassword(String(b.password || ""), user.salt, user.hash))) {
+      return err("Email sau parolă greșite.", 401);
+    }
+    const token = await signJWT({ role: "customer", sub: email, name: user.name, email }, env.JWT_SECRET);
+    return json({ ok: true, token, user: { email, name: user.name, phone: user.phone } });
+  }
+
+  // restul — client autentificat
+  const cust = await getCustomer(request, env);
+  if (!cust) return err("Neautorizat.", 401);
+
+  if (action === "me" && request.method === "GET") {
+    const user = await env.CONTENT.get(USER_PREFIX + cust.sub, "json");
+    if (!user) return err("Cont inexistent.", 404);
+    return json({ email: user.email, name: user.name, phone: user.phone });
+  }
+  if (action === "orders" && request.method === "GET") {
+    const all = await listOrders(env);
+    return json({ orders: all.filter((o) => o.userId === cust.sub) });
+  }
+  return err("Endpoint inexistent.", 404);
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -319,6 +402,8 @@ export default {
             return json({ ok: true, content: DEFAULT_CONTENT });
           }
         }
+
+        if (segs[0] === "auth") return handleAuth(request, env, segs);
 
         if (segs[0] === "orders") return handleOrders(request, env, segs);
 
