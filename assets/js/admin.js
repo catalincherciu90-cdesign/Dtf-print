@@ -310,7 +310,7 @@
             "\" data-name=\"" + esc(o.file.name) + "\">⬇ " + esc(o.file.name) + "</button>";
         } else {
           fileRow = "<span class=\"order-file-pending\">📎 " + esc(o.file.name) +
-            " (nestocat — R2 neconfigurat)</span>";
+            " (fișier indisponibil)</span>";
         }
       } else {
         fileRow = "<span class=\"order-meta\">Fără fișier atașat</span>";

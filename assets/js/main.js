@@ -182,7 +182,13 @@
       fd.append("message", document.getElementById("ordMessage").value || "");
       fd.append("width", width ? width.value : "");
       fd.append("length", length ? length.value : "");
-      if (fileInput && fileInput.files && fileInput.files.length) fd.append("file", fileInput.files[0]);
+      if (fileInput && fileInput.files && fileInput.files.length) {
+        var fobj = fileInput.files[0];
+        if (fobj.size > 20 * 1024 * 1024) {
+          return setOrderMsg("Fișierul e prea mare (max 20 MB). Trimite-l separat pe email.", true);
+        }
+        fd.append("file", fobj);
+      }
 
       orderSubmit.disabled = true;
       setOrderMsg("Se trimite comanda…", false);

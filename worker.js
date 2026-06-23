@@ -4,8 +4,8 @@
 //
 // Bindings (vezi wrangler.jsonc):
 //   ASSETS   – static assets (site-ul)
-//   CONTENT  – KV namespace (conținut sub cheia "home" + comenzi sub "order:*")
-//   UPLOADS  – R2 bucket pentru fișierele de design (opțional)
+//   CONTENT  – KV namespace: conținut ("home"), comenzi ("order:*"),
+//              fișiere design ("orderfile:*", max 20 MB, stocate ca bytes)
 // Secrets:
 //   ADMIN_PASSWORD – parola de login în /admin
 //   JWT_SECRET     – cheie pentru semnarea token-ului
@@ -13,6 +13,9 @@
 
 const KV_KEY = "home";
 const ORDER_PREFIX = "order:";
+const FILE_PREFIX = "orderfile:";
+const MAX_FILE_MB = 20;
+const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
 const STATUSES = ["Nouă", "În lucru", "Trimisă", "Finalizată", "Anulată"];
 
 // ---- Conținut implicit (folosit dacă KV e gol) ----
@@ -213,16 +216,13 @@ async function handleOrders(request, env, segs) {
     };
 
     if (file) {
-      const meta = { name: file.name, size: file.size, type: file.type || "application/octet-stream" };
-      if (env.UPLOADS) {
-        if (file.size > 50 * 1024 * 1024) return err("Fișier prea mare (max 50 MB).");
-        const key = `orders/${order.id}/${sanitize(file.name)}`;
-        await env.UPLOADS.put(key, file.stream(), { httpMetadata: { contentType: meta.type } });
-        order.file = { ...meta, key };
-      } else {
-        // R2 neconfigurat — păstrăm doar numele, ca să știi că există un fișier
-        order.file = { ...meta, key: null, pending: true };
+      if (file.size > MAX_FILE_BYTES) {
+        return err("Fișier prea mare (max " + MAX_FILE_MB + " MB). Trimite-l separat pe email.");
       }
+      const meta = { name: file.name, size: file.size, type: file.type || "application/octet-stream" };
+      const fileKey = FILE_PREFIX + order.id;
+      await env.CONTENT.put(fileKey, await file.arrayBuffer());
+      order.file = { ...meta, key: fileKey };
     }
 
     await env.CONTENT.put(ORDER_PREFIX + order.id, JSON.stringify(order));
@@ -241,10 +241,9 @@ async function handleOrders(request, env, segs) {
   if (id && segs[2] === "file" && request.method === "GET") {
     const o = await env.CONTENT.get(ORDER_PREFIX + id, "json");
     if (!o || !o.file || !o.file.key) return err("Fișier inexistent.", 404);
-    if (!env.UPLOADS) return err("R2 neconfigurat.", 503);
-    const obj = await env.UPLOADS.get(o.file.key);
-    if (!obj) return err("Fișier inexistent în R2.", 404);
-    return new Response(obj.body, {
+    const buf = await env.CONTENT.get(o.file.key, "arrayBuffer");
+    if (!buf) return err("Fișier inexistent.", 404);
+    return new Response(buf, {
       headers: {
         "Content-Type": o.file.type || "application/octet-stream",
         "Content-Disposition": `attachment; filename="${sanitize(o.file.name)}"`,
@@ -267,7 +266,7 @@ async function handleOrders(request, env, segs) {
   // DELETE /api/orders/:id
   if (id && request.method === "DELETE") {
     const o = await env.CONTENT.get(ORDER_PREFIX + id, "json");
-    if (o && o.file && o.file.key && env.UPLOADS) await env.UPLOADS.delete(o.file.key);
+    if (o && o.file && o.file.key) await env.CONTENT.delete(o.file.key);
     await env.CONTENT.delete(ORDER_PREFIX + id);
     return json({ ok: true });
   }
@@ -286,7 +285,7 @@ export default {
         const segs = path.replace(/^\/api\//, "").replace(/\/+$/, "").split("/");
 
         if (segs[0] === "status" && request.method === "GET") {
-          return json({ ok: true, kv: !!env.CONTENT, r2: !!env.UPLOADS, auth: !!(env.JWT_SECRET && env.ADMIN_PASSWORD) });
+          return json({ ok: true, kv: !!env.CONTENT, files: !!env.CONTENT, auth: !!(env.JWT_SECRET && env.ADMIN_PASSWORD) });
         }
 
         if (segs[0] === "login" && request.method === "POST") {
