@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Admin — MrDTF</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/admin.css" />
+</head>
+<body class="admin">
+  <header class="admin__top">
+    <a class="logo" href="/">
+      <span class="logo__mark"><span class="logo__mr">Mr</span>DTF</span>
+      <span class="logo__sub">PANOU ADMIN</span>
+    </a>
+    <div class="admin__top-actions" id="topActions" hidden>
+      <a class="btn btn--ghost" href="/" target="_blank" rel="noopener">Vezi site-ul ↗</a>
+      <button class="btn btn--ghost" id="logoutBtn">Ieșire</button>
+    </div>
+  </header>
+
+  <!-- Login -->
+  <main class="admin__login" id="loginView">
+    <form class="panel login-card" id="loginForm">
+      <h1>Autentificare</h1>
+      <p class="muted">Introdu parola pentru a edita pagina principală.</p>
+      <input type="password" id="password" placeholder="Parolă" autocomplete="current-password" required />
+      <button type="submit" class="btn btn--primary btn--block" id="loginBtn">Intră în panou</button>
+      <p class="form-msg" id="loginMsg" role="alert"></p>
+    </form>
+  </main>
+
+  <!-- Editor -->
+  <main class="admin__editor container" id="editorView" hidden>
+    <div class="editor-head">
+      <div>
+        <h1>Editează pagina principală</h1>
+        <p class="muted">Modifică textele și prețurile, apoi salvează. Schimbările apar imediat pe site.</p>
+      </div>
+      <div class="editor-actions">
+        <button class="btn btn--ghost" id="resetBtn" type="button">Resetează</button>
+        <button class="btn btn--primary" id="saveBtn" type="button">💾 Salvează</button>
+      </div>
+    </div>
+    <p class="form-msg" id="editorMsg" role="status"></p>
+    <form id="form" autocomplete="off"></form>
+    <div class="editor-actions editor-actions--bottom">
+      <button class="btn btn--primary" id="saveBtn2" type="button">💾 Salvează</button>
+    </div>
+  </main>
+
+  <script src="/assets/js/admin.js"></script>
+</body>
+</html>
