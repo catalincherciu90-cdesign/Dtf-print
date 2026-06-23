@@ -126,9 +126,62 @@
       }
     } else if (value && typeof value === "object") {
       Object.keys(value).forEach(function (k) { buildInto(parent, value[k], path + "." + k); });
+    } else if (keyOf(path) === "img") {
+      parent.appendChild(mediaField(value, path));
     } else {
       field(parent, label(keyOf(path)), scalarInput(value, path));
     }
+  }
+
+  /* câmp imagine: previzualizare + buton de încărcare + cale text */
+  function mediaField(value, path) {
+    var wrap = document.createElement("div");
+    wrap.className = "edit-field media-field";
+    var span = document.createElement("span");
+    span.textContent = "Imagine produs";
+    wrap.appendChild(span);
+
+    var prev = document.createElement("img");
+    prev.className = "media-prev";
+    if (value) prev.src = value; else prev.style.display = "none";
+
+    var input = el("input", { type: "text" });
+    input.value = value == null ? "" : value;
+    input.placeholder = "URL sau cale imagine";
+    input.dataset.path = path;
+    input.addEventListener("input", function () {
+      setPath(content, path, input.value);
+      if (input.value) { prev.src = input.value; prev.style.display = ""; } else prev.style.display = "none";
+    });
+
+    var btn = document.createElement("button");
+    btn.type = "button"; btn.className = "btn btn--ghost btn--sm";
+    btn.textContent = "⬆ Încarcă imagine";
+    var file = el("input", { type: "file", accept: "image/*" });
+    file.style.display = "none";
+    btn.addEventListener("click", function () { file.click(); });
+    file.addEventListener("change", function () {
+      if (!file.files || !file.files.length) return;
+      var f = file.files[0];
+      if (f.size > 5 * 1024 * 1024) { alert("Imagine prea mare (max 5 MB)."); return; }
+      btn.disabled = true; btn.textContent = "Se încarcă…";
+      var fd = new FormData(); fd.append("file", f);
+      fetch("/api/media", { method: "POST", headers: { Authorization: "Bearer " + token }, body: fd })
+        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+        .then(function (res) {
+          btn.disabled = false; btn.textContent = "⬆ Încarcă imagine";
+          if (!res.ok) { alert(res.d.error || "Eroare la încărcare."); return; }
+          input.value = res.d.url; setPath(content, path, res.d.url);
+          prev.src = res.d.url; prev.style.display = "";
+        })
+        .catch(function () { btn.disabled = false; btn.textContent = "⬆ Încarcă imagine"; alert("Eroare de rețea."); });
+    });
+
+    var row = document.createElement("div");
+    row.className = "media-row";
+    row.appendChild(btn); row.appendChild(input);
+    wrap.appendChild(prev); wrap.appendChild(row); wrap.appendChild(file);
+    return wrap;
   }
 
   function objectCard(item, path, arrPath, index) {

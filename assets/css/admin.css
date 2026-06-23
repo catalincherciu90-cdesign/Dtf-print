@@ -56,6 +56,13 @@
 .card-del:hover { background: rgba(255, 80, 80, 0.25); }
 .btn--add { width: 100%; margin: 4px 0 4px; border-style: dashed; font-size: 0.9rem; padding: 11px; }
 
+.media-prev {
+  width: 90px; height: 90px; object-fit: contain; border-radius: 10px; padding: 6px;
+  background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); margin-bottom: 8px;
+}
+.media-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.media-row input[type="text"] { flex: 1; min-width: 160px; }
+
 .edit-field { display: grid; gap: 6px; margin-bottom: 14px; }
 .edit-field > span { font-size: 0.82rem; color: var(--muted); font-weight: 500; }
 
