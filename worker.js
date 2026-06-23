@@ -86,6 +86,10 @@ const DEFAULT_CONTENT = {
     schedule: "L–V: 09:00 – 17:00",
     copyright: "© 2024 MrDTF — Print DTF Premium. Toate drepturile rezervate.",
   },
+  banners: {
+    heroLeft: "assets/img/hero-prints.jpg",
+    heroRight: "assets/img/hero-printer.jpg",
+  },
 };
 
 // ---- Helpers HTTP ----
@@ -151,7 +155,8 @@ async function getContent(env) {
   if (env.CONTENT) {
     try {
       const stored = await env.CONTENT.get(KV_KEY, "json");
-      if (stored) return stored;
+      // merge la nivel de top — adaugă cheile noi (ex. banners) la conținutul deja salvat
+      if (stored) return { ...DEFAULT_CONTENT, ...stored };
     } catch { /* fallback */ }
   }
   return DEFAULT_CONTENT;

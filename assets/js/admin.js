@@ -32,6 +32,7 @@
     trust: "Garanții (jos)",
     footer: "Footer", tagline: "Descriere footer", phone: "Telefon", email: "Email",
     schedule: "Program", copyright: "Text copyright",
+    banners: "Bannere", heroLeft: "Banner stânga (printuri)", heroRight: "Banner dreapta (imprimantă)",
   };
   var SINGULAR = { pills: "Avantaj", items: "Produs", steps: "Pas", trust: "Garanție" };
   function label(key) {
@@ -70,7 +71,7 @@
     var form = $("form");
     form.innerHTML = "";
     Object.keys(content).forEach(function (key) {
-      if (key === "products") return; // produsele au tab propriu
+      if (key === "products" || key === "banners") return; // au tab-uri proprii
       var section = document.createElement("section");
       section.className = "edit-section";
       var h = document.createElement("h2");
@@ -94,9 +95,23 @@
     form.appendChild(section);
   }
 
-  // reconstruiește tab-ul activ (Conținut sau Produse)
+  function buildBanners() {
+    var form = $("bannersForm");
+    if (!form || !content.banners) return;
+    form.innerHTML = "";
+    var section = document.createElement("section");
+    section.className = "edit-section";
+    var h = document.createElement("h2");
+    h.textContent = "Imagini hero";
+    section.appendChild(h);
+    buildInto(section, content.banners, "banners");
+    form.appendChild(section);
+  }
+
+  // reconstruiește tab-ul activ
   function rerender() {
-    if ($("tab-products") && !$("tab-products").hidden) buildProducts();
+    if ($("tab-banners") && !$("tab-banners").hidden) buildBanners();
+    else if ($("tab-products") && !$("tab-products").hidden) buildProducts();
     else buildForm();
   }
 
@@ -126,19 +141,19 @@
       }
     } else if (value && typeof value === "object") {
       Object.keys(value).forEach(function (k) { buildInto(parent, value[k], path + "." + k); });
-    } else if (keyOf(path) === "img") {
-      parent.appendChild(mediaField(value, path));
+    } else if (keyOf(path) === "img" || path.indexOf("banners.") === 0) {
+      parent.appendChild(mediaField(value, path, label(keyOf(path))));
     } else {
       field(parent, label(keyOf(path)), scalarInput(value, path));
     }
   }
 
   /* câmp imagine: previzualizare + buton de încărcare + cale text */
-  function mediaField(value, path) {
+  function mediaField(value, path, labelText) {
     var wrap = document.createElement("div");
     wrap.className = "edit-field media-field";
     var span = document.createElement("span");
-    span.textContent = "Imagine produs";
+    span.textContent = labelText || "Imagine";
     wrap.appendChild(span);
 
     var prev = document.createElement("img");
@@ -318,6 +333,8 @@
   $("saveBtn2").addEventListener("click", function () { save("editorMsg"); });
   $("saveProductsBtn").addEventListener("click", function () { save("productsMsg"); });
   $("saveProductsBtn2").addEventListener("click", function () { save("productsMsg"); });
+  $("saveBannersBtn").addEventListener("click", function () { save("bannersMsg"); });
+  $("saveBannersBtn2").addEventListener("click", function () { save("bannersMsg"); });
 
   /* ---------- Reset ---------- */
   $("resetBtn").addEventListener("click", function () {
@@ -341,10 +358,12 @@
       btn.classList.add("is-active");
       var which = btn.dataset.tab;
       $("tab-content").hidden = which !== "content";
+      $("tab-banners").hidden = which !== "banners";
       $("tab-products").hidden = which !== "products";
       $("tab-orders").hidden = which !== "orders";
       if (which === "orders") loadOrders();
       else if (which === "products") buildProducts();
+      else if (which === "banners") buildBanners();
       else buildForm();
     });
   });
