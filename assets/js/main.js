@@ -90,6 +90,14 @@
         "</em></div></div>";
     });
 
+    // Bannere hero
+    if (c.banners) {
+      var bl = document.getElementById("heroImgLeft");
+      var br = document.getElementById("heroImgRight");
+      if (bl && c.banners.heroLeft) bl.src = c.banners.heroLeft;
+      if (br && c.banners.heroRight) br.src = c.banners.heroRight;
+    }
+
     // Contact (text + href)
     if (c.footer) {
       setContact("footerPhone", c.footer.phone, "tel:");
