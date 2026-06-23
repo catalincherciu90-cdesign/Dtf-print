@@ -69,7 +69,50 @@
 .form-msg.is-error { color: #ff8484; }
 .form-msg.is-ok { color: #5fe0a0; }
 
+/* ---- Tab-uri ---- */
+.tabs { display: flex; gap: 8px; margin: 24px 0 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+.tab {
+  background: none; border: none; cursor: pointer; color: var(--muted); font: inherit; font-weight: 600;
+  padding: 12px 18px; border-radius: 10px 10px 0 0; position: relative; display: inline-flex; align-items: center; gap: 8px;
+}
+.tab:hover { color: var(--text); }
+.tab.is-active { color: var(--text); }
+.tab.is-active::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: -1px; height: 2px; background: var(--grad); }
+.tab-badge { background: var(--orange); color: #fff; font-size: 0.72rem; font-weight: 700; border-radius: 999px; padding: 1px 8px; }
+
+/* ---- Comenzi ---- */
+.order-card {
+  background: var(--panel); border: 1px solid var(--panel-border); border-left: 4px solid var(--muted);
+  border-radius: var(--radius-sm); padding: 18px; margin-top: 14px; backdrop-filter: blur(12px);
+}
+.order-card[data-status="Nouă"] { border-left-color: #38bdf8; }
+.order-card[data-status="În lucru"] { border-left-color: #f5b13d; }
+.order-card[data-status="Trimisă"] { border-left-color: #a78bfa; }
+.order-card[data-status="Finalizată"] { border-left-color: #5fe0a0; }
+.order-card[data-status="Anulată"] { border-left-color: #ff6b6b; }
+.order-card__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.order-card__top strong { font-size: 1.02rem; }
+.order-meta { color: var(--muted); font-size: 0.8rem; }
+.order-status {
+  font: inherit; font-size: 0.85rem; font-weight: 600; padding: 8px 12px; border-radius: 999px; cursor: pointer;
+  background: rgba(10, 10, 26, 0.7); border: 1px solid rgba(255, 255, 255, 0.18); color: var(--text);
+}
+.order-grid { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 12px; font-size: 0.9rem; color: #d4d4ec; }
+.order-message {
+  margin-top: 12px; padding: 10px 14px; border-radius: 10px; font-size: 0.9rem; color: #cfcfe6;
+  background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.order-card__foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
+.btn--sm { padding: 8px 14px; font-size: 0.85rem; }
+.order-file-pending { color: var(--orange); font-size: 0.84rem; }
+.order-del {
+  background: rgba(255, 80, 80, 0.1); border: 1px solid rgba(255, 80, 80, 0.28); color: #ff8a8a;
+  width: 36px; height: 36px; border-radius: 10px; cursor: pointer; font-size: 0.95rem; transition: background 0.2s;
+}
+.order-del:hover { background: rgba(255, 80, 80, 0.24); }
+
 @media (max-width: 560px) {
   .editor-actions--bottom { justify-content: stretch; }
   .editor-actions--bottom .btn { width: 100%; }
+  .order-card__top { flex-direction: column; }
 }
