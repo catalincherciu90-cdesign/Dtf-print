@@ -14,8 +14,11 @@
 const KV_KEY = "home";
 const ORDER_PREFIX = "order:";
 const FILE_PREFIX = "orderfile:";
+const MEDIA_PREFIX = "media:";
 const MAX_FILE_MB = 20;
 const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
+const MAX_IMG_MB = 5;
+const MAX_IMG_BYTES = MAX_IMG_MB * 1024 * 1024;
 const STATUSES = ["Nouă", "În lucru", "Trimisă", "Finalizată", "Anulată"];
 
 // ---- Conținut implicit (folosit dacă KV e gol) ----
@@ -313,6 +316,35 @@ export default {
         }
 
         if (segs[0] === "orders") return handleOrders(request, env, segs);
+
+        if (segs[0] === "media") {
+          const mid = segs[1];
+          // GET /api/media/:id — public (imaginea încărcată)
+          if (mid && request.method === "GET") {
+            if (!env.CONTENT) return err("Indisponibil.", 404);
+            const res = await env.CONTENT.getWithMetadata(MEDIA_PREFIX + mid, { type: "arrayBuffer" });
+            if (!res || !res.value) return err("Imagine inexistentă.", 404);
+            const type = (res.metadata && res.metadata.type) || "application/octet-stream";
+            return new Response(res.value, {
+              headers: { "Content-Type": type, "Cache-Control": "public, max-age=31536000, immutable" },
+            });
+          }
+          // POST /api/media — încărcare imagine (auth)
+          if (!mid && request.method === "POST") {
+            if (!(await requireAuth(request, env))) return err("Neautorizat.", 401);
+            if (!env.CONTENT) return err("KV neconfigurat.", 503);
+            const form = await request.formData();
+            const file = form.get("file");
+            if (!file || typeof file === "string" || !file.size) return err("Fără fișier.");
+            if (!/^image\//.test(file.type || "")) return err("Doar imagini sunt permise.");
+            if (file.size > MAX_IMG_BYTES) return err("Imagine prea mare (max " + MAX_IMG_MB + " MB).");
+            const id = genId();
+            await env.CONTENT.put(MEDIA_PREFIX + id, await file.arrayBuffer(),
+              { metadata: { type: file.type, name: String(file.name || "").slice(0, 80) } });
+            return json({ ok: true, id, url: "/api/media/" + id });
+          }
+          return err("Endpoint inexistent.", 404);
+        }
 
         return err("Endpoint inexistent.", 404);
       }

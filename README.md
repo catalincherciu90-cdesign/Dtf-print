@@ -64,6 +64,8 @@ Site-ul funcționează imediat cu valorile implicite. Ca să poți **salva** din
 | PATCH | `/api/orders/:id` | da | schimbă statusul comenzii |
 | DELETE | `/api/orders/:id` | da | șterge comanda (+ fișierul) |
 | GET | `/api/orders/:id/file` | da | descarcă fișierul de design |
+| POST | `/api/media` | da | încarcă o imagine (produs) → `{ url }` |
+| GET | `/api/media/:id` | — | servește imaginea încărcată |
 
 ## Comenzi
 
