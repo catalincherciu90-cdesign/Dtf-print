@@ -284,10 +284,18 @@
     return fetch(path, { method: method, headers: headers, body: body ? JSON.stringify(body) : undefined });
   }
 
+  // asigură că produsele au câmp de preț (pentru conținut salvat înainte)
+  function normalizeContent(c) {
+    if (c && c.products && Array.isArray(c.products.items)) {
+      c.products.items.forEach(function (it) { if (it.price == null) it.price = 0; });
+    }
+  }
+
   function showEditor() {
     loginView.hidden = true; editorView.hidden = false; topActions.hidden = false;
     api("GET", "/api/content").then(function (r) { return r.json(); }).then(function (data) {
-      content = data; templates = {}; captureTemplates(content, "");
+      content = data; normalizeContent(content);
+      templates = {}; captureTemplates(content, "");
       buildForm();
     });
   }
@@ -344,7 +352,8 @@
     }).then(function (res) {
       if (res.status === 401) { showLogin("Sesiune expirată. Autentifică-te din nou."); return; }
       if (!res.ok) return setMsg("editorMsg", res.d.error || "Eroare.", true);
-      content = res.d.content; templates = {}; captureTemplates(content, "");
+      content = res.d.content; normalizeContent(content);
+      templates = {}; captureTemplates(content, "");
       rerender();
       setMsg("editorMsg", "✓ Resetat la valorile implicite.", false);
     });
@@ -401,33 +410,48 @@
       var opts = statuses.map(function (s) {
         return "<option" + (s === o.status ? " selected" : "") + ">" + esc(s) + "</option>";
       }).join("");
-      var fileRow = "";
-      if (o.file) {
-        if (o.file.key) {
-          fileRow = "<button class=\"btn btn--ghost btn--sm order-dl\" data-id=\"" + esc(o.id) +
-            "\" data-name=\"" + esc(o.file.name) + "\">⬇ " + esc(o.file.name) + "</button>";
-        } else {
-          fileRow = "<span class=\"order-file-pending\">📎 " + esc(o.file.name) +
-            " (fișier indisponibil)</span>";
-        }
-      } else {
-        fileRow = "<span class=\"order-meta\">Fără fișier atașat</span>";
+
+      // articole comandate
+      var itemsHtml = "";
+      if (Array.isArray(o.items) && o.items.length) {
+        itemsHtml = "<ul class=\"order-items\">" + o.items.map(function (it) {
+          var dim = it.type === "dtf" ? " <span class=\"order-meta\">(" + esc(it.width) + "×" + esc(it.length) + " m)</span>" : "";
+          var line = (Number(it.price) * Number(it.qty)).toFixed(2);
+          return "<li>" + esc(it.qty) + "× " + esc(it.name) + dim +
+            " <span class=\"order-meta\">— " + line + " RON</span></li>";
+        }).join("") + "</ul>";
+      } else if (o.width != null) {
+        itemsHtml = "<ul class=\"order-items\"><li>Print DTF " + esc(o.width) + "×" + esc(o.length) + " m</li></ul>";
       }
+
+      // fișiere (mai multe sau unul vechi)
+      var files = Array.isArray(o.files) ? o.files : (o.file ? [o.file] : []);
+      var filesHtml = files.length ? files.map(function (f, idx) {
+        if (f.key) {
+          return "<button class=\"btn btn--ghost btn--sm order-dl\" data-id=\"" + esc(o.id) +
+            "\" data-i=\"" + idx + "\" data-name=\"" + esc(f.name) + "\">⬇ " + esc(f.name) + "</button>";
+        }
+        return "<span class=\"order-file-pending\">📎 " + esc(f.name) + "</span>";
+      }).join(" ") : "<span class=\"order-meta\">Fără fișiere</span>";
+
       var contact = [];
-      if (o.phone) contact.push("📞 " + esc(o.phone));
       if (o.email) contact.push("✉️ " + esc(o.email));
+      if (o.phone) contact.push("📞 " + esc(o.phone));
+      var total = o.total != null ? o.total : o.price;
+      var note = o.note || o.message;
+
       return "<div class=\"order-card\" data-status=\"" + esc(o.status) + "\">" +
         "<div class=\"order-card__top\">" +
-          "<div><strong>" + esc(o.name) + "</strong><div class=\"order-meta\">" + fmtDate(o.createdAt) + "</div></div>" +
+          "<div><strong>" + esc(o.name || "Client") + "</strong><div class=\"order-meta\">" + fmtDate(o.createdAt) + "</div></div>" +
           "<select class=\"order-status\" data-id=\"" + esc(o.id) + "\">" + opts + "</select>" +
         "</div>" +
         "<div class=\"order-grid\">" +
-          "<span>" + (contact.join(" · ") || "<span class='order-meta'>fără contact</span>") + "</span>" +
-          "<span>📐 " + esc(o.width) + "×" + esc(o.length) + " (l×L)</span>" +
-          "<span>💰 <strong>" + esc(o.price) + " RON</strong></span>" +
+          "<span>" + (contact.join(" · ") || "<span class='order-meta'>—</span>") + "</span>" +
+          "<span>💰 <strong>" + esc(total) + " RON</strong></span>" +
         "</div>" +
-        (o.message ? "<p class=\"order-message\">„" + esc(o.message) + "”</p>" : "") +
-        "<div class=\"order-card__foot\">" + fileRow +
+        itemsHtml +
+        (note ? "<p class=\"order-message\">„" + esc(note) + "”</p>" : "") +
+        "<div class=\"order-card__foot\"><div class=\"order-files\">" + filesHtml + "</div>" +
           "<button class=\"order-del\" data-id=\"" + esc(o.id) + "\" title=\"Șterge comanda\">🗑</button>" +
         "</div>" +
       "</div>";
@@ -437,7 +461,7 @@
       sel.addEventListener("change", function () { changeStatus(sel.dataset.id, sel.value, sel); });
     });
     list.querySelectorAll(".order-dl").forEach(function (b) {
-      b.addEventListener("click", function () { downloadFile(b.dataset.id, b.dataset.name); });
+      b.addEventListener("click", function () { downloadFile(b.dataset.id, b.dataset.i, b.dataset.name); });
     });
     list.querySelectorAll(".order-del").forEach(function (b) {
       b.addEventListener("click", function () { deleteOrder(b.dataset.id); });
@@ -453,8 +477,8 @@
     }).catch(function () { setMsg("ordersMsg", "Eroare de rețea.", true); });
   }
 
-  function downloadFile(id, name) {
-    api("GET", "/api/orders/" + id + "/file", null, true).then(function (r) {
+  function downloadFile(id, i, name) {
+    api("GET", "/api/orders/" + id + "/file?i=" + (i || 0), null, true).then(function (r) {
       if (!r.ok) throw 0;
       return r.blob();
     }).then(function (blob) {

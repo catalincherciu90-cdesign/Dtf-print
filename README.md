@@ -66,6 +66,19 @@ Site-ul funcționează imediat cu valorile implicite. Ca să poți **salva** din
 | GET | `/api/orders/:id/file` | da | descarcă fișierul de design |
 | POST | `/api/media` | da | încarcă o imagine (produs) → `{ url }` |
 | GET | `/api/media/:id` | — | servește imaginea încărcată |
+| POST | `/api/auth/register` | — | cont nou → `{ token }` |
+| POST | `/api/auth/login` | — | autentificare client → `{ token }` |
+| GET | `/api/auth/me` | client | datele contului |
+| GET | `/api/auth/orders` | client | comenzile clientului logat |
+
+## Magazin (conturi + coș)
+
+- **Conturi de client** la `/cont` (înregistrare/login). Parole hash-uite PBKDF2.
+- **Coș** (drawer): produse cu preț + comenzi de print DTF la metru.
+- **Checkout necesită cont** (`POST /api/orders` cere token de client). Comanda reține
+  articolele, totalul, fișierele de design atașate și e legată de cont — vizibilă în
+  „Comenzile mele” și în admin → Comenzi.
+- Prețul produselor se setează din **admin → Produse**.
 
 ## Comenzi
 

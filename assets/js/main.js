@@ -76,12 +76,17 @@
 
     // Produse
     fill("productGrid", c.products && c.products.items, function (p) {
+      var price = Number(p.price) || 0;
+      var priceHtml = price ? "<div class=\"product-price\">" + price.toFixed(2) + " RON</div>" : "";
+      var btn = price
+        ? "<button class=\"btn btn--primary btn--sm add-cart\" data-name=\"" + esc(p.name) +
+          "\" data-price=\"" + price + "\" data-img=\"" + esc(p.img) + "\">＋ În coș</button>"
+        : "";
       return "<article class=\"product\"><div class=\"product__img\"><img src=\"" +
         esc(p.img) + "\" alt=\"" + esc(p.name) + "\" loading=\"lazy\" /></div><h4>" +
-        esc(p.name) + "</h4><p>" + esc(p.desc) + "</p>" +
-        "<a href=\"#contact\" class=\"product__arrow\" aria-label=\"" + esc(p.name) +
-        "\">→</a></article>";
+        esc(p.name) + "</h4><p>" + esc(p.desc) + "</p>" + priceHtml + btn + "</article>";
     });
+    bindAddToCart();
 
     // Trust badges
     fill("trustWrap", c.trust, function (t) {
@@ -147,75 +152,142 @@
     recalc();
   }
 
-  /* ---------- Upload design ---------- */
-  var uploadBtn = document.getElementById("uploadBtn");
-  var fileInput = document.getElementById("fileInput");
-  var fileNote = document.getElementById("fileNote");
-  if (uploadBtn && fileInput) {
-    uploadBtn.addEventListener("click", function () { fileInput.click(); });
-    fileInput.addEventListener("change", function () {
-      if (fileInput.files && fileInput.files.length) {
-        var f = fileInput.files[0];
-        var mb = (f.size / (1024 * 1024)).toFixed(2);
-        fileNote.textContent = "✓ " + f.name + " (" + mb + " MB) — gata de trimis";
-        fileNote.style.color = "#6fe0ff";
-      }
+  /* ---------- Coș ---------- */
+  var CART_KEY = "mrdtf_cart";
+  var CUST_KEY = "mrdtf_customer";
+  function loadCart() { try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; } catch (e) { return []; } }
+  function saveCart() { localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
+  var cart = loadCart();
+
+  function cartAdd(line) {
+    if (line.type === "product") {
+      var ex = cart.find(function (x) { return x.type === "product" && x.name === line.name && x.price === line.price; });
+      if (ex) { ex.qty += line.qty; saveCart(); renderCart(); return; }
+    }
+    cart.push(line); saveCart(); renderCart();
+  }
+  function cartRemove(i) { cart.splice(i, 1); saveCart(); renderCart(); }
+  function cartQty(i, d) { if (cart[i]) { cart[i].qty = Math.max(1, cart[i].qty + d); saveCart(); renderCart(); } }
+  function cartTotal() { return cart.reduce(function (s, it) { return s + it.price * it.qty; }, 0); }
+  function cartCount() { return cart.reduce(function (s, it) { return s + it.qty; }, 0); }
+
+  var elCart = document.getElementById("cart");
+  var elItems = document.getElementById("cartItems");
+  var elTotal = document.getElementById("cartTotal");
+  var elCount = document.getElementById("cartCount");
+  var elFiles = document.getElementById("cartFiles");
+  var elCheckout = document.getElementById("cartCheckout");
+
+  function renderCart() {
+    var n = cartCount();
+    if (elCount) { elCount.textContent = n; elCount.hidden = n === 0; }
+    if (!elItems) return;
+    if (!cart.length) {
+      elItems.innerHTML = "<p class=\"cart__empty\">Coșul tău este gol.</p>";
+      if (elCheckout) elCheckout.style.display = "none";
+    } else {
+      if (elCheckout) elCheckout.style.display = "";
+      elItems.innerHTML = cart.map(function (it, i) {
+        var sub = it.type === "dtf" ? ("Print " + it.width + "×" + it.length + " m") : "";
+        var img = it.img ? "<img src=\"" + esc(it.img) + "\" alt=\"\" />" : "<span class=\"cart-item__ico\">🧾</span>";
+        return "<div class=\"cart-item\">" +
+          "<div class=\"cart-item__img\">" + img + "</div>" +
+          "<div class=\"cart-item__info\"><strong>" + esc(it.name) + "</strong>" +
+          (sub ? "<span class=\"cart-item__sub\">" + esc(sub) + "</span>" : "") +
+          "<span class=\"cart-item__price\">" + Number(it.price).toFixed(2) + " RON</span></div>" +
+          "<div class=\"cart-item__qty\"><button type=\"button\" data-q=\"-1\" data-i=\"" + i + "\">−</button>" +
+          "<span>" + it.qty + "</span><button type=\"button\" data-q=\"1\" data-i=\"" + i + "\">+</button></div>" +
+          "<button type=\"button\" class=\"cart-item__del\" data-del=\"" + i + "\" aria-label=\"Șterge\">✕</button>" +
+          "</div>";
+      }).join("");
+    }
+    if (elTotal) elTotal.textContent = cartTotal().toFixed(2) + " RON";
+    if (elFiles) elFiles.hidden = !cart.some(function (it) { return it.type === "dtf"; });
+  }
+
+  if (elItems) {
+    elItems.addEventListener("click", function (e) {
+      var t = e.target;
+      if (t.dataset.del != null) cartRemove(Number(t.dataset.del));
+      else if (t.dataset.q != null) cartQty(Number(t.dataset.i), Number(t.dataset.q));
     });
   }
 
-  /* ---------- Trimitere comandă ---------- */
-  var orderForm = document.getElementById("calc");
-  var orderMsg = document.getElementById("orderMsg");
-  var orderSubmit = document.getElementById("orderSubmit");
+  function openCart() { if (elCart) { elCart.hidden = false; document.body.style.overflow = "hidden"; } }
+  function closeCart() { if (elCart) { elCart.hidden = true; document.body.style.overflow = ""; } }
+  var cartBtn = document.getElementById("cartBtn");
+  if (cartBtn) cartBtn.addEventListener("click", openCart);
+  var cartCloseBtn = document.getElementById("cartClose");
+  if (cartCloseBtn) cartCloseBtn.addEventListener("click", closeCart);
+  var cartOverlay = document.getElementById("cartOverlay");
+  if (cartOverlay) cartOverlay.addEventListener("click", closeCart);
 
-  function setOrderMsg(t, isErr) {
-    if (!orderMsg) return;
-    orderMsg.textContent = t;
-    orderMsg.className = "order-msg" + (isErr ? " is-error" : " is-ok");
+  function bindAddToCart() {
+    var grid = document.getElementById("productGrid");
+    if (!grid) return;
+    grid.querySelectorAll(".add-cart").forEach(function (b) {
+      b.addEventListener("click", function () {
+        cartAdd({ type: "product", name: b.dataset.name, price: Number(b.dataset.price), img: b.dataset.img, qty: 1 });
+        openCart();
+      });
+    });
   }
 
-  if (orderForm) {
-    orderForm.addEventListener("submit", function (e) {
-      e.preventDefault();
-      var name = (document.getElementById("ordName").value || "").trim();
-      var phone = (document.getElementById("ordPhone").value || "").trim();
-      var email = (document.getElementById("ordEmail").value || "").trim();
-      if (!name) return setOrderMsg("Te rugăm completează numele.", true);
-      if (!phone && !email) return setOrderMsg("Adaugă un telefon sau un email.", true);
+  var dtfAddCart = document.getElementById("dtfAddCart");
+  if (dtfAddCart) {
+    dtfAddCart.addEventListener("click", function () {
+      var w = width ? parseInt(width.value, 10) : 0;
+      var l = length ? parseInt(length.value, 10) : 0;
+      cartAdd({ type: "dtf", name: "Print DTF la metru", width: w, length: l, price: Number((l * PRICE_PER_METER).toFixed(2)), qty: 1 });
+      openCart();
+    });
+  }
 
+  /* ---------- Checkout ---------- */
+  var cartSubmit = document.getElementById("cartSubmit");
+  var cartMsg = document.getElementById("cartMsg");
+  var cartNote = document.getElementById("cartNote");
+  var cartFileInput = document.getElementById("cartFileInput");
+  function setCartMsg(t, e) { if (cartMsg) { cartMsg.textContent = t; cartMsg.className = "order-msg" + (e ? " is-error" : " is-ok"); } }
+
+  if (cartSubmit) {
+    cartSubmit.addEventListener("click", function () {
+      if (!cart.length) return setCartMsg("Coșul este gol.", true);
+      var token = localStorage.getItem(CUST_KEY);
+      if (!token) {
+        setCartMsg("Trebuie să ai cont. Te ducem spre autentificare…", true);
+        setTimeout(function () { window.location.href = "/cont"; }, 1300);
+        return;
+      }
       var fd = new FormData();
-      fd.append("name", name);
-      fd.append("phone", phone);
-      fd.append("email", email);
-      fd.append("message", document.getElementById("ordMessage").value || "");
-      fd.append("width", width ? width.value : "");
-      fd.append("length", length ? length.value : "");
-      if (fileInput && fileInput.files && fileInput.files.length) {
-        var fobj = fileInput.files[0];
-        if (fobj.size > 20 * 1024 * 1024) {
-          return setOrderMsg("Fișierul e prea mare (max 20 MB). Trimite-l separat pe email.", true);
+      fd.append("items", JSON.stringify(cart));
+      fd.append("note", cartNote ? cartNote.value : "");
+      if (cartFileInput && cartFileInput.files) {
+        for (var i = 0; i < cartFileInput.files.length; i++) {
+          if (cartFileInput.files[i].size > 20 * 1024 * 1024) return setCartMsg("Un fișier depășește 20 MB.", true);
+          fd.append("file", cartFileInput.files[i]);
         }
-        fd.append("file", fobj);
       }
-
-      orderSubmit.disabled = true;
-      setOrderMsg("Se trimite comanda…", false);
-      fetch("/api/orders", { method: "POST", body: fd })
-        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      cartSubmit.disabled = true;
+      setCartMsg("Se trimite comanda…", false);
+      fetch("/api/orders", { method: "POST", headers: { Authorization: "Bearer " + token }, body: fd })
+        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, status: r.status, d: d }; }); })
         .then(function (res) {
-          orderSubmit.disabled = false;
-          if (!res.ok) return setOrderMsg(res.d.error || "Eroare la trimitere.", true);
-          setOrderMsg("✓ Comanda a fost trimisă! Te contactăm în curând.", false);
-          orderForm.reset();
-          recalc();
-          if (fileNote) fileNote.style.color = "";
+          cartSubmit.disabled = false;
+          if (res.status === 401) {
+            setCartMsg("Sesiune expirată. Te ducem spre autentificare…", true);
+            setTimeout(function () { window.location.href = "/cont"; }, 1300);
+            return;
+          }
+          if (!res.ok) return setCartMsg(res.d.error || "Eroare la trimitere.", true);
+          cart = []; saveCart(); renderCart();
+          setCartMsg("✓ Comanda a fost trimisă! O găsești în contul tău.", false);
         })
-        .catch(function () {
-          orderSubmit.disabled = false;
-          setOrderMsg("Eroare de rețea. Încearcă din nou.", true);
-        });
+        .catch(function () { cartSubmit.disabled = false; setCartMsg("Eroare de rețea.", true); });
     });
   }
+
+  renderCart();
 
   /* ---------- Meniu mobil ---------- */
   var burger = document.getElementById("burger");
