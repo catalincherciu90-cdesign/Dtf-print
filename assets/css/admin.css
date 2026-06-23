@@ -38,11 +38,20 @@
   display: inline-block;
 }
 
+.edit-list { display: grid; gap: 4px; }
 .edit-card {
   border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-sm);
   padding: 16px; margin-bottom: 14px; background: rgba(255, 255, 255, 0.02);
 }
-.edit-card h4 { font-size: 0.92rem; margin-bottom: 12px; color: var(--blue); }
+.edit-card__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.edit-card__head h4 { font-size: 0.92rem; color: var(--blue); margin: 0; }
+.card-del {
+  width: 28px; height: 28px; flex: none; border-radius: 8px; cursor: pointer;
+  background: rgba(255, 80, 80, 0.12); border: 1px solid rgba(255, 80, 80, 0.3);
+  color: #ff8a8a; font-size: 0.9rem; line-height: 1; transition: background 0.2s;
+}
+.card-del:hover { background: rgba(255, 80, 80, 0.25); }
+.btn--add { width: 100%; margin: 4px 0 4px; border-style: dashed; font-size: 0.9rem; padding: 11px; }
 
 .edit-field { display: grid; gap: 6px; margin-bottom: 14px; }
 .edit-field > span { font-size: 0.82rem; color: var(--muted); font-weight: 500; }
