@@ -58,7 +58,28 @@ Site-ul funcționează imediat cu valorile implicite. Ca să poți **salva** din
 | PUT | `/api/content` | da | salvează conținutul |
 | DELETE | `/api/content` | da | resetează la valorile implicite |
 | POST | `/api/login` | — | `{ password }` → `{ token }` |
-| GET | `/api/status` | — | starea configurării |
+| GET | `/api/status` | — | starea configurării (`kv`, `r2`, `auth`) |
+| POST | `/api/orders` | — | plasează o comandă (multipart: contact + dimensiuni + `file`) |
+| GET | `/api/orders` | da | lista comenzilor |
+| PATCH | `/api/orders/:id` | da | schimbă statusul comenzii |
+| DELETE | `/api/orders/:id` | da | șterge comanda (+ fișierul) |
+| GET | `/api/orders/:id/file` | da | descarcă fișierul de design |
+
+## Comenzi (R2)
+
+Formularul „Comandă DTF” de pe site trimite comenzile, vizibile în **`/admin` → tab Comenzi**
+(status: Nouă / În lucru / Trimisă / Finalizată / Anulată). Comenzile se salvează în KV.
+
+Pentru a stoca și **fișierul de design** atașat de client îți trebuie un bucket R2:
+
+1. Cloudflare → *R2 Object Storage* → *Create bucket* → nume **`dtfprint-uploads`**.
+2. În `wrangler.jsonc` decomentează blocul:
+   ```jsonc
+   ,"r2_buckets": [
+     { "binding": "UPLOADS", "bucket_name": "dtfprint-uploads" }
+   ]
+   ```
+3. Redeploy. Fără R2, comenzile se salvează normal, dar fișierul apare ca „nestocat”.
 
 ## Rulare locală
 
