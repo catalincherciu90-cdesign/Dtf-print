@@ -70,6 +70,7 @@
     var form = $("form");
     form.innerHTML = "";
     Object.keys(content).forEach(function (key) {
+      if (key === "products") return; // produsele au tab propriu
       var section = document.createElement("section");
       section.className = "edit-section";
       var h = document.createElement("h2");
@@ -78,6 +79,25 @@
       buildInto(section, content[key], key);
       form.appendChild(section);
     });
+  }
+
+  function buildProducts() {
+    var form = $("productsForm");
+    if (!form || !content.products) return;
+    form.innerHTML = "";
+    var section = document.createElement("section");
+    section.className = "edit-section";
+    var h = document.createElement("h2");
+    h.textContent = "Secțiunea Produse";
+    section.appendChild(h);
+    buildInto(section, content.products, "products");
+    form.appendChild(section);
+  }
+
+  // reconstruiește tab-ul activ (Conținut sau Produse)
+  function rerender() {
+    if ($("tab-products") && !$("tab-products").hidden) buildProducts();
+    else buildForm();
   }
 
   function buildInto(parent, value, path) {
@@ -97,7 +117,7 @@
         add.addEventListener("click", function () {
           var tpl = templates[path] || blankTemplate(value[0] || {});
           value.push(JSON.parse(JSON.stringify(tpl)));
-          buildForm();
+          rerender();
         });
         parent.appendChild(add);
       } else {
@@ -126,7 +146,7 @@
     del.addEventListener("click", function () {
       var arr = getPath(content, arrPath);
       arr.splice(index, 1);
-      buildForm();
+      rerender();
     });
     head.appendChild(t); head.appendChild(del);
     card.appendChild(head);
@@ -230,18 +250,21 @@
   });
 
   /* ---------- Salvare ---------- */
-  function save() {
-    setMsg("editorMsg", "Se salvează…", false);
+  function save(msgId) {
+    msgId = msgId || "editorMsg";
+    setMsg(msgId, "Se salvează…", false);
     api("PUT", "/api/content", content, true).then(function (r) {
       return r.json().then(function (d) { return { ok: r.ok, status: r.status, d: d }; });
     }).then(function (res) {
       if (res.status === 401) { showLogin("Sesiune expirată. Autentifică-te din nou."); return; }
-      if (!res.ok) return setMsg("editorMsg", res.d.error || "Eroare la salvare.", true);
-      setMsg("editorMsg", "✓ Salvat! Schimbările sunt live pe site.", false);
-    }).catch(function () { setMsg("editorMsg", "Eroare de rețea.", true); });
+      if (!res.ok) return setMsg(msgId, res.d.error || "Eroare la salvare.", true);
+      setMsg(msgId, "✓ Salvat! Schimbările sunt live pe site.", false);
+    }).catch(function () { setMsg(msgId, "Eroare de rețea.", true); });
   }
-  $("saveBtn").addEventListener("click", save);
-  $("saveBtn2").addEventListener("click", save);
+  $("saveBtn").addEventListener("click", function () { save("editorMsg"); });
+  $("saveBtn2").addEventListener("click", function () { save("editorMsg"); });
+  $("saveProductsBtn").addEventListener("click", function () { save("productsMsg"); });
+  $("saveProductsBtn2").addEventListener("click", function () { save("productsMsg"); });
 
   /* ---------- Reset ---------- */
   $("resetBtn").addEventListener("click", function () {
@@ -252,7 +275,7 @@
       if (res.status === 401) { showLogin("Sesiune expirată. Autentifică-te din nou."); return; }
       if (!res.ok) return setMsg("editorMsg", res.d.error || "Eroare.", true);
       content = res.d.content; templates = {}; captureTemplates(content, "");
-      buildForm();
+      rerender();
       setMsg("editorMsg", "✓ Resetat la valorile implicite.", false);
     });
   });
@@ -265,8 +288,11 @@
       btn.classList.add("is-active");
       var which = btn.dataset.tab;
       $("tab-content").hidden = which !== "content";
+      $("tab-products").hidden = which !== "products";
       $("tab-orders").hidden = which !== "orders";
       if (which === "orders") loadOrders();
+      else if (which === "products") buildProducts();
+      else buildForm();
     });
   });
   $("ordersRefresh").addEventListener("click", loadOrders);
