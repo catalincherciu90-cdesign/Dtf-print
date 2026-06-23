@@ -257,6 +257,125 @@
     });
   });
 
+  /* ---------- Tab-uri ---------- */
+  var statuses = ["Nouă", "În lucru", "Trimisă", "Finalizată", "Anulată"];
+  document.querySelectorAll(".tab").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll(".tab").forEach(function (b) { b.classList.remove("is-active"); });
+      btn.classList.add("is-active");
+      var which = btn.dataset.tab;
+      $("tab-content").hidden = which !== "content";
+      $("tab-orders").hidden = which !== "orders";
+      if (which === "orders") loadOrders();
+    });
+  });
+  $("ordersRefresh").addEventListener("click", loadOrders);
+
+  /* ---------- Comenzi ---------- */
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function fmtDate(iso) {
+    try { return new Date(iso).toLocaleString("ro-RO", { dateStyle: "medium", timeStyle: "short" }); }
+    catch (e) { return iso || ""; }
+  }
+
+  function loadOrders() {
+    setMsg("ordersMsg", "Se încarcă…", false);
+    api("GET", "/api/orders", null, true).then(function (r) {
+      if (r.status === 401) { showLogin("Sesiune expirată. Autentifică-te din nou."); return null; }
+      return r.json();
+    }).then(function (d) {
+      if (!d) return;
+      if (d.statuses) statuses = d.statuses;
+      renderOrders(d.orders || []);
+      var badge = $("ordersBadge");
+      var n = (d.orders || []).length;
+      badge.textContent = n; badge.hidden = n === 0;
+      setMsg("ordersMsg", n ? "" : "Nicio comandă încă.", false);
+    }).catch(function () { setMsg("ordersMsg", "Eroare la încărcare.", true); });
+  }
+
+  function renderOrders(orders) {
+    var list = $("ordersList");
+    list.innerHTML = orders.map(function (o) {
+      var opts = statuses.map(function (s) {
+        return "<option" + (s === o.status ? " selected" : "") + ">" + esc(s) + "</option>";
+      }).join("");
+      var fileRow = "";
+      if (o.file) {
+        if (o.file.key) {
+          fileRow = "<button class=\"btn btn--ghost btn--sm order-dl\" data-id=\"" + esc(o.id) +
+            "\" data-name=\"" + esc(o.file.name) + "\">⬇ " + esc(o.file.name) + "</button>";
+        } else {
+          fileRow = "<span class=\"order-file-pending\">📎 " + esc(o.file.name) +
+            " (nestocat — R2 neconfigurat)</span>";
+        }
+      } else {
+        fileRow = "<span class=\"order-meta\">Fără fișier atașat</span>";
+      }
+      var contact = [];
+      if (o.phone) contact.push("📞 " + esc(o.phone));
+      if (o.email) contact.push("✉️ " + esc(o.email));
+      return "<div class=\"order-card\" data-status=\"" + esc(o.status) + "\">" +
+        "<div class=\"order-card__top\">" +
+          "<div><strong>" + esc(o.name) + "</strong><div class=\"order-meta\">" + fmtDate(o.createdAt) + "</div></div>" +
+          "<select class=\"order-status\" data-id=\"" + esc(o.id) + "\">" + opts + "</select>" +
+        "</div>" +
+        "<div class=\"order-grid\">" +
+          "<span>" + (contact.join(" · ") || "<span class='order-meta'>fără contact</span>") + "</span>" +
+          "<span>📐 " + esc(o.width) + "×" + esc(o.length) + " (l×L)</span>" +
+          "<span>💰 <strong>" + esc(o.price) + " RON</strong></span>" +
+        "</div>" +
+        (o.message ? "<p class=\"order-message\">„" + esc(o.message) + "”</p>" : "") +
+        "<div class=\"order-card__foot\">" + fileRow +
+          "<button class=\"order-del\" data-id=\"" + esc(o.id) + "\" title=\"Șterge comanda\">🗑</button>" +
+        "</div>" +
+      "</div>";
+    }).join("");
+
+    list.querySelectorAll(".order-status").forEach(function (sel) {
+      sel.addEventListener("change", function () { changeStatus(sel.dataset.id, sel.value, sel); });
+    });
+    list.querySelectorAll(".order-dl").forEach(function (b) {
+      b.addEventListener("click", function () { downloadFile(b.dataset.id, b.dataset.name); });
+    });
+    list.querySelectorAll(".order-del").forEach(function (b) {
+      b.addEventListener("click", function () { deleteOrder(b.dataset.id); });
+    });
+  }
+
+  function changeStatus(id, status, sel) {
+    var card = sel.closest(".order-card");
+    api("PATCH", "/api/orders/" + id, { status: status }, true).then(function (r) {
+      if (r.status === 401) { showLogin("Sesiune expirată."); return; }
+      if (r.ok && card) card.dataset.status = status;
+      setMsg("ordersMsg", r.ok ? "✓ Status actualizat." : "Eroare la actualizare.", !r.ok);
+    }).catch(function () { setMsg("ordersMsg", "Eroare de rețea.", true); });
+  }
+
+  function downloadFile(id, name) {
+    api("GET", "/api/orders/" + id + "/file", null, true).then(function (r) {
+      if (!r.ok) throw 0;
+      return r.blob();
+    }).then(function (blob) {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = name || "design";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    }).catch(function () { setMsg("ordersMsg", "Nu am putut descărca fișierul.", true); });
+  }
+
+  function deleteOrder(id) {
+    if (!confirm("Ștergi definitiv această comandă?")) return;
+    api("DELETE", "/api/orders/" + id, null, true).then(function (r) {
+      if (r.status === 401) { showLogin("Sesiune expirată."); return; }
+      if (r.ok) loadOrders();
+    });
+  }
+
   /* ---------- Start ---------- */
   if (token) showEditor(); else showLogin();
 })();

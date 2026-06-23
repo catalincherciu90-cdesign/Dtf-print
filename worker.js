@@ -1,16 +1,19 @@
 // ===========================================================
 // MrDTF — Cloudflare Worker
-// Servește site-ul static + API CMS pentru /admin.
+// Site static + API CMS (conținut) + API Comenzi.
 //
 // Bindings (vezi wrangler.jsonc):
 //   ASSETS   – static assets (site-ul)
-//   CONTENT  – KV namespace (opțional; fără el se folosesc valorile implicite)
-// Secrets (Settings → Variables and Secrets, în dashboard):
+//   CONTENT  – KV namespace (conținut sub cheia "home" + comenzi sub "order:*")
+//   UPLOADS  – R2 bucket pentru fișierele de design (opțional)
+// Secrets:
 //   ADMIN_PASSWORD – parola de login în /admin
 //   JWT_SECRET     – cheie pentru semnarea token-ului
 // ===========================================================
 
 const KV_KEY = "home";
+const ORDER_PREFIX = "order:";
+const STATUSES = ["Nouă", "În lucru", "Trimisă", "Finalizată", "Anulată"];
 
 // ---- Conținut implicit (folosit dacă KV e gol) ----
 const DEFAULT_CONTENT = {
@@ -79,17 +82,16 @@ const DEFAULT_CONTENT = {
   },
 };
 
-// ---- Helpers ----
+// ---- Helpers HTTP ----
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET,PUT,POST,PATCH,DELETE,OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type,Authorization",
+};
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), {
     status,
-    headers: {
-      "Content-Type": "application/json; charset=utf-8",
-      "Cache-Control": "no-store",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET,PUT,POST,OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type,Authorization",
-    },
+    headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store", ...CORS },
   });
 const err = (msg, status = 400) => json({ error: msg }, status);
 
@@ -100,14 +102,10 @@ function b64u(buf) {
   for (const b of bytes) s += String.fromCharCode(b);
   return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 }
-function b64uToStr(s) {
-  return atob(s.replace(/-/g, "+").replace(/_/g, "/"));
-}
+function b64uToStr(s) { return atob(s.replace(/-/g, "+").replace(/_/g, "/")); }
 async function hmacKey(secret) {
-  return crypto.subtle.importKey(
-    "raw", new TextEncoder().encode(secret),
-    { name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"]
-  );
+  return crypto.subtle.importKey("raw", new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"]);
 }
 async function signJWT(payload, secret, expSec = 7 * 86400) {
   const now = Math.floor(Date.now() / 1000);
@@ -124,39 +122,157 @@ async function verifyJWT(token, secret) {
     const key = await hmacKey(secret);
     const data = new TextEncoder().encode(`${h}.${b}`);
     const sig = Uint8Array.from(b64uToStr(s.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
-    const ok = await crypto.subtle.verify("HMAC", key, sig, data);
-    if (!ok) return null;
+    if (!(await crypto.subtle.verify("HMAC", key, sig, data))) return null;
     const payload = JSON.parse(b64uToStr(b));
     if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
     return payload;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
-
 function timingSafeEqual(a, b) {
   if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) return false;
   let out = 0;
   for (let i = 0; i < a.length; i++) out |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return out === 0;
 }
+async function requireAuth(request, env) {
+  if (!env.JWT_SECRET) return false;
+  const token = (request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
+  return token ? !!(await verifyJWT(token, env.JWT_SECRET)) : false;
+}
 
+// ---- Content ----
 async function getContent(env) {
   if (env.CONTENT) {
     try {
       const stored = await env.CONTENT.get(KV_KEY, "json");
       if (stored) return stored;
-    } catch { /* fallback la default */ }
+    } catch { /* fallback */ }
   }
   return DEFAULT_CONTENT;
 }
 
-async function requireAuth(request, env) {
-  if (!env.JWT_SECRET) return false;
-  const auth = request.headers.get("Authorization") || "";
-  const token = auth.replace(/^Bearer\s+/i, "");
-  if (!token) return false;
-  return !!(await verifyJWT(token, env.JWT_SECRET));
+// ---- Orders ----
+function genId() {
+  return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
+}
+function sanitize(name) {
+  return String(name || "fisier").replace(/[^\w.\-]+/g, "_").slice(0, 80);
+}
+async function listOrders(env) {
+  if (!env.CONTENT) return [];
+  const out = [];
+  let cursor;
+  do {
+    const res = await env.CONTENT.list({ prefix: ORDER_PREFIX, cursor });
+    for (const k of res.keys) {
+      const o = await env.CONTENT.get(k.name, "json");
+      if (o) out.push(o);
+    }
+    cursor = res.list_complete ? null : res.cursor;
+  } while (cursor);
+  out.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+  return out;
+}
+
+async function handleOrders(request, env, segs) {
+  // segs: ["orders"] | ["orders", id] | ["orders", id, "file"]
+  const id = segs[1];
+
+  // POST /api/orders  — public (plasare comandă)
+  if (!id && request.method === "POST") {
+    if (!env.CONTENT) return err("Stocare neconfigurată.", 503);
+    const ct = request.headers.get("Content-Type") || "";
+    let f = {}, file = null;
+    if (ct.includes("multipart/form-data")) {
+      const form = await request.formData();
+      form.forEach((v, k) => { if (typeof v === "string") f[k] = v; });
+      const up = form.get("file");
+      if (up && typeof up !== "string" && up.size > 0) file = up;
+    } else {
+      f = await request.json().catch(() => ({}));
+    }
+    if (!f.name || !f.name.trim()) return err("Numele este obligatoriu.");
+    if (!f.phone && !f.email) return err("Adaugă un telefon sau un email.");
+
+    const content = await getContent(env);
+    const ppm = Number((content.order && content.order.pricePerMeter) || 25);
+    const length = Math.max(0, Number(f.length) || 0);
+    const width = Math.max(0, Number(f.width) || 0);
+
+    const order = {
+      id: genId(),
+      createdAt: new Date().toISOString(),
+      status: "Nouă",
+      name: String(f.name).slice(0, 120),
+      phone: String(f.phone || "").slice(0, 40),
+      email: String(f.email || "").slice(0, 120),
+      width, length,
+      price: Number((length * ppm).toFixed(2)),
+      message: String(f.message || "").slice(0, 2000),
+      file: null,
+    };
+
+    if (file) {
+      const meta = { name: file.name, size: file.size, type: file.type || "application/octet-stream" };
+      if (env.UPLOADS) {
+        if (file.size > 50 * 1024 * 1024) return err("Fișier prea mare (max 50 MB).");
+        const key = `orders/${order.id}/${sanitize(file.name)}`;
+        await env.UPLOADS.put(key, file.stream(), { httpMetadata: { contentType: meta.type } });
+        order.file = { ...meta, key };
+      } else {
+        // R2 neconfigurat — păstrăm doar numele, ca să știi că există un fișier
+        order.file = { ...meta, key: null, pending: true };
+      }
+    }
+
+    await env.CONTENT.put(ORDER_PREFIX + order.id, JSON.stringify(order));
+    return json({ ok: true, id: order.id });
+  }
+
+  // de aici încolo — doar admin
+  if (!(await requireAuth(request, env))) return err("Neautorizat.", 401);
+
+  // GET /api/orders — listă
+  if (!id && request.method === "GET") {
+    return json({ orders: await listOrders(env), statuses: STATUSES });
+  }
+
+  // GET /api/orders/:id/file — descărcare fișier
+  if (id && segs[2] === "file" && request.method === "GET") {
+    const o = await env.CONTENT.get(ORDER_PREFIX + id, "json");
+    if (!o || !o.file || !o.file.key) return err("Fișier inexistent.", 404);
+    if (!env.UPLOADS) return err("R2 neconfigurat.", 503);
+    const obj = await env.UPLOADS.get(o.file.key);
+    if (!obj) return err("Fișier inexistent în R2.", 404);
+    return new Response(obj.body, {
+      headers: {
+        "Content-Type": o.file.type || "application/octet-stream",
+        "Content-Disposition": `attachment; filename="${sanitize(o.file.name)}"`,
+        "Cache-Control": "no-store",
+      },
+    });
+  }
+
+  // PATCH /api/orders/:id — schimbă statusul
+  if (id && request.method === "PATCH") {
+    const o = await env.CONTENT.get(ORDER_PREFIX + id, "json");
+    if (!o) return err("Comandă inexistentă.", 404);
+    const body = await request.json().catch(() => ({}));
+    if (body.status && !STATUSES.includes(body.status)) return err("Status invalid.");
+    if (body.status) o.status = body.status;
+    await env.CONTENT.put(ORDER_PREFIX + id, JSON.stringify(o));
+    return json({ ok: true, order: o });
+  }
+
+  // DELETE /api/orders/:id
+  if (id && request.method === "DELETE") {
+    const o = await env.CONTENT.get(ORDER_PREFIX + id, "json");
+    if (o && o.file && o.file.key && env.UPLOADS) await env.UPLOADS.delete(o.file.key);
+    await env.CONTENT.delete(ORDER_PREFIX + id);
+    return json({ ok: true });
+  }
+
+  return err("Endpoint inexistent.", 404);
 }
 
 export default {
@@ -166,55 +282,44 @@ export default {
 
     try {
       if (path.startsWith("/api/")) {
-        if (request.method === "OPTIONS") return json({}, 204);
+        if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
+        const segs = path.replace(/^\/api\//, "").replace(/\/+$/, "").split("/");
 
-        // status — util pentru a verifica configurarea
-        if (path === "/api/status" && request.method === "GET") {
-          return json({ ok: true, kv: !!env.CONTENT, auth: !!(env.JWT_SECRET && env.ADMIN_PASSWORD) });
+        if (segs[0] === "status" && request.method === "GET") {
+          return json({ ok: true, kv: !!env.CONTENT, r2: !!env.UPLOADS, auth: !!(env.JWT_SECRET && env.ADMIN_PASSWORD) });
         }
 
-        // login
-        if (path === "/api/login" && request.method === "POST") {
-          if (!env.ADMIN_PASSWORD || !env.JWT_SECRET) {
-            return err("Admin neconfigurat: setează ADMIN_PASSWORD și JWT_SECRET.", 503);
-          }
+        if (segs[0] === "login" && request.method === "POST") {
+          if (!env.ADMIN_PASSWORD || !env.JWT_SECRET) return err("Admin neconfigurat: setează ADMIN_PASSWORD și JWT_SECRET.", 503);
           const body = await request.json().catch(() => ({}));
-          if (!body.password || !timingSafeEqual(body.password, env.ADMIN_PASSWORD)) {
-            return err("Parolă greșită.", 401);
+          if (!body.password || !timingSafeEqual(body.password, env.ADMIN_PASSWORD)) return err("Parolă greșită.", 401);
+          return json({ token: await signJWT({ role: "admin" }, env.JWT_SECRET) });
+        }
+
+        if (segs[0] === "content") {
+          if (request.method === "GET") return json(await getContent(env));
+          if (request.method === "PUT") {
+            if (!(await requireAuth(request, env))) return err("Neautorizat.", 401);
+            if (!env.CONTENT) return err("KV neconfigurat.", 503);
+            const data = await request.json().catch(() => null);
+            if (!data || typeof data !== "object") return err("JSON invalid.");
+            await env.CONTENT.put(KV_KEY, JSON.stringify(data));
+            return json({ ok: true });
           }
-          const token = await signJWT({ role: "admin" }, env.JWT_SECRET);
-          return json({ token });
+          if (request.method === "DELETE") {
+            if (!(await requireAuth(request, env))) return err("Neautorizat.", 401);
+            if (env.CONTENT) await env.CONTENT.delete(KV_KEY);
+            return json({ ok: true, content: DEFAULT_CONTENT });
+          }
         }
 
-        // get content (public)
-        if (path === "/api/content" && request.method === "GET") {
-          return json(await getContent(env));
-        }
-
-        // save content (auth)
-        if (path === "/api/content" && request.method === "PUT") {
-          if (!(await requireAuth(request, env))) return err("Neautorizat.", 401);
-          if (!env.CONTENT) return err("KV neconfigurat: adaugă binding-ul CONTENT.", 503);
-          const data = await request.json().catch(() => null);
-          if (!data || typeof data !== "object") return err("JSON invalid.");
-          await env.CONTENT.put(KV_KEY, JSON.stringify(data));
-          return json({ ok: true });
-        }
-
-        // reset la valorile implicite (auth)
-        if (path === "/api/content" && request.method === "DELETE") {
-          if (!(await requireAuth(request, env))) return err("Neautorizat.", 401);
-          if (env.CONTENT) await env.CONTENT.delete(KV_KEY);
-          return json({ ok: true, content: DEFAULT_CONTENT });
-        }
+        if (segs[0] === "orders") return handleOrders(request, env, segs);
 
         return err("Endpoint inexistent.", 404);
       }
 
-      // restul — site static
       return env.ASSETS.fetch(request);
     } catch (e) {
-      // în caz de eroare neașteptată, nu blocăm site-ul static
       if (!path.startsWith("/api/")) return env.ASSETS.fetch(request);
       return err("Eroare server: " + (e && e.message), 500);
     }

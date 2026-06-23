@@ -35,20 +35,43 @@
 
   <!-- Editor -->
   <main class="admin__editor container" id="editorView" hidden>
-    <div class="editor-head">
-      <div>
-        <h1>Editează pagina principală</h1>
-        <p class="muted">Modifică textele și prețurile, apoi salvează. Schimbările apar imediat pe site.</p>
+    <div class="tabs" id="tabs">
+      <button class="tab is-active" type="button" data-tab="content">📝 Conținut</button>
+      <button class="tab" type="button" data-tab="orders">📦 Comenzi <span class="tab-badge" id="ordersBadge" hidden>0</span></button>
+    </div>
+
+    <!-- Tab: Conținut -->
+    <div class="tab-panel" id="tab-content">
+      <div class="editor-head">
+        <div>
+          <h1>Editează pagina principală</h1>
+          <p class="muted">Modifică textele și prețurile, apoi salvează. Schimbările apar imediat pe site.</p>
+        </div>
+        <div class="editor-actions">
+          <button class="btn btn--ghost" id="resetBtn" type="button">Resetează</button>
+          <button class="btn btn--primary" id="saveBtn" type="button">💾 Salvează</button>
+        </div>
       </div>
-      <div class="editor-actions">
-        <button class="btn btn--ghost" id="resetBtn" type="button">Resetează</button>
-        <button class="btn btn--primary" id="saveBtn" type="button">💾 Salvează</button>
+      <p class="form-msg" id="editorMsg" role="status"></p>
+      <form id="form" autocomplete="off"></form>
+      <div class="editor-actions editor-actions--bottom">
+        <button class="btn btn--primary" id="saveBtn2" type="button">💾 Salvează</button>
       </div>
     </div>
-    <p class="form-msg" id="editorMsg" role="status"></p>
-    <form id="form" autocomplete="off"></form>
-    <div class="editor-actions editor-actions--bottom">
-      <button class="btn btn--primary" id="saveBtn2" type="button">💾 Salvează</button>
+
+    <!-- Tab: Comenzi -->
+    <div class="tab-panel" id="tab-orders" hidden>
+      <div class="editor-head">
+        <div>
+          <h1>Comenzi</h1>
+          <p class="muted">Comenzile primite de pe site. Schimbă statusul sau descarcă fișierul de design.</p>
+        </div>
+        <div class="editor-actions">
+          <button class="btn btn--ghost" id="ordersRefresh" type="button">↻ Reîmprospătează</button>
+        </div>
+      </div>
+      <p class="form-msg" id="ordersMsg" role="status"></p>
+      <div id="ordersList"></div>
     </div>
   </main>
 

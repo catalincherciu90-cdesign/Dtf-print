@@ -215,6 +215,21 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
 .calc__total strong { font-family: "Poppins"; font-size: 2.4rem; font-weight: 800; color: var(--text); }
 .calc__note { text-align: center; font-size: 0.78rem; color: var(--muted); margin-top: 12px; }
 
+.order-fields { display: grid; gap: 10px; margin-top: 16px; }
+.order-fields input, .order-fields textarea {
+  width: 100%; padding: 12px 14px; border-radius: 10px; font: inherit; font-size: 0.95rem;
+  background: rgba(10, 10, 26, 0.6); border: 1px solid rgba(255, 255, 255, 0.12); color: var(--text);
+  resize: vertical;
+}
+.order-fields input:focus, .order-fields textarea:focus {
+  outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.18);
+}
+.order-fields ::placeholder { color: #7e7e9c; }
+#orderSubmit { margin-top: 14px; }
+.order-msg { min-height: 20px; text-align: center; font-size: 0.85rem; margin-top: 10px; }
+.order-msg.is-error { color: #ff8a8a; }
+.order-msg.is-ok { color: #5fe0a0; }
+
 /* ---------- Steps ---------- */
 .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 26px; }
 .step { padding: 22px; text-align: left; }

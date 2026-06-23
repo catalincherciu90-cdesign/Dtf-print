@@ -155,6 +155,54 @@
     });
   }
 
+  /* ---------- Trimitere comandă ---------- */
+  var orderForm = document.getElementById("calc");
+  var orderMsg = document.getElementById("orderMsg");
+  var orderSubmit = document.getElementById("orderSubmit");
+
+  function setOrderMsg(t, isErr) {
+    if (!orderMsg) return;
+    orderMsg.textContent = t;
+    orderMsg.className = "order-msg" + (isErr ? " is-error" : " is-ok");
+  }
+
+  if (orderForm) {
+    orderForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var name = (document.getElementById("ordName").value || "").trim();
+      var phone = (document.getElementById("ordPhone").value || "").trim();
+      var email = (document.getElementById("ordEmail").value || "").trim();
+      if (!name) return setOrderMsg("Te rugăm completează numele.", true);
+      if (!phone && !email) return setOrderMsg("Adaugă un telefon sau un email.", true);
+
+      var fd = new FormData();
+      fd.append("name", name);
+      fd.append("phone", phone);
+      fd.append("email", email);
+      fd.append("message", document.getElementById("ordMessage").value || "");
+      fd.append("width", width ? width.value : "");
+      fd.append("length", length ? length.value : "");
+      if (fileInput && fileInput.files && fileInput.files.length) fd.append("file", fileInput.files[0]);
+
+      orderSubmit.disabled = true;
+      setOrderMsg("Se trimite comanda…", false);
+      fetch("/api/orders", { method: "POST", body: fd })
+        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+        .then(function (res) {
+          orderSubmit.disabled = false;
+          if (!res.ok) return setOrderMsg(res.d.error || "Eroare la trimitere.", true);
+          setOrderMsg("✓ Comanda a fost trimisă! Te contactăm în curând.", false);
+          orderForm.reset();
+          recalc();
+          if (fileNote) fileNote.style.color = "";
+        })
+        .catch(function () {
+          orderSubmit.disabled = false;
+          setOrderMsg("Eroare de rețea. Încearcă din nou.", true);
+        });
+    });
+  }
+
   /* ---------- Meniu mobil ---------- */
   var burger = document.getElementById("burger");
   var nav = document.getElementById("nav");

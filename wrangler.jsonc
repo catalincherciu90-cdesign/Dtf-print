@@ -16,4 +16,12 @@
   "kv_namespaces": [
     { "binding": "CONTENT", "id": "69ad61bb836248e9a70778bb92b25e98" }
   ]
+
+  // ── Fișiere comenzi (R2): creează un bucket numit "dtfprint-uploads",
+  //    apoi decomentează blocul de mai jos. Fără el, comenzile se salvează
+  //    fără fișierul de design (apare ca „nestocat”).
+  //
+  // ,"r2_buckets": [
+  //   { "binding": "UPLOADS", "bucket_name": "dtfprint-uploads" }
+  // ]
 }
