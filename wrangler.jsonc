@@ -1,14 +1,23 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "dtfprint",
+  "main": "worker.js",
   "compatibility_date": "2026-06-23",
   "observability": {
     "enabled": true
   },
   "assets": {
-    "directory": "."
+    "directory": ".",
+    "binding": "ASSETS"
   },
   "compatibility_flags": [
     "nodejs_compat"
   ]
+
+  // ── CMS: pentru a putea SALVA din /admin, creează un KV namespace și
+  //    decomentează blocul de mai jos cu id-ul lui:
+  //
+  // ,"kv_namespaces": [
+  //   { "binding": "CONTENT", "id": "PUNE_AICI_ID-UL_KV" }
+  // ]
 }

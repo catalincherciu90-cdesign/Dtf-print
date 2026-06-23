@@ -30,7 +30,7 @@
     <div class="container header__inner">
       <a class="logo" href="#top" aria-label="MrDTF — acasă">
         <span class="logo__mark"><span class="logo__mr">Mr</span>DTF</span>
-        <span class="logo__sub">PRINT DTF PREMIUM</span>
+        <span class="logo__sub" data-edit="brandTagline">PRINT DTF PREMIUM</span>
       </a>
 
       <nav class="nav" id="nav">
@@ -66,18 +66,18 @@
       </div>
 
       <div class="container hero__content">
-        <h1 class="hero__title">
+        <h1 class="hero__title" id="heroTitle">
           PRINT <span class="grad-text">DTF</span><br />
           LA METRU LINIAR
         </h1>
-        <p class="hero__sub">LĂȚIME DE <span class="grad-text">90 CM</span></p>
+        <p class="hero__sub" id="heroSub">LĂȚIME DE <span class="grad-text">90 CM</span></p>
 
-        <ul class="hero__stats">
+        <ul class="hero__stats" id="heroStats">
           <li>🏷️ De la 6,50 lei/ml</li>
           <li>📏 Lățime 90 cm</li>
           <li>🚚 Livrare 24-48h</li>
         </ul>
-        <ul class="hero__stats hero__stats--check">
+        <ul class="hero__stats hero__stats--check" id="heroChecks">
           <li>Comandă online</li>
           <li>Livrare rapidă</li>
           <li>Culori vibrante</li>
@@ -86,16 +86,16 @@
         <div class="hero__cta">
           <a href="#comanda" class="btn btn--cta">
             <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M7 4h-2L4 2H1v2h2l3.6 7.6-1.35 2.45A2 2 0 0 0 7 17h12v-2H7.4l1.1-2h7a2 2 0 0 0 1.8-1.1L21 4H7Zm0 15a2 2 0 1 0 2 2 2 2 0 0 0-2-2Zm10 0a2 2 0 1 0 2 2 2 2 0 0 0-2-2Z"/></svg>
-            COMANDĂ ACUM
+            <span data-edit="hero.cta">COMANDĂ ACUM</span>
             <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M5 12h12l-5-5 1.4-1.4L21 13l-7.6 7.4L12 19l5-5H5Z"/></svg>
           </a>
         </div>
-        <p class="hero__hint">Încarcă fișierele în 2 minute</p>
+        <p class="hero__hint" data-edit="hero.hint">Încarcă fișierele în 2 minute</p>
         <span class="hero__chevron" aria-hidden="true">⌄</span>
       </div>
 
       <div class="container">
-        <ul class="feature-pills feature-pills--hero">
+        <ul class="feature-pills feature-pills--hero" id="heroPills">
           <li class="pill">
             <span class="pill__ico">🛡️</span>
             <span><strong>Culori vibrante</strong><em>Calitate premium</em></span>
@@ -121,13 +121,13 @@
       <div class="container">
         <div class="panel order__panel">
           <div class="order__info">
-            <span class="eyebrow">Comandă rapid și ușor</span>
-            <h2 class="order__title grad-text">Comandă DTF</h2>
-            <p class="order__desc">
+            <span class="eyebrow" data-edit="order.eyebrow">Comandă rapid și ușor</span>
+            <h2 class="order__title grad-text" data-edit="order.title">Comandă DTF</h2>
+            <p class="order__desc" data-edit="order.desc">
               Încarci designul, alegi dimensiunea și primești printul DTF la
               metru liniar, gata de aplicat.
             </p>
-            <ul class="check-list">
+            <ul class="check-list" id="orderChecklist">
               <li>Preț afișat la metru liniar</li>
               <li>Lățime maximă print: 60 cm</li>
               <li>Print de înaltă rezoluție</li>
@@ -138,7 +138,7 @@
 
           <!-- Calculator -->
           <form class="calc" id="calc" novalidate>
-            <h3 class="calc__title">Calculează prețul</h3>
+            <h3 class="calc__title" data-edit="order.calcTitle">Calculează prețul</h3>
 
             <div class="calc__row">
               <label for="width">Lățime print (cm) <output id="widthOut">58 cm</output></label>
@@ -156,16 +156,16 @@
             </div>
 
             <button type="button" class="btn btn--primary btn--block" id="uploadBtn">
-              Încarcă design
+              <span data-edit="order.uploadText">Încarcă design</span>
               <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 3l5 5h-3v6h-4V8H7l5-5Zm-7 14h14v2H5v-2Z"/></svg>
             </button>
             <input type="file" id="fileInput" accept=".pdf,.png,.tiff,.tif,image/png" hidden />
-            <p class="calc__note" id="fileNote">Upload PDF, PNG, TIFF (300dpi recomandat)</p>
+            <p class="calc__note" id="fileNote" data-edit="order.calcNote">Upload PDF, PNG, TIFF (300dpi recomandat)</p>
           </form>
         </div>
 
         <!-- Steps -->
-        <div class="steps">
+        <div class="steps" id="stepsWrap">
           <div class="step">
             <span class="step__ico">📤</span>
             <h4>1. Încarcă design</h4>
@@ -196,18 +196,18 @@
         <div class="panel products__panel">
           <div class="products__head">
             <div>
-              <span class="eyebrow">Textile și accesorii</span>
-              <h2 class="products__title grad-text">Produse Blank</h2>
-              <p class="products__desc">
+              <span class="eyebrow" data-edit="products.eyebrow">Textile și accesorii</span>
+              <h2 class="products__title grad-text" data-edit="products.title">Produse Blank</h2>
+              <p class="products__desc" data-edit="products.desc">
                 Descoperă gama noastră de produse blank premium, perfecte
                 pentru personalizare.
               </p>
-              <a href="#contact" class="btn btn--primary">Vezi toate produsele
+              <a href="#contact" class="btn btn--primary"><span data-edit="products.cta">Vezi toate produsele</span>
                 <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M5 12h12l-5-5 1.4-1.4L21 13l-7.6 7.4L12 19l5-5H5Z"/></svg>
               </a>
             </div>
 
-            <div class="product-grid">
+            <div class="product-grid" id="productGrid">
               <article class="product">
                 <div class="product__img"><img src="assets/img/prod-tricou.jpg" alt="Tricouri blank" loading="lazy" /></div>
                 <h4>Tricouri</h4>
@@ -241,7 +241,7 @@
     <!-- ===== Trust badges ===== -->
     <section class="trust" id="despre">
       <div class="container">
-        <div class="panel trust__panel">
+        <div class="panel trust__panel" id="trustWrap">
           <div class="trust__item">
             <span class="trust__ico">🏅</span>
             <div><strong>Calitate garantată</strong><em>Materiale și print premium</em></div>
@@ -269,9 +269,9 @@
       <div class="footer__brand">
         <a class="logo" href="#top">
           <span class="logo__mark"><span class="logo__mr">Mr</span>DTF</span>
-          <span class="logo__sub">PRINT DTF PREMIUM</span>
+          <span class="logo__sub" data-edit="brandTagline">PRINT DTF PREMIUM</span>
         </a>
-        <p>Specialiști în print DTF premium la metru liniar și produse blank pentru personalizare.</p>
+        <p data-edit="footer.tagline">Specialiști în print DTF premium la metru liniar și produse blank pentru personalizare.</p>
       </div>
 
       <div class="footer__col">
@@ -293,9 +293,9 @@
 
       <div class="footer__col">
         <h5>Contact</h5>
-        <a href="tel:+40123456789">📞 +40 123 456 789</a>
-        <a href="mailto:contact@dtfprint.ro">✉️ contact@dtfprint.ro</a>
-        <span>🕘 L–V: 09:00 – 17:00</span>
+        <a id="footerPhone" href="tel:+40123456789">📞 +40 123 456 789</a>
+        <a id="footerEmail" href="mailto:contact@dtfprint.ro">✉️ contact@dtfprint.ro</a>
+        <span id="footerSchedule">🕘 L–V: 09:00 – 17:00</span>
       </div>
 
       <div class="footer__col">
@@ -308,7 +308,7 @@
       </div>
     </div>
     <div class="footer__bottom">
-      <div class="container">© 2024 MrDTF — Print DTF Premium. Toate drepturile rezervate.</div>
+      <div class="container" data-edit="footer.copyright">© 2024 MrDTF — Print DTF Premium. Toate drepturile rezervate.</div>
     </div>
   </footer>
 

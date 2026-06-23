@@ -1,50 +1,84 @@
-# DTF Print la ML
+# MrDTF — Print DTF Premium
 
-Website pentru servicii de **print DTF la metru liniar** și **produse blank** pentru personalizare.
+Website pentru servicii de **print DTF la metru liniar** și **produse blank** pentru
+personalizare, cu **panou de administrare** pentru editarea paginii principale.
 
-Construit pe baza schiței de design furnizate: temă dark, glassmorphism, gradient violet → albastru.
-
-## Conținut
-
-- **Hero** — „Print DTF la metru liniar”, features (culori vibrante, rezistență, livrare rapidă) + CTA.
-- **Comandă DTF** — descriere serviciu + **calculator de preț** funcțional (lățime / lungime → preț în RON) și upload design.
-- **Pași** — Încarcă design → Noi printăm → Verificare → Livrare.
-- **Produse Blank** — tricouri, hanorace, genți, șepci.
-- **Trust badges** — calitate, livrare, plăți securizate, suport.
-- **Footer** — link-uri, informații, contact, social.
+Temă dark, glassmorphism, brand cyan → magenta. Rulează pe **Cloudflare Workers**
+(site static + un mic API/CMS).
 
 ## Structură
 
 ```
 index.html              # pagina principală
+admin/index.html        # panou admin (/admin)
+worker.js               # Cloudflare Worker: servește site-ul + API CMS
+wrangler.jsonc          # config deploy (Workers + assets + KV)
+.assetsignore           # fișiere care NU se publică ca asset-uri
 assets/
-  css/styles.css        # temă & layout (responsive)
-  js/main.js            # calculator preț, upload, meniu mobil
+  css/styles.css        # temă & layout
+  css/admin.css         # stiluri panou admin
+  js/main.js            # render conținut + calculator + upload + meniu
+  js/admin.js           # logică panou admin
+  img/                  # imagini hero + produse
 ```
+
+## Panou de administrare (CMS)
+
+La adresa **`/admin`** poți edita tot textul și prețurile de pe pagina principală
+(hero, calculator, produse, contact, footer etc.). Conținutul se salvează în
+**Cloudflare KV** și e citit automat de pagină prin `/api/content`.
+
+### Configurare (o singură dată)
+
+Site-ul funcționează imediat cu valorile implicite. Ca să poți **salva** din `/admin`:
+
+1. **Creează un KV namespace**
+   Cloudflare Dashboard → *Storage & Databases* → *KV* → *Create namespace*
+   (ex. nume `mrdtf-content`). Copiază **Namespace ID**.
+
+2. **Leagă-l în `wrangler.jsonc`** — decomentează blocul și pune id-ul:
+   ```jsonc
+   ,"kv_namespaces": [
+     { "binding": "CONTENT", "id": "ID-UL_COPIAT" }
+   ]
+   ```
+
+3. **Setează 2 secrete** (Worker → *Settings* → *Variables and Secrets* → *Add*):
+   - `ADMIN_PASSWORD` — parola ta de login în `/admin`
+   - `JWT_SECRET` — un șir lung, aleatoriu (ex. generat din parolă random)
+
+4. Fă push (sau redeploy). Gata — intri pe `/admin`, te loghezi cu parola și editezi.
+
+> Verificare rapidă: `GET /api/status` întoarce `{ kv: true, auth: true }` când e configurat.
+
+### API
+| Metodă | Rută | Auth | Descriere |
+|--------|------|------|-----------|
+| GET | `/api/content` | — | conținutul curent (sau valorile implicite) |
+| PUT | `/api/content` | da | salvează conținutul |
+| DELETE | `/api/content` | da | resetează la valorile implicite |
+| POST | `/api/login` | — | `{ password }` → `{ token }` |
+| GET | `/api/status` | — | starea configurării |
 
 ## Rulare locală
 
-Site static, fără build. Deschide direct `index.html` sau servește folderul:
+Pentru tot (inclusiv API/admin) folosește Wrangler:
 
 ```bash
-python3 -m http.server 8080
-# → http://localhost:8080
+npx wrangler dev
+# → http://localhost:8787   (și /admin)
 ```
 
-## Deploy (Cloudflare Pages)
+Doar pentru pagina statică e suficient și `python3 -m http.server 8080`
+(dar `/api/*` și salvarea din admin nu vor funcționa fără Worker).
 
-Proiect static, fără pas de build:
+## Deploy (Cloudflare Workers)
 
-- **Build command:** *(gol)*
-- **Output directory:** `/` (rădăcina repo-ului)
+Deploy automat din git (production branch `main`), comandă `npx wrangler deploy`.
+Vezi build-urile în Dashboard → *Workers & Pages* → `dtfprint`.
 
 ## Preț
 
-Tariful e calculat la **metru liniar** (lățime până la 60 cm inclusă):
-`preț = lungime (m) × 25 RON`. Modifică `PRICE_PER_METER` în `assets/js/main.js`.
-
-## De personalizat
-
-- Date de contact (telefon, email, program) în `index.html`, secțiunea footer.
-- Tariful (`PRICE_PER_METER`) în `assets/js/main.js`.
-- Imaginile produselor — momentan emoji placeholder; se pot înlocui cu fotografii în `assets/img/`.
+Tariful e calculat la **metru liniar**: `preț = lungime (m) × preț/m`.
+Prețul pe metru și lățimea maximă se editează din **/admin** (secțiunea *Comandă*),
+fără să atingi codul.
