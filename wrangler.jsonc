@@ -12,12 +12,8 @@
   },
   "compatibility_flags": [
     "nodejs_compat"
+  ],
+  "kv_namespaces": [
+    { "binding": "CONTENT", "id": "69ad61bb836248e9a70778bb92b25e98" }
   ]
-
-  // ── CMS: pentru a putea SALVA din /admin, creează un KV namespace și
-  //    decomentează blocul de mai jos cu id-ul lui:
-  //
-  // ,"kv_namespaces": [
-  //   { "binding": "CONTENT", "id": "PUNE_AICI_ID-UL_KV" }
-  // ]
 }
