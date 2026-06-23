@@ -144,28 +144,13 @@ img { max-width: 100%; display: block; }
 
 .hero__cta { display: flex; gap: 14px; flex-wrap: wrap; }
 
-/* Hero visual / blob */
+/* Hero visual / image */
 .hero__visual { position: relative; display: grid; place-items: center; min-height: 420px; }
-.blob {
-  width: min(440px, 90%); aspect-ratio: 1.05 / 1;
-  background: conic-gradient(from 200deg at 60% 40%, #ff7bd5, #7b5cff, #4aa8ff, #34d0ff, #ff7bd5);
-  border-radius: 60% 40% 55% 45% / 50% 55% 45% 50%;
-  filter: saturate(1.1);
-  box-shadow: inset 0 0 60px rgba(255, 255, 255, 0.35), 0 40px 80px -20px rgba(80, 40, 200, 0.6);
-  display: grid; place-items: center; position: relative; overflow: hidden;
-  animation: morph 9s ease-in-out infinite;
+.hero__img {
+  width: min(460px, 95%); height: auto; border-radius: 26px;
+  box-shadow: 0 40px 90px -25px rgba(80, 40, 200, 0.65);
+  animation: float 7s ease-in-out infinite;
 }
-.blob::after { content: ""; position: absolute; top: 10%; left: 14%; width: 35%; height: 25%;
-  background: radial-gradient(circle, rgba(255,255,255,0.85), transparent 70%); filter: blur(6px); border-radius: 50%; }
-.blob__inner { width: 78%; aspect-ratio: 1.6/1; border-radius: 18px;
-  background: linear-gradient(135deg, #1a1030, #2a1245); display: grid; place-items: center;
-  box-shadow: inset 0 0 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); }
-.create-tag { text-align: center; transform: rotate(-6deg); }
-.create-tag__top { display: block; font-family: "Poppins"; font-weight: 800; font-size: 2rem;
-  background: linear-gradient(180deg, #ff6ec7, #b06bff); -webkit-background-clip: text; background-clip: text; color: transparent;
-  text-shadow: 0 2px 0 rgba(0,0,0,0.3); }
-.create-tag__bottom { display: block; font-family: "Poppins"; font-weight: 700; font-size: 0.85rem;
-  letter-spacing: 3px; color: #6fe0ff; }
 
 .bubble { position: absolute; border-radius: 50%;
   background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(120,150,255,0.2) 60%, transparent);
@@ -173,10 +158,6 @@ img { max-width: 100%; display: block; }
 .bubble--a { width: 46px; height: 46px; bottom: 8%; left: 6%; animation: float 6s ease-in-out infinite; }
 .bubble--b { width: 26px; height: 26px; top: 14%; right: 8%; animation: float 5s ease-in-out infinite 1s; }
 
-@keyframes morph {
-  0%, 100% { border-radius: 60% 40% 55% 45% / 50% 55% 45% 50%; }
-  50% { border-radius: 45% 55% 40% 60% / 55% 45% 60% 40%; }
-}
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
 
 /* ---------- Order / Calculator ---------- */
@@ -231,8 +212,10 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
   background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.07);
   transition: transform 0.25s var(--ease), border-color 0.25s, background 0.25s; }
 .product:hover { transform: translateY(-6px); border-color: rgba(123, 92, 255, 0.5); background: rgba(123, 92, 255, 0.08); }
-.product__img { font-size: 2.6rem; height: 90px; display: grid; place-items: center;
+.product__img { height: 130px; display: grid; place-items: center; overflow: hidden;
   background: rgba(255, 255, 255, 0.05); border-radius: 12px; margin-bottom: 14px; }
+.product__img img { width: 100%; height: 100%; object-fit: contain; padding: 8px;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.45)); }
 .product h4 { font-size: 1rem; margin-bottom: 3px; }
 .product p { color: var(--muted); font-size: 0.82rem; }
 .product__arrow { position: absolute; right: 14px; bottom: 14px; width: 30px; height: 30px; border-radius: 50%;
@@ -285,6 +268,6 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .blob, .bubble { animation: none; }
+  .hero__img, .bubble { animation: none; }
   html { scroll-behavior: auto; }
 }
