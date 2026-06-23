@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contul meu — MrDTF</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/account.css" />
+</head>
+<body class="account">
+  <header class="account__top">
+    <a class="logo" href="/">
+      <span class="logo__mark"><span class="logo__mr">Mr</span>DTF</span>
+      <span class="logo__sub">CONTUL MEU</span>
+    </a>
+    <a class="btn btn--ghost" href="/">← Înapoi la site</a>
+  </header>
+
+  <main class="account__main container">
+    <!-- Neautentificat -->
+    <div id="authView">
+      <div class="tabs">
+        <button class="tab is-active" type="button" data-auth-tab="login">Autentificare</button>
+        <button class="tab" type="button" data-auth-tab="register">Cont nou</button>
+      </div>
+
+      <form class="panel auth-card" id="loginForm">
+        <h1>Autentificare</h1>
+        <input type="email" id="loginEmail" placeholder="Email" autocomplete="email" required />
+        <input type="password" id="loginPass" placeholder="Parolă" autocomplete="current-password" required />
+        <button type="submit" class="btn btn--primary btn--block">Intră în cont</button>
+        <p class="form-msg" id="loginMsg" role="alert"></p>
+      </form>
+
+      <form class="panel auth-card" id="registerForm" hidden>
+        <h1>Creează cont</h1>
+        <input type="text" id="regName" placeholder="Nume și prenume" autocomplete="name" required />
+        <input type="email" id="regEmail" placeholder="Email" autocomplete="email" required />
+        <input type="tel" id="regPhone" placeholder="Telefon (opțional)" autocomplete="tel" />
+        <input type="password" id="regPass" placeholder="Parolă (min. 6 caractere)" autocomplete="new-password" required />
+        <button type="submit" class="btn btn--primary btn--block">Creează cont</button>
+        <p class="form-msg" id="regMsg" role="alert"></p>
+      </form>
+    </div>
+
+    <!-- Autentificat -->
+    <div id="accountView" hidden>
+      <div class="account-head">
+        <div>
+          <h1>Salut, <span id="accName"></span>!</h1>
+          <p class="muted" id="accEmail"></p>
+        </div>
+        <button class="btn btn--ghost" id="logoutBtn" type="button">Ieșire din cont</button>
+      </div>
+      <h2 class="account-sub">Comenzile mele</h2>
+      <p class="form-msg" id="ordersMsg" role="status"></p>
+      <div id="myOrders"></div>
+    </div>
+  </main>
+
+  <script src="/assets/js/cont.js"></script>
+</body>
+</html>

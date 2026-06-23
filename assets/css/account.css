@@ -1,0 +1,45 @@
+/* ===========================================================
+   MrDTF — Stiluri pagină cont (folosește variabilele din styles.css)
+   =========================================================== */
+.account { min-height: 100vh; }
+.account__top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 22px; border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(7, 7, 18, 0.6); backdrop-filter: blur(12px);
+  position: sticky; top: 0; z-index: 10;
+}
+.account__main { padding: 32px 22px 70px; }
+
+.tabs { display: flex; gap: 8px; margin-bottom: 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); max-width: 420px; }
+.tab { background: none; border: none; cursor: pointer; color: var(--muted); font: inherit; font-weight: 600;
+  padding: 12px 18px; border-radius: 10px 10px 0 0; position: relative; }
+.tab:hover { color: var(--text); }
+.tab.is-active { color: var(--text); }
+.tab.is-active::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: -1px; height: 2px; background: var(--grad); }
+
+.auth-card { width: 100%; max-width: 420px; padding: 30px; display: grid; gap: 14px; }
+.auth-card h1 { font-size: 1.5rem; }
+.account input {
+  width: 100%; padding: 12px 14px; border-radius: 10px; font: inherit; font-size: 0.95rem;
+  background: rgba(10, 10, 26, 0.7); border: 1px solid rgba(255, 255, 255, 0.12); color: var(--text);
+}
+.account input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.18); }
+.account ::placeholder { color: #7e7e9c; }
+
+.account-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.account-head h1 { font-size: 1.7rem; }
+.account .muted { color: var(--muted); }
+.account-sub { font-size: 1.2rem; margin: 26px 0 10px; }
+
+.form-msg { min-height: 20px; font-size: 0.9rem; margin: 4px 0 0; }
+.form-msg.is-error { color: #ff8a8a; }
+.form-msg.is-ok { color: #5fe0a0; }
+
+.order-card {
+  background: var(--panel); border: 1px solid var(--panel-border); border-left: 4px solid var(--blue);
+  border-radius: var(--radius-sm); padding: 16px 18px; margin-top: 12px; display: grid; gap: 6px;
+}
+.order-card__top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.pill-status { font-size: 0.78rem; font-weight: 700; padding: 3px 12px; border-radius: 999px;
+  background: var(--grad-soft); border: 1px solid var(--panel-border); color: #cfe9ff; }
+.order-total { font-family: "Poppins"; font-weight: 700; }
