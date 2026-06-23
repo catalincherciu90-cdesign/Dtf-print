@@ -1,12 +1,15 @@
 /* ===========================================================
    MrDTF — Panou admin (CMS) pentru pagina principală
+   Model „viu”: inputurile modifică direct obiectul `content`,
+   iar listele de obiecte se pot adăuga / șterge.
    =========================================================== */
 (function () {
   "use strict";
 
   var TOKEN_KEY = "mrdtf_token";
   var token = localStorage.getItem(TOKEN_KEY) || "";
-  var content = null;
+  var content = null;     // modelul curent (sursa de adevăr)
+  var templates = {};     // șabloane pentru elemente noi, după calea listei
 
   var $ = function (id) { return document.getElementById(id); };
   var loginView = $("loginView"), editorView = $("editorView"), topActions = $("topActions");
@@ -25,26 +28,54 @@
     calcTitle: "Titlu calculator", pricePerMeter: "Preț pe metru liniar (RON)",
     maxWidth: "Lățime maximă (cm)", uploadText: "Text buton upload", calcNote: "Notă sub buton",
     steps: "Pași (cum funcționează)",
-    products: "Secțiunea Produse", items: "Produse", img: "Cale imagine", name: "Nume",
+    products: "Secțiunea Produse", items: "Produse", img: "Cale imagine (ex. assets/img/x.jpg)", name: "Nume",
     trust: "Garanții (jos)",
     footer: "Footer", tagline: "Descriere footer", phone: "Telefon", email: "Email",
     schedule: "Program", copyright: "Text copyright",
   };
+  var SINGULAR = { pills: "Avantaj", items: "Produs", steps: "Pas", trust: "Garanție" };
   function label(key) {
     return LABELS[key] || key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, " $1");
   }
 
+  /* ---------- Utilitare model ---------- */
+  function getPath(obj, path) {
+    return path.split(".").reduce(function (o, k) { return o == null ? undefined : o[k]; }, obj);
+  }
+  function blankTemplate(obj) {
+    if (Array.isArray(obj)) return [];
+    if (obj && typeof obj === "object") {
+      var o = {};
+      Object.keys(obj).forEach(function (k) { o[k] = blankTemplate(obj[k]); });
+      return o;
+    }
+    return typeof obj === "number" ? 0 : "";
+  }
+  function captureTemplates(data, path) {
+    Object.keys(data).forEach(function (k) {
+      var v = data[k], p = path ? path + "." + k : k;
+      if (Array.isArray(v)) {
+        if (v.length && typeof v[0] === "object") {
+          templates[p] = blankTemplate(v[0]);
+          v.forEach(function (it, i) { captureTemplates(it, p + "." + i); });
+        }
+      } else if (v && typeof v === "object") {
+        captureTemplates(v, p);
+      }
+    });
+  }
+
   /* ---------- Construire formular ---------- */
-  function buildForm(data) {
+  function buildForm() {
     var form = $("form");
     form.innerHTML = "";
-    Object.keys(data).forEach(function (key) {
+    Object.keys(content).forEach(function (key) {
       var section = document.createElement("section");
       section.className = "edit-section";
       var h = document.createElement("h2");
       h.textContent = label(key);
       section.appendChild(h);
-      buildInto(section, data[key], key);
+      buildInto(section, content[key], key);
       form.appendChild(section);
     });
   }
@@ -52,35 +83,86 @@
   function buildInto(parent, value, path) {
     if (Array.isArray(value)) {
       if (value.length && typeof value[0] === "object") {
+        var list = document.createElement("div");
+        list.className = "edit-list";
         value.forEach(function (item, i) {
-          var card = document.createElement("div");
-          card.className = "edit-card";
-          var t = document.createElement("h4");
-          t.textContent = (item.title || item.name || "Element") + " " + (i + 1);
-          card.appendChild(t);
-          buildInto(card, item, path + "." + i);
-          parent.appendChild(card);
+          list.appendChild(objectCard(item, path + "." + i, path, i));
         });
+        parent.appendChild(list);
+        // buton adăugare
+        var add = document.createElement("button");
+        add.type = "button";
+        add.className = "btn btn--ghost btn--add";
+        add.textContent = "＋ Adaugă " + (SINGULAR[keyOf(path)] || "element");
+        add.addEventListener("click", function () {
+          var tpl = templates[path] || blankTemplate(value[0] || {});
+          value.push(JSON.parse(JSON.stringify(tpl)));
+          buildForm();
+        });
+        parent.appendChild(add);
       } else {
-        field(parent, label(keyOf(path)), textarea(value.join("\n"), path, "lines"));
+        // listă de text → o linie per element
+        field(parent, label(keyOf(path)), linesTextarea(value, path));
       }
     } else if (value && typeof value === "object") {
-      Object.keys(value).forEach(function (k) {
-        buildInto(parent, value[k], path + "." + k);
-      });
+      Object.keys(value).forEach(function (k) { buildInto(parent, value[k], path + "." + k); });
     } else {
-      var key = keyOf(path);
-      var input;
-      if (typeof value === "number") {
-        input = el("input", { type: "number", step: "any", value: value });
-      } else if (String(value).length > 70) {
-        input = textarea(value, path);
-      } else {
-        input = el("input", { type: "text", value: value == null ? "" : value });
-      }
-      input.dataset.path = path;
-      field(parent, label(key), input);
+      field(parent, label(keyOf(path)), scalarInput(value, path));
     }
+  }
+
+  function objectCard(item, path, arrPath, index) {
+    var card = document.createElement("div");
+    card.className = "edit-card";
+    var head = document.createElement("div");
+    head.className = "edit-card__head";
+    var t = document.createElement("h4");
+    t.textContent = (item.title || item.name || SINGULAR[keyOf(arrPath)] || "Element") + " " + (index + 1);
+    var del = document.createElement("button");
+    del.type = "button";
+    del.className = "card-del";
+    del.title = "Șterge";
+    del.textContent = "✕";
+    del.addEventListener("click", function () {
+      var arr = getPath(content, arrPath);
+      arr.splice(index, 1);
+      buildForm();
+    });
+    head.appendChild(t); head.appendChild(del);
+    card.appendChild(head);
+    buildInto(card, item, path);
+    return card;
+  }
+
+  /* ---------- Inputuri legate de model ---------- */
+  function scalarInput(value, path) {
+    var input;
+    if (typeof value === "number") {
+      input = el("input", { type: "number", step: "any" });
+      input.value = value;
+      input.addEventListener("input", function () {
+        setPath(content, path, input.value === "" ? 0 : Number(input.value));
+      });
+    } else if (String(value).length > 70) {
+      input = document.createElement("textarea");
+      input.rows = 3; input.value = value;
+      input.addEventListener("input", function () { setPath(content, path, input.value); });
+    } else {
+      input = el("input", { type: "text" });
+      input.value = value == null ? "" : value;
+      input.addEventListener("input", function () { setPath(content, path, input.value); });
+    }
+    return input;
+  }
+  function linesTextarea(arr, path) {
+    var t = document.createElement("textarea");
+    t.value = arr.join("\n");
+    t.rows = Math.max(2, arr.length);
+    t.addEventListener("input", function () {
+      setPath(content, path, t.value.split("\n").map(function (s) { return s.trim(); })
+        .filter(function (s) { return s.length; }));
+    });
+    return t;
   }
 
   function keyOf(path) { return path.split(".").pop(); }
@@ -89,41 +171,13 @@
     for (var k in attrs) e.setAttribute(k, attrs[k]);
     return e;
   }
-  function textarea(val, path, kind) {
-    var t = document.createElement("textarea");
-    t.value = val;
-    t.rows = kind === "lines" ? Math.max(2, String(val).split("\n").length) : 2;
-    t.dataset.path = path;
-    if (kind) t.dataset.kind = kind;
-    return t;
-  }
   function field(parent, labelText, input) {
     var wrap = document.createElement("label");
     wrap.className = "edit-field";
     var span = document.createElement("span");
     span.textContent = labelText;
-    wrap.appendChild(span);
-    wrap.appendChild(input);
+    wrap.appendChild(span); wrap.appendChild(input);
     parent.appendChild(wrap);
-  }
-
-  /* ---------- Citire valori → obiect ---------- */
-  function collect(base) {
-    var out = JSON.parse(JSON.stringify(base));
-    document.querySelectorAll("[data-path]").forEach(function (input) {
-      var path = input.dataset.path;
-      var val;
-      if (input.dataset.kind === "lines") {
-        val = input.value.split("\n").map(function (s) { return s.trim(); })
-          .filter(function (s) { return s.length; });
-      } else if (input.type === "number") {
-        val = input.value === "" ? 0 : Number(input.value);
-      } else {
-        val = input.value;
-      }
-      setPath(out, path, val);
-    });
-    return out;
   }
   function setPath(obj, path, val) {
     var parts = path.split("."), o = obj;
@@ -143,21 +197,16 @@
   }
 
   function showEditor() {
-    loginView.hidden = true;
-    editorView.hidden = false;
-    topActions.hidden = false;
+    loginView.hidden = true; editorView.hidden = false; topActions.hidden = false;
     api("GET", "/api/content").then(function (r) { return r.json(); }).then(function (data) {
-      content = data;
-      buildForm(content);
+      content = data; templates = {}; captureTemplates(content, "");
+      buildForm();
     });
   }
   function showLogin(msg) {
-    editorView.hidden = true;
-    topActions.hidden = true;
-    loginView.hidden = false;
+    editorView.hidden = true; topActions.hidden = true; loginView.hidden = false;
     if (msg) setMsg("loginMsg", msg, true);
   }
-
   function setMsg(id, text, isError) {
     var m = $(id);
     m.textContent = text;
@@ -172,27 +221,22 @@
       return r.json().then(function (d) { return { ok: r.ok, d: d }; });
     }).then(function (res) {
       if (!res.ok) return setMsg("loginMsg", res.d.error || "Eroare la autentificare.", true);
-      token = res.d.token;
-      localStorage.setItem(TOKEN_KEY, token);
+      token = res.d.token; localStorage.setItem(TOKEN_KEY, token);
       showEditor();
     }).catch(function () { setMsg("loginMsg", "Eroare de rețea.", true); });
   });
-
   $("logoutBtn").addEventListener("click", function () {
-    localStorage.removeItem(TOKEN_KEY); token = "";
-    showLogin();
+    localStorage.removeItem(TOKEN_KEY); token = ""; showLogin();
   });
 
   /* ---------- Salvare ---------- */
   function save() {
-    var data = collect(content);
     setMsg("editorMsg", "Se salvează…", false);
-    api("PUT", "/api/content", data, true).then(function (r) {
+    api("PUT", "/api/content", content, true).then(function (r) {
       return r.json().then(function (d) { return { ok: r.ok, status: r.status, d: d }; });
     }).then(function (res) {
       if (res.status === 401) { showLogin("Sesiune expirată. Autentifică-te din nou."); return; }
       if (!res.ok) return setMsg("editorMsg", res.d.error || "Eroare la salvare.", true);
-      content = data;
       setMsg("editorMsg", "✓ Salvat! Schimbările sunt live pe site.", false);
     }).catch(function () { setMsg("editorMsg", "Eroare de rețea.", true); });
   }
@@ -207,8 +251,8 @@
     }).then(function (res) {
       if (res.status === 401) { showLogin("Sesiune expirată. Autentifică-te din nou."); return; }
       if (!res.ok) return setMsg("editorMsg", res.d.error || "Eroare.", true);
-      content = res.d.content;
-      buildForm(content);
+      content = res.d.content; templates = {}; captureTemplates(content, "");
+      buildForm();
       setMsg("editorMsg", "✓ Resetat la valorile implicite.", false);
     });
   });
