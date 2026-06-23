@@ -5,6 +5,9 @@
 
 .admin { min-height: 100vh; padding-bottom: 60px; }
 
+/* atributul `hidden` trebuie să ascundă întotdeauna, chiar dacă o clasă setează display */
+.admin [hidden], .admin[hidden] { display: none !important; }
+
 .admin__top {
   display: flex; align-items: center; justify-content: space-between;
   padding: 16px 22px; border-bottom: 1px solid rgba(255, 255, 255, 0.07);
