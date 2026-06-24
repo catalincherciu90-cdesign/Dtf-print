@@ -478,3 +478,28 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
   .btn--cta { animation: none; box-shadow: 0 0 8px rgba(255, 150, 70, 0.7), 0 0 22px rgba(249, 99, 30, 0.5), 0 14px 34px -10px rgba(249, 99, 30, 0.7); }
   .btn--primary:not(.btn--sm) { animation: none; box-shadow: 0 0 8px rgba(255, 150, 70, 0.6), 0 0 22px rgba(249, 99, 30, 0.45); }
 }
+
+/* =================================================================
+   Margine „lichidă” — lumină care curge pe chenarul blocurilor
+   ================================================================= */
+@property --lq-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+.panel::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px; pointer-events: none;
+  background: conic-gradient(from var(--lq-angle),
+    transparent 0deg, rgba(34, 211, 238, 0) 60deg, #22d3ee 110deg, #5b8cff 160deg,
+    #d946ef 215deg, rgba(217, 70, 239, 0) 270deg, transparent 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  animation: lq-flow 7s linear infinite;
+}
+@keyframes lq-flow { to { --lq-angle: 360deg; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .panel::after { animation: none; }
+}
