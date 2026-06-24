@@ -1,0 +1,50 @@
+/* ===========================================================
+   MrDTF — Stiluri pagini de conținut (legal / FAQ)
+   =========================================================== */
+.page { min-height: 100vh; display: flex; flex-direction: column; }
+.page__top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 22px; border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(7, 7, 18, 0.6); backdrop-filter: blur(12px);
+  position: sticky; top: 0; z-index: 10;
+}
+.page__main { flex: 1; width: 100%; max-width: 860px; margin-inline: auto; padding: 40px 22px 60px; }
+.page__main h1 {
+  font-size: clamp(1.8rem, 5vw, 2.6rem); font-weight: 800; margin-bottom: 8px;
+  background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.page__lead { color: var(--muted); margin-bottom: 12px; }
+.page__note {
+  background: var(--grad-soft); border: 1px solid var(--panel-border); border-radius: var(--radius-sm);
+  padding: 12px 16px; font-size: 0.88rem; color: #cfe3ff; margin: 18px 0 28px;
+}
+.page__main h2 { font-size: 1.25rem; margin: 30px 0 10px; }
+.page__main h3 { font-size: 1.05rem; margin: 22px 0 6px; color: var(--text); }
+.page__main p, .page__main li { color: #c7c7dd; line-height: 1.7; }
+.page__main p { margin-bottom: 12px; }
+.page__main ul, .page__main ol { margin: 0 0 14px 22px; display: grid; gap: 6px; }
+.page__main a.inline { color: var(--blue); }
+.page__main strong { color: var(--text); }
+
+.faq { display: grid; gap: 12px; margin-top: 20px; }
+.faq details {
+  background: var(--panel); border: 1px solid var(--panel-border); border-radius: var(--radius-sm);
+  padding: 4px 18px; backdrop-filter: blur(10px);
+}
+.faq summary { cursor: pointer; font-weight: 600; padding: 14px 0; list-style: none; position: relative; padding-right: 28px; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; position: absolute; right: 4px; top: 12px; font-size: 1.3rem; color: var(--blue); }
+.faq details[open] summary::after { content: "−"; }
+.faq details p { padding-bottom: 14px; margin: 0; }
+
+.page__footer { border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(7, 7, 18, 0.6); padding: 26px 0; }
+.page__footer .container { display: flex; flex-direction: column; gap: 14px; align-items: center; text-align: center; }
+.page__footer-links { display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: center; }
+.page__footer-links a { color: var(--muted); font-size: 0.9rem; }
+.page__footer-links a:hover { color: var(--text); }
+.page__footer p { color: var(--muted); font-size: 0.82rem; }
+
+@media (max-width: 540px) {
+  .page__top { padding: 12px 16px; }
+  .page__main { padding: 26px 16px 44px; }
+}
