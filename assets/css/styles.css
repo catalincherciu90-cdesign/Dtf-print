@@ -417,13 +417,21 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
   box-shadow: var(--lg-hi);
 }
 
-.icon-btn, .btn--ghost {
+.icon-btn {
+  background: linear-gradient(135deg, rgba(52, 52, 88, 0.5), rgba(16, 16, 36, 0.58));
+  border: 1px solid var(--lg-border);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(180%);
+  box-shadow: var(--lg-hi);
+}
+.btn--ghost {
   background: var(--lg-bg);
   border: 1px solid var(--lg-border);
   -webkit-backdrop-filter: blur(16px) saturate(185%);
   backdrop-filter: blur(16px) saturate(185%);
   box-shadow: var(--lg-hi);
 }
+.socials .icon-btn svg { filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5)); }
 
 .badge {
   -webkit-backdrop-filter: blur(16px) saturate(180%);
