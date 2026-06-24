@@ -29,6 +29,7 @@
     maxWidth: "Lățime maximă (cm)", uploadText: "Text buton upload", calcNote: "Notă sub buton",
     steps: "Pași (cum funcționează)",
     products: "Secțiunea Produse", items: "Produse", img: "Cale imagine (ex. assets/img/x.jpg)", name: "Nume",
+    reducere: "Reducere produs (%)",
     trust: "Garanții (jos)",
     footer: "Footer", tagline: "Descriere footer", phone: "Telefon", email: "Email",
     schedule: "Program", copyright: "Text copyright",
@@ -325,7 +326,10 @@
   function normalizeContent(c) {
     if (!c) return;
     if (c.products && Array.isArray(c.products.items)) {
-      c.products.items.forEach(function (it) { if (it.price == null) it.price = 0; });
+      c.products.items.forEach(function (it) {
+        if (it.price == null) it.price = 0;
+        if (it.reducere == null) it.reducere = 0;
+      });
     }
     var b = c.banners || {};
     c.banners = {

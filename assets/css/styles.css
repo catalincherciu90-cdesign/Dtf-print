@@ -265,6 +265,10 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
 .product:hover .product__arrow { background: var(--grad); }
 .product-price { font-family: "Poppins"; font-weight: 700; font-size: 1.05rem; margin: 6px 0 10px;
   background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.product-price__old { -webkit-text-fill-color: var(--muted); color: var(--muted); text-decoration: line-through;
+  font-size: 0.82rem; font-weight: 600; margin-right: 7px; }
+.product-badge { position: absolute; top: 10px; right: 10px; z-index: 1; background: var(--grad-orange); color: #fff;
+  font-size: 0.72rem; font-weight: 800; padding: 3px 9px; border-radius: 999px; box-shadow: 0 4px 12px -4px rgba(249, 99, 30, 0.7); }
 .btn--sm { padding: 9px 16px; font-size: 0.85rem; }
 .add-cart { width: 100%; }
 

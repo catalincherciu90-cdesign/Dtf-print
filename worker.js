@@ -68,10 +68,10 @@ const DEFAULT_CONTENT = {
     desc: "Descoperă gama noastră de produse blank premium, perfecte pentru personalizare.",
     cta: "Vezi toate produsele",
     items: [
-      { img: "assets/img/prod-tricou.jpg", name: "Tricouri", desc: "De la XS la 5XL", price: 35 },
-      { img: "assets/img/prod-hanorac.jpg", name: "Hanorace", desc: "Model unisex", price: 90 },
-      { img: "assets/img/prod-geanta.jpg", name: "Genți", desc: "Bumbac premium", price: 25 },
-      { img: "assets/img/prod-sapca.jpg", name: "Șepci", desc: "Diverse modele", price: 30 },
+      { img: "assets/img/prod-tricou.jpg", name: "Tricouri", desc: "De la XS la 5XL", price: 35, reducere: 0 },
+      { img: "assets/img/prod-hanorac.jpg", name: "Hanorace", desc: "Model unisex", price: 90, reducere: 0 },
+      { img: "assets/img/prod-geanta.jpg", name: "Genți", desc: "Bumbac premium", price: 25, reducere: 0 },
+      { img: "assets/img/prod-sapca.jpg", name: "Șepci", desc: "Diverse modele", price: 30, reducere: 0 },
     ],
   },
   trust: [
