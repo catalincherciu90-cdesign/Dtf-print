@@ -353,7 +353,7 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
   .icon-btn { width: 38px; height: 38px; }
   .hero { padding: 40px 0 30px; }
   .feature-pills { flex-direction: column; }
-  .feature-pills--hero .pill { max-width: none; }
+  .feature-pills--hero .pill { flex: none; max-width: none; }
   .hero__photo { opacity: 0.3; }
   .hero__stats { gap: 6px 22px; font-size: 0.84rem; }
   .pill { width: 100%; }
