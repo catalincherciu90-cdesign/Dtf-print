@@ -222,6 +222,96 @@ async function listOrders(env) {
   return out;
 }
 
+// ---- CRM ----
+async function listUsers(env) {
+  if (!env.CONTENT) return [];
+  const out = [];
+  let cursor;
+  do {
+    const res = await env.CONTENT.list({ prefix: USER_PREFIX, cursor });
+    for (const k of res.keys) {
+      const u = await env.CONTENT.get(k.name, "json");
+      if (u) out.push({ email: u.email, name: u.name, phone: u.phone, createdAt: u.createdAt });
+    }
+    cursor = res.list_complete ? null : res.cursor;
+  } while (cursor);
+  return out;
+}
+function orderTotal(o) {
+  return Number(o.total != null ? o.total : (o.price || 0)) || 0;
+}
+
+async function handleAdmin(request, env, segs) {
+  if (!(await requireAuth(request, env))) return err("Neautorizat.", 401);
+  if (!env.CONTENT) return err("KV neconfigurat.", 503);
+  const sub = segs[1];
+
+  // GET /api/admin/stats — dashboard
+  if (sub === "stats" && request.method === "GET") {
+    const orders = await listOrders(env);
+    const users = await listUsers(env);
+    const byStatus = {};
+    let revenue = 0, units = 0;
+    for (const o of orders) {
+      byStatus[o.status] = (byStatus[o.status] || 0) + 1;
+      if (o.status !== "Anulată") revenue += orderTotal(o);
+      if (Array.isArray(o.items)) for (const it of o.items) units += Number(it.qty) || 0;
+    }
+    const recent = orders.slice(0, 8).map((o) => ({
+      id: o.id, name: o.name, email: o.email, total: orderTotal(o), status: o.status, createdAt: o.createdAt,
+    }));
+    return json({
+      totalCustomers: users.length, totalOrders: orders.length,
+      revenue: Number(revenue.toFixed(2)), units, byStatus, recent,
+    });
+  }
+
+  // GET /api/admin/customers — listă agregată
+  if (sub === "customers" && !segs[2] && request.method === "GET") {
+    const orders = await listOrders(env);
+    const users = await listUsers(env);
+    const map = {};
+    for (const u of users) {
+      map[u.email] = { email: u.email, name: u.name, phone: u.phone, createdAt: u.createdAt, orderCount: 0, totalSpent: 0, lastOrderAt: null };
+    }
+    for (const o of orders) {
+      const k = o.userId || o.email || "—";
+      if (!map[k]) map[k] = { email: k, name: o.name || "", phone: o.phone || "", createdAt: null, orderCount: 0, totalSpent: 0, lastOrderAt: null };
+      map[k].orderCount++;
+      if (o.status !== "Anulată") map[k].totalSpent += orderTotal(o);
+      if (!map[k].lastOrderAt || (o.createdAt || "") > map[k].lastOrderAt) map[k].lastOrderAt = o.createdAt;
+    }
+    const list = Object.values(map).map((c) => ({ ...c, totalSpent: Number(c.totalSpent.toFixed(2)) }));
+    list.sort((a, b) => (b.lastOrderAt || "").localeCompare(a.lastOrderAt || ""));
+    return json({ customers: list });
+  }
+
+  // /api/admin/customers/:email[/notes]
+  if (sub === "customers" && segs[2]) {
+    const email = decodeURIComponent(segs[2]);
+    if (segs[3] === "notes" && request.method === "PUT") {
+      const b = await request.json().catch(() => ({}));
+      await env.CONTENT.put("crmnote:" + email, JSON.stringify({ notes: String(b.notes || "").slice(0, 5000) }));
+      return json({ ok: true });
+    }
+    if (request.method === "GET") {
+      const user = await env.CONTENT.get(USER_PREFIX + email, "json");
+      const all = await listOrders(env);
+      const orders = all.filter((o) => (o.userId || o.email) === email);
+      const noteRec = await env.CONTENT.get("crmnote:" + email, "json");
+      const fallback = orders[0] || {};
+      return json({
+        customer: user
+          ? { email: user.email, name: user.name, phone: user.phone, createdAt: user.createdAt }
+          : { email, name: fallback.name || "", phone: fallback.phone || "", createdAt: null },
+        orders, notes: (noteRec && noteRec.notes) || "",
+      });
+    }
+  }
+
+  return err("Endpoint inexistent.", 404);
+}
+
 async function handleOrders(request, env, segs) {
   // segs: ["orders"] | ["orders", id] | ["orders", id, "file"]
   const id = segs[1];
@@ -422,6 +512,8 @@ export default {
         }
 
         if (segs[0] === "auth") return handleAuth(request, env, segs);
+
+        if (segs[0] === "admin") return handleAdmin(request, env, segs);
 
         if (segs[0] === "orders") return handleOrders(request, env, segs);
 

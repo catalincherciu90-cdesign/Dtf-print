@@ -70,6 +70,10 @@ Site-ul funcționează imediat cu valorile implicite. Ca să poți **salva** din
 | POST | `/api/auth/login` | — | autentificare client → `{ token }` |
 | GET | `/api/auth/me` | client | datele contului |
 | GET | `/api/auth/orders` | client | comenzile clientului logat |
+| GET | `/api/admin/stats` | admin | statistici CRM (clienți, comenzi, venit, status) |
+| GET | `/api/admin/customers` | admin | listă clienți agregată |
+| GET | `/api/admin/customers/:email` | admin | fișa clientului (date, comenzi, note) |
+| PUT | `/api/admin/customers/:email/notes` | admin | salvează note interne CRM |
 
 ## Magazin (conturi + coș)
 
