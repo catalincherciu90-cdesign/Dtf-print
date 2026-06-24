@@ -105,6 +105,12 @@ const DEFAULT_CONTENT = {
     profileUrl: "",
     videos: [],
   },
+  social: {
+    facebook: "",
+    instagram: "",
+    tiktok: "",
+    youtube: "",
+  },
 };
 
 // ---- Helpers HTTP ----
