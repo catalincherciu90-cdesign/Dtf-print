@@ -81,7 +81,7 @@
       var priceHtml = price ? "<div class=\"product-price\">" + price.toFixed(2) + " RON</div>" : "";
       var btn = price
         ? "<button class=\"btn btn--primary btn--sm add-cart\" data-name=\"" + esc(p.name) +
-          "\" data-price=\"" + price + "\" data-img=\"" + esc(p.img) + "\">＋ În coș</button>"
+          "\" data-price=\"" + price + "\" data-img=\"" + esc(p.img) + "\">Adaugă în coș</button>"
         : "";
       return "<article class=\"product\"><div class=\"product__img\"><img src=\"" +
         esc(p.img) + "\" alt=\"" + esc(p.name) + "\" loading=\"lazy\" /></div><h4>" +
