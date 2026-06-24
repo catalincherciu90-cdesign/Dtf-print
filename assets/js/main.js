@@ -118,6 +118,9 @@
     discountCfg = c.discount || null;
     renderCart();
 
+    // TikTok
+    renderTikTok(c.tiktok);
+
     // Contact (text + href)
     if (c.footer) {
       setContact("footerPhone", c.footer.phone, "tel:");
@@ -142,6 +145,39 @@
     if (!el) return;
     if (src) { el.src = src; el.style.display = ""; }
     else { el.removeAttribute("src"); el.style.display = "none"; }
+  }
+
+  /* ---------- TikTok ---------- */
+  function renderTikTok(tk) {
+    var sec = document.getElementById("tiktok");
+    if (!sec) return;
+    var vids = (tk && Array.isArray(tk.videos) ? tk.videos : []).filter(function (u) { return String(u).trim(); });
+    if (!tk || !tk.enabled || !vids.length) { sec.hidden = true; return; }
+    sec.hidden = false;
+    var t = document.getElementById("tiktokTitle");
+    if (t) t.textContent = tk.title || "TikTok";
+    var link = document.getElementById("tiktokProfile");
+    if (link) {
+      if (tk.profileUrl) { link.href = tk.profileUrl; link.hidden = false; } else link.hidden = true;
+    }
+    var grid = document.getElementById("tiktokGrid");
+    grid.innerHTML = vids.map(function (url) {
+      url = String(url).trim();
+      var id = (url.match(/\/video\/(\d+)/) || [])[1] || (url.match(/(\d{6,})/) || [])[1] || "";
+      return "<blockquote class=\"tiktok-embed\" cite=\"" + esc(url) + "\"" +
+        (id ? " data-video-id=\"" + esc(id) + "\"" : "") +
+        " style=\"max-width:325px;min-width:280px;margin:0;\"><section></section></blockquote>";
+    }).join("");
+    loadTikTokScript();
+  }
+  function loadTikTokScript() {
+    var old = document.getElementById("tiktok-embed-js");
+    if (old) old.remove();
+    var s = document.createElement("script");
+    s.id = "tiktok-embed-js";
+    s.async = true;
+    s.src = "https://www.tiktok.com/embed.js";
+    document.body.appendChild(s);
   }
   function setContact(id, val, scheme) {
     var el = document.getElementById(id);

@@ -38,6 +38,7 @@
     veilOpacity: "Opacitate val (0–100, întunecime peste imagini)",
     discount: "Reducere coș", enabled: "Activă", tipPrag: "Tip prag",
     prag: "Prag (RON sau bucăți)", procent: "Procent reducere (%)",
+    tiktok: "TikTok", profileUrl: "Link profil TikTok", videos: "Linkuri video (unul pe linie)",
   };
   var SINGULAR = { pills: "Avantaj", items: "Produs", steps: "Pas", trust: "Garanție" };
   function label(key) {
@@ -354,6 +355,11 @@
     c.discount = {
       enabled: !!d.enabled, tipPrag: d.tipPrag || "valoare",
       prag: d.prag != null ? d.prag : 0, procent: d.procent != null ? d.procent : 0,
+    };
+    var tk = c.tiktok || {};
+    c.tiktok = {
+      enabled: !!tk.enabled, title: tk.title || "Urmărește-ne pe TikTok",
+      profileUrl: tk.profileUrl || "", videos: Array.isArray(tk.videos) ? tk.videos : [],
     };
   }
 

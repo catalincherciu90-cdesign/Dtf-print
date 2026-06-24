@@ -316,6 +316,13 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
   background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.12); color: var(--text);
   resize: vertical; margin-bottom: 12px; }
 
+/* ---------- TikTok ---------- */
+.tiktok { padding: 40px 0; }
+.tiktok__head { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+.tiktok__title { font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 800; }
+.tiktok__grid { display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; }
+.tiktok__grid .tiktok-embed { flex: 0 0 auto; border-radius: var(--radius-sm); overflow: hidden; }
+
 /* ---------- Trust ---------- */
 .trust { padding: 20px 0 60px; }
 .trust__panel { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; padding: 30px 40px; }
