@@ -503,3 +503,19 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
 @media (prefers-reduced-motion: reduce) {
   .panel::after { animation: none; }
 }
+
+/* =================================================================
+   Deformare lichidă subtilă a blocurilor principale
+   ================================================================= */
+.panel { animation: lq-morph 9s ease-in-out infinite; }
+.products .panel { animation-delay: -3s; }
+.trust .panel { animation-delay: -6s; }
+@keyframes lq-morph {
+  0%, 100% { border-radius: 22px; }
+  25% { border-radius: 28px 18px 26px 20px; }
+  50% { border-radius: 20px 28px 18px 26px; }
+  75% { border-radius: 26px 20px 28px 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .panel { animation: none; }
+}
