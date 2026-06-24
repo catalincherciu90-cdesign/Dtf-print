@@ -452,3 +452,29 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
   backdrop-filter: blur(42px) saturate(190%);
   box-shadow: -24px 0 70px rgba(0, 0, 0, 0.55), inset 1px 0 0 rgba(255, 255, 255, 0.22), var(--lg-hi);
 }
+
+/* =================================================================
+   Neon flicker pe butoanele principale
+   ================================================================= */
+.btn--cta { animation: neon-cta 4.5s linear infinite; }
+.btn--primary:not(.btn--sm) { animation: neon-primary 5s linear infinite; }
+
+@keyframes neon-cta {
+  0%, 42%, 46%, 48%, 82%, 84%, 100% {
+    box-shadow: 0 0 8px rgba(255, 150, 70, 0.85), 0 0 24px rgba(249, 99, 30, 0.6), 0 14px 34px -10px rgba(249, 99, 30, 0.7);
+  }
+  44%, 83% { box-shadow: 0 0 3px rgba(255, 150, 70, 0.4), 0 0 8px rgba(249, 99, 30, 0.3), 0 10px 26px -12px rgba(249, 99, 30, 0.5); }
+  47% { box-shadow: 0 0 5px rgba(255, 150, 70, 0.6), 0 0 14px rgba(249, 99, 30, 0.4), 0 12px 30px -10px rgba(249, 99, 30, 0.6); }
+}
+@keyframes neon-primary {
+  0%, 42%, 46%, 48%, 82%, 84%, 100% {
+    box-shadow: 0 0 8px rgba(34, 211, 238, 0.7), 0 0 22px rgba(217, 70, 239, 0.5), 0 12px 30px -8px rgba(123, 92, 255, 0.5);
+  }
+  44%, 83% { box-shadow: 0 0 3px rgba(34, 211, 238, 0.35), 0 0 8px rgba(217, 70, 239, 0.25); }
+  47% { box-shadow: 0 0 5px rgba(34, 211, 238, 0.5), 0 0 14px rgba(217, 70, 239, 0.35); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn--cta { animation: none; box-shadow: 0 0 8px rgba(255, 150, 70, 0.7), 0 0 22px rgba(249, 99, 30, 0.5), 0 14px 34px -10px rgba(249, 99, 30, 0.7); }
+  .btn--primary:not(.btn--sm) { animation: none; box-shadow: 0 0 8px rgba(34, 211, 238, 0.6), 0 0 22px rgba(217, 70, 239, 0.45); }
+}
