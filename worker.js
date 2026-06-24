@@ -631,6 +631,19 @@ async function handleAuth(request, env, segs) {
   return err("Endpoint inexistent.", 404);
 }
 
+// Servește asset-urile statice cu revalidare, ca schimbările (HTML/CSS/JS) să apară
+// imediat după deploy, fără să rămână versiuni vechi în cache-ul browserului.
+async function serveAsset(request, env) {
+  const res = await env.ASSETS.fetch(request);
+  const ct = res.headers.get("Content-Type") || "";
+  if (/text\/html|text\/css|javascript/.test(ct)) {
+    const headers = new Headers(res.headers);
+    headers.set("Cache-Control", "no-cache");
+    return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
+  }
+  return res;
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -709,7 +722,7 @@ export default {
         return err("Endpoint inexistent.", 404);
       }
 
-      return env.ASSETS.fetch(request);
+      return serveAsset(request, env);
     } catch (e) {
       if (!path.startsWith("/api/")) return env.ASSETS.fetch(request);
       return err("Eroare server: " + (e && e.message), 500);
