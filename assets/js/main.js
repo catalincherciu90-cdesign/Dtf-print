@@ -107,6 +107,10 @@
       }
     }
 
+    // Reducere coș
+    discountCfg = c.discount || null;
+    renderCart();
+
     // Contact (text + href)
     if (c.footer) {
       setContact("footerPhone", c.footer.phone, "tel:");
@@ -187,6 +191,19 @@
   var elCount = document.getElementById("cartCount");
   var elFiles = document.getElementById("cartFiles");
   var elCheckout = document.getElementById("cartCheckout");
+  var elSummary = document.getElementById("cartSummary");
+  var discountCfg = null;
+
+  function computeDiscount(subtotal, qty) {
+    if (!discountCfg || !discountCfg.enabled) return { amount: 0, percent: 0 };
+    var pct = Number(discountCfg.procent) || 0;
+    if (pct <= 0) return { amount: 0, percent: 0 };
+    var metric = discountCfg.tipPrag === "cantitate" ? qty : subtotal;
+    if (metric >= (Number(discountCfg.prag) || 0)) {
+      return { amount: Number((subtotal * pct / 100).toFixed(2)), percent: pct };
+    }
+    return { amount: 0, percent: 0 };
+  }
 
   function renderCart() {
     var n = cartCount();
@@ -211,7 +228,15 @@
           "</div>";
       }).join("");
     }
-    if (elTotal) elTotal.textContent = cartTotal().toFixed(2) + " RON";
+    var subtotal = cartTotal();
+    var disc = computeDiscount(subtotal, cartCount());
+    if (elSummary) {
+      elSummary.innerHTML = disc.amount > 0
+        ? "<div class=\"cart__line\"><span>Subtotal</span><span>" + subtotal.toFixed(2) + " RON</span></div>" +
+          "<div class=\"cart__line cart__line--disc\"><span>Reducere (-" + disc.percent + "%)</span><span>-" + disc.amount.toFixed(2) + " RON</span></div>"
+        : "";
+    }
+    if (elTotal) elTotal.textContent = (subtotal - disc.amount).toFixed(2) + " RON";
     if (elFiles) elFiles.hidden = !cart.some(function (it) { return it.type === "dtf"; });
   }
 

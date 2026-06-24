@@ -93,6 +93,12 @@ const DEFAULT_CONTENT = {
     heroRight: "assets/img/hero-printer.jpg",
     veilOpacity: 100,
   },
+  discount: {
+    enabled: false,
+    tipPrag: "valoare",
+    prag: 0,
+    procent: 0,
+  },
 };
 
 // ---- Helpers HTTP ----
@@ -356,7 +362,19 @@ async function handleOrders(request, env, segs) {
       if (o.type === "dtf") { o.width = Math.max(0, Number(it.width) || 0); o.length = Math.max(0, Number(it.length) || 0); }
       return o;
     });
-    const total = Number(cleanItems.reduce((s, it) => s + it.price * it.qty, 0).toFixed(2));
+    const subtotal = Number(cleanItems.reduce((s, it) => s + it.price * it.qty, 0).toFixed(2));
+    const totalQty = cleanItems.reduce((s, it) => s + it.qty, 0);
+    const content = await getContent(env);
+    const dc = content.discount || {};
+    let discountPercent = 0, discount = 0;
+    if (dc.enabled && Number(dc.procent) > 0) {
+      const metric = dc.tipPrag === "cantitate" ? totalQty : subtotal;
+      if (metric >= Number(dc.prag || 0)) {
+        discountPercent = Number(dc.procent);
+        discount = Number((subtotal * discountPercent / 100).toFixed(2));
+      }
+    }
+    const total = Number((subtotal - discount).toFixed(2));
 
     const storedFiles = [];
     let fi = 0;
@@ -376,7 +394,7 @@ async function handleOrders(request, env, segs) {
       email: cust.sub,
       phone: (user && user.phone) || "",
       note: String(f.note || "").slice(0, 2000),
-      items: cleanItems, total, files: storedFiles,
+      items: cleanItems, subtotal, discount, discountPercent, total, files: storedFiles,
     };
     await env.CONTENT.put(ORDER_PREFIX + oid, JSON.stringify(order));
     return json({ ok: true, id: oid });

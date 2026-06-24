@@ -253,3 +253,12 @@
   background: rgba(255, 255, 255, 0.05); border: 1px dashed rgba(255, 255, 255, 0.2); color: var(--muted);
 }
 .crm-tagsugg:hover { color: var(--text); border-color: var(--blue); }
+
+/* ---- câmpuri boolean / select ---- */
+.edit-field--bool { display: flex; flex-direction: row; align-items: center; gap: 10px; }
+.edit-field--bool input { width: 18px; height: 18px; accent-color: var(--blue); }
+.admin select {
+  width: 100%; padding: 11px 14px; border-radius: 10px; font: inherit; font-size: 0.95rem;
+  background: rgba(10, 10, 26, 0.7); border: 1px solid rgba(255, 255, 255, 0.12); color: var(--text); cursor: pointer;
+}
+.admin select:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.18); }

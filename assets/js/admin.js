@@ -35,6 +35,8 @@
     banners: "Bannere", heroBg: "Fundal Hero (imagine completă)",
     heroLeft: "Banner stânga (printuri)", heroRight: "Banner dreapta (imprimantă)",
     veilOpacity: "Opacitate val (0–100, întunecime peste imagini)",
+    discount: "Reducere coș", enabled: "Activă", tipPrag: "Tip prag",
+    prag: "Prag (RON sau bucăți)", procent: "Procent reducere (%)",
   };
   var SINGULAR = { pills: "Avantaj", items: "Produs", steps: "Pas", trust: "Garanție" };
   function label(key) {
@@ -143,11 +145,44 @@
       }
     } else if (value && typeof value === "object") {
       Object.keys(value).forEach(function (k) { buildInto(parent, value[k], path + "." + k); });
+    } else if (typeof value === "boolean") {
+      parent.appendChild(boolField(label(keyOf(path)), value, path));
+    } else if (keyOf(path) === "tipPrag") {
+      parent.appendChild(selectField(label("tipPrag"), value, path,
+        [["valoare", "După valoarea coșului (RON)"], ["cantitate", "După cantitatea de produse"]]));
     } else if (keyOf(path) === "img" || /^banners\.hero/.test(path)) {
       parent.appendChild(mediaField(value, path, label(keyOf(path))));
     } else {
       field(parent, label(keyOf(path)), scalarInput(value, path));
     }
+  }
+
+  function boolField(labelText, value, path) {
+    var wrap = document.createElement("label");
+    wrap.className = "edit-field edit-field--bool";
+    var input = el("input", { type: "checkbox" });
+    input.checked = !!value;
+    input.addEventListener("change", function () { setPath(content, path, input.checked); });
+    var span = document.createElement("span");
+    span.textContent = labelText;
+    wrap.appendChild(input); wrap.appendChild(span);
+    return wrap;
+  }
+  function selectField(labelText, value, path, options) {
+    var wrap = document.createElement("label");
+    wrap.className = "edit-field";
+    var span = document.createElement("span");
+    span.textContent = labelText;
+    var sel = document.createElement("select");
+    options.forEach(function (o) {
+      var opt = document.createElement("option");
+      opt.value = o[0]; opt.textContent = o[1];
+      if (o[0] === value) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    sel.addEventListener("change", function () { setPath(content, path, sel.value); });
+    wrap.appendChild(span); wrap.appendChild(sel);
+    return wrap;
   }
 
   /* câmp imagine: previzualizare + buton de încărcare + cale text */
@@ -448,6 +483,8 @@
       if (o.email) contact.push("✉️ " + esc(o.email));
       if (o.phone) contact.push("📞 " + esc(o.phone));
       var total = o.total != null ? o.total : o.price;
+      var discNote = (o.discount && o.discount > 0)
+        ? " <span class=\"order-meta\">(−" + esc(o.discountPercent) + "% · −" + esc(o.discount) + " RON)</span>" : "";
       var note = o.note || o.message;
 
       return "<div class=\"order-card\" data-status=\"" + esc(o.status) + "\">" +
@@ -457,7 +494,7 @@
         "</div>" +
         "<div class=\"order-grid\">" +
           "<span>" + (contact.join(" · ") || "<span class='order-meta'>—</span>") + "</span>" +
-          "<span>💰 <strong>" + esc(total) + " RON</strong></span>" +
+          "<span>💰 <strong>" + esc(total) + " RON</strong>" + discNote + "</span>" +
         "</div>" +
         itemsHtml +
         (note ? "<p class=\"order-message\">„" + esc(note) + "”</p>" : "") +
