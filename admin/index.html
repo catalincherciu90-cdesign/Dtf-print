@@ -40,6 +40,7 @@
       <button class="tab" type="button" data-tab="banners">🖼️ Bannere</button>
       <button class="tab" type="button" data-tab="products">🛍️ Produse</button>
       <button class="tab" type="button" data-tab="orders">📦 Comenzi <span class="tab-badge" id="ordersBadge" hidden>0</span></button>
+      <button class="tab" type="button" data-tab="crm">📊 CRM</button>
     </div>
 
     <!-- Tab: Conținut -->
@@ -110,6 +111,28 @@
       </div>
       <p class="form-msg" id="ordersMsg" role="status"></p>
       <div id="ordersList"></div>
+    </div>
+
+    <!-- Tab: CRM -->
+    <div class="tab-panel" id="tab-crm" hidden>
+      <div class="editor-head">
+        <div>
+          <h1>CRM</h1>
+          <p class="muted">Clienți, comenzi și statistici.</p>
+        </div>
+        <div class="editor-actions">
+          <button class="btn btn--ghost" id="crmRefresh" type="button">↻ Reîmprospătează</button>
+        </div>
+      </div>
+      <p class="form-msg" id="crmMsg" role="status"></p>
+
+      <div class="crm-stats" id="crmStats"></div>
+
+      <h2 class="crm-h">Clienți</h2>
+      <div class="crm-list" id="crmCustomers"></div>
+
+      <!-- Fișa clientului -->
+      <div class="crm-detail" id="crmDetail" hidden></div>
     </div>
   </main>
 

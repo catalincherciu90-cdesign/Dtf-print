@@ -378,9 +378,11 @@
       $("tab-banners").hidden = which !== "banners";
       $("tab-products").hidden = which !== "products";
       $("tab-orders").hidden = which !== "orders";
+      $("tab-crm").hidden = which !== "crm";
       if (which === "orders") loadOrders();
       else if (which === "products") buildProducts();
       else if (which === "banners") buildBanners();
+      else if (which === "crm") loadCRM();
       else buildForm();
     });
   });
@@ -503,6 +505,106 @@
     api("DELETE", "/api/orders/" + id, null, true).then(function (r) {
       if (r.status === 401) { showLogin("Sesiune expirată."); return; }
       if (r.ok) loadOrders();
+    });
+  }
+
+  /* ---------- CRM ---------- */
+  $("crmRefresh").addEventListener("click", loadCRM);
+  function money(n) { return (Number(n) || 0).toFixed(2) + " RON"; }
+
+  function loadCRM() {
+    setMsg("crmMsg", "Se încarcă…", false);
+    closeCustomer();
+    Promise.all([
+      api("GET", "/api/admin/stats", null, true).then(function (r) { return r.status === 401 ? null : r.json(); }),
+      api("GET", "/api/admin/customers", null, true).then(function (r) { return r.status === 401 ? null : r.json(); }),
+    ]).then(function (res) {
+      if (!res[0] || !res[1]) { showLogin("Sesiune expirată. Autentifică-te din nou."); return; }
+      renderStats(res[0]);
+      renderCustomers(res[1].customers || []);
+      setMsg("crmMsg", "", false);
+    }).catch(function () { setMsg("crmMsg", "Eroare la încărcare.", true); });
+  }
+
+  function crmCard(ico, label, val) {
+    return "<div class=\"crm-card\"><span class=\"crm-card__ico\">" + ico + "</span>" +
+      "<div><strong>" + esc(val) + "</strong><em>" + esc(label) + "</em></div></div>";
+  }
+  function renderStats(s) {
+    var chips = Object.keys(s.byStatus || {}).map(function (k) {
+      return "<span class=\"crm-chip\" data-status=\"" + esc(k) + "\">" + esc(k) + ": <strong>" + esc(s.byStatus[k]) + "</strong></span>";
+    }).join("");
+    var cards = crmCard("👥", "Clienți", s.totalCustomers) + crmCard("📦", "Comenzi", s.totalOrders) +
+      crmCard("💰", "Venit", money(s.revenue)) + crmCard("🧾", "Produse vândute", s.units || 0);
+    var recent = (s.recent || []).map(function (o) {
+      return "<div class=\"crm-recent__row\"><span class=\"order-meta\">" + fmtDate(o.createdAt) + "</span>" +
+        "<span>" + esc(o.name || o.email || "—") + "</span>" +
+        "<span class=\"crm-chip\" data-status=\"" + esc(o.status) + "\">" + esc(o.status) + "</span>" +
+        "<strong>" + money(o.total) + "</strong></div>";
+    }).join("");
+    $("crmStats").innerHTML = "<div class=\"crm-cards\">" + cards + "</div>" +
+      (chips ? "<div class=\"crm-status\">" + chips + "</div>" : "") +
+      (recent ? "<div class=\"crm-recent\"><h3>Activitate recentă</h3>" + recent + "</div>" : "");
+  }
+
+  function renderCustomers(list) {
+    if (!list.length) { $("crmCustomers").innerHTML = "<p class=\"order-meta\">Niciun client încă.</p>"; return; }
+    $("crmCustomers").innerHTML = list.map(function (c) {
+      return "<button type=\"button\" class=\"crm-row\" data-email=\"" + esc(c.email) + "\">" +
+        "<span class=\"crm-row__main\"><strong>" + esc(c.name || "—") + "</strong>" +
+          "<em>" + esc(c.email) + (c.phone ? " · " + esc(c.phone) : "") + "</em></span>" +
+        "<span class=\"crm-row__meta\">" +
+          "<span class=\"crm-kv\">" + esc(c.orderCount) + " com.</span>" +
+          "<strong>" + money(c.totalSpent) + "</strong>" +
+          "<em class=\"order-meta\">" + (c.lastOrderAt ? fmtDate(c.lastOrderAt) : "—") + "</em></span></button>";
+    }).join("");
+    $("crmCustomers").querySelectorAll(".crm-row[data-email]").forEach(function (b) {
+      b.addEventListener("click", function () { openCustomer(b.dataset.email); });
+    });
+  }
+
+  function openCustomer(email) {
+    setMsg("crmMsg", "Se încarcă fișa…", false);
+    api("GET", "/api/admin/customers/" + encodeURIComponent(email), null, true).then(function (r) {
+      return r.status === 401 ? null : r.json();
+    }).then(function (d) {
+      if (!d) { showLogin("Sesiune expirată."); return; }
+      setMsg("crmMsg", "", false);
+      renderDetail(d);
+    }).catch(function () { setMsg("crmMsg", "Eroare.", true); });
+  }
+  function closeCustomer() { var el = $("crmDetail"); if (el) { el.hidden = true; el.innerHTML = ""; } }
+
+  function renderDetail(d) {
+    var c = d.customer || {};
+    var orders = (d.orders || []).map(function (o) {
+      var items = (o.items || []).map(function (it) { return esc(it.qty) + "× " + esc(it.name); }).join(", ");
+      return "<div class=\"crm-order\"><div><strong>" + fmtDate(o.createdAt) + "</strong> " +
+        "<span class=\"crm-chip\" data-status=\"" + esc(o.status) + "\">" + esc(o.status) + "</span></div>" +
+        "<div class=\"order-meta\">" + (items || "—") + "</div>" +
+        "<div class=\"crm-order__total\"><strong>" + money(o.total != null ? o.total : o.price) + "</strong></div></div>";
+    }).join("") || "<p class=\"order-meta\">Nicio comandă.</p>";
+    var el = $("crmDetail");
+    el.hidden = false;
+    el.innerHTML =
+      "<div class=\"crm-detail__head\"><div><h2>" + esc(c.name || "Client") + "</h2>" +
+        "<p class=\"order-meta\">" + esc(c.email) + (c.phone ? " · " + esc(c.phone) : "") + "</p></div>" +
+        "<button class=\"btn btn--ghost btn--sm\" id=\"crmBack\" type=\"button\">← Înapoi</button></div>" +
+      "<label class=\"crm-notes\"><span>Note interne (CRM)</span>" +
+        "<textarea id=\"crmNotes\" rows=\"4\" placeholder=\"Observații despre client, preferințe, follow-up…\">" + esc(d.notes || "") + "</textarea></label>" +
+      "<div class=\"crm-notes__actions\"><button class=\"btn btn--primary btn--sm\" id=\"crmSaveNotes\" type=\"button\">💾 Salvează notele</button>" +
+        "<span class=\"form-msg\" id=\"crmNotesMsg\"></span></div>" +
+      "<h3 class=\"crm-h\">Comenzi (" + (d.orders || []).length + ")</h3><div class=\"crm-orders\">" + orders + "</div>";
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    $("crmBack").addEventListener("click", closeCustomer);
+    $("crmSaveNotes").addEventListener("click", function () {
+      api("PUT", "/api/admin/customers/" + encodeURIComponent(c.email) + "/notes", { notes: $("crmNotes").value }, true)
+        .then(function (r) {
+          if (r.status === 401) { showLogin("Sesiune expirată."); return; }
+          var m = $("crmNotesMsg");
+          if (r.ok) { m.textContent = "✓ Salvat."; m.className = "form-msg is-ok"; }
+          else { m.textContent = "Eroare la salvare."; m.className = "form-msg is-error"; }
+        });
     });
   }
 

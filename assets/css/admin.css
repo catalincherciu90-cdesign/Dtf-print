@@ -158,3 +158,62 @@
   backdrop-filter: blur(24px) saturate(200%);
   box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.06);
 }
+
+/* ---------- CRM ---------- */
+.crm-stats { display: grid; gap: 16px; margin-bottom: 22px; }
+.crm-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.crm-card { display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-radius: var(--radius-sm);
+  background: var(--lg-bg); border: 1px solid var(--lg-border); box-shadow: var(--lg-hi); }
+.crm-card__ico { font-size: 1.35rem; width: 44px; height: 44px; flex: none; display: grid; place-items: center;
+  border-radius: 12px; background: var(--grad-soft); border: 1px solid var(--panel-border); }
+.crm-card strong { display: block; font-family: "Poppins"; font-size: 1.2rem; }
+.crm-card em { font-style: normal; color: var(--muted); font-size: 0.8rem; }
+
+.crm-status { display: flex; flex-wrap: wrap; gap: 8px; }
+.crm-chip { font-size: 0.78rem; font-weight: 600; padding: 4px 12px; border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.14); color: #d6d6ec; }
+.crm-chip[data-status="Nouă"] { border-color: #38bdf8; color: #9fdcff; }
+.crm-chip[data-status="În lucru"] { border-color: #f5b13d; color: #ffd79a; }
+.crm-chip[data-status="Trimisă"] { border-color: #a78bfa; color: #d3c4ff; }
+.crm-chip[data-status="Finalizată"] { border-color: #5fe0a0; color: #b5f3d3; }
+.crm-chip[data-status="Anulată"] { border-color: #ff6b6b; color: #ffb3b3; }
+
+.crm-recent { background: var(--lg-bg); border: 1px solid var(--lg-border); border-radius: var(--radius-sm);
+  padding: 16px 18px; box-shadow: var(--lg-hi); }
+.crm-recent h3 { font-size: 1rem; margin-bottom: 8px; }
+.crm-recent__row { display: grid; grid-template-columns: auto 1fr auto auto; gap: 12px; align-items: center;
+  padding: 8px 0; border-top: 1px solid rgba(255, 255, 255, 0.06); font-size: 0.9rem; }
+
+.crm-h { font-size: 1.15rem; margin: 22px 0 12px; }
+
+.crm-list { display: grid; gap: 8px; }
+.crm-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; width: 100%;
+  text-align: left; padding: 14px 16px; border-radius: 12px; cursor: pointer; font: inherit;
+  background: var(--lg-bg); border: 1px solid var(--lg-border); color: var(--text); transition: border-color 0.2s; }
+.crm-row:hover { border-color: rgba(34, 211, 238, 0.5); }
+.crm-row__main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.crm-row__main strong { font-size: 0.98rem; }
+.crm-row__main em { font-style: normal; color: var(--muted); font-size: 0.82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.crm-row__meta { display: flex; align-items: center; gap: 16px; flex: none; }
+.crm-row__meta strong { font-family: "Poppins"; }
+.crm-row__meta em { font-style: normal; }
+.crm-kv { font-size: 0.82rem; color: var(--muted); }
+
+.crm-detail { margin-top: 22px; padding: 22px; border-radius: var(--radius);
+  background: var(--lg-bg); border: 1px solid var(--lg-border); box-shadow: var(--shadow), var(--lg-hi); }
+.crm-detail__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.crm-detail__head h2 { font-size: 1.4rem; }
+.crm-notes { display: grid; gap: 6px; margin: 18px 0 10px; }
+.crm-notes > span { font-size: 0.82rem; color: var(--muted); }
+.crm-notes__actions { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.crm-orders { display: grid; gap: 8px; }
+.crm-order { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center;
+  padding: 10px 14px; border-radius: 10px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); }
+
+@media (max-width: 600px) {
+  .crm-cards { grid-template-columns: repeat(2, 1fr); }
+  .crm-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .crm-recent__row { grid-template-columns: 1fr auto; }
+  .crm-recent__row > span:first-child { display: none; }
+  .crm-order { grid-template-columns: 1fr auto; }
+}
