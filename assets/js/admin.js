@@ -76,7 +76,7 @@
     var form = $("form");
     form.innerHTML = "";
     Object.keys(content).forEach(function (key) {
-      if (key === "products" || key === "banners") return; // au tab-uri proprii
+      if (key === "products" || key === "banners" || key === "discount") return; // au tab-uri proprii
       var section = document.createElement("section");
       section.className = "edit-section";
       var h = document.createElement("h2");
@@ -113,10 +113,24 @@
     form.appendChild(section);
   }
 
+  function buildPromo() {
+    var form = $("promoForm");
+    if (!form || !content.discount) return;
+    form.innerHTML = "";
+    var section = document.createElement("section");
+    section.className = "edit-section";
+    var h = document.createElement("h2");
+    h.textContent = "Reducere coș";
+    section.appendChild(h);
+    buildInto(section, content.discount, "discount");
+    form.appendChild(section);
+  }
+
   // reconstruiește tab-ul activ
   function rerender() {
     if ($("tab-banners") && !$("tab-banners").hidden) buildBanners();
     else if ($("tab-products") && !$("tab-products").hidden) buildProducts();
+    else if ($("tab-promo") && !$("tab-promo").hidden) buildPromo();
     else buildForm();
   }
 
@@ -336,6 +350,11 @@
       heroBg: b.heroBg || "", heroLeft: b.heroLeft || "", heroRight: b.heroRight || "",
       veilOpacity: b.veilOpacity != null ? b.veilOpacity : 100,
     };
+    var d = c.discount || {};
+    c.discount = {
+      enabled: !!d.enabled, tipPrag: d.tipPrag || "valoare",
+      prag: d.prag != null ? d.prag : 0, procent: d.procent != null ? d.procent : 0,
+    };
   }
 
   function showEditor() {
@@ -390,6 +409,8 @@
   $("saveProductsBtn2").addEventListener("click", function () { save("productsMsg"); });
   $("saveBannersBtn").addEventListener("click", function () { save("bannersMsg"); });
   $("saveBannersBtn2").addEventListener("click", function () { save("bannersMsg"); });
+  $("savePromoBtn").addEventListener("click", function () { save("promoMsg"); });
+  $("savePromoBtn2").addEventListener("click", function () { save("promoMsg"); });
 
   /* ---------- Reset ---------- */
   $("resetBtn").addEventListener("click", function () {
@@ -416,11 +437,13 @@
       $("tab-content").hidden = which !== "content";
       $("tab-banners").hidden = which !== "banners";
       $("tab-products").hidden = which !== "products";
+      $("tab-promo").hidden = which !== "promo";
       $("tab-orders").hidden = which !== "orders";
       $("tab-crm").hidden = which !== "crm";
       if (which === "orders") loadOrders();
       else if (which === "products") buildProducts();
       else if (which === "banners") buildBanners();
+      else if (which === "promo") buildPromo();
       else if (which === "crm") loadCRM();
       else buildForm();
     });
