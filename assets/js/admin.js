@@ -32,7 +32,8 @@
     trust: "Garanții (jos)",
     footer: "Footer", tagline: "Descriere footer", phone: "Telefon", email: "Email",
     schedule: "Program", copyright: "Text copyright",
-    banners: "Bannere", heroLeft: "Banner stânga (printuri)", heroRight: "Banner dreapta (imprimantă)",
+    banners: "Bannere", heroBg: "Fundal Hero (imagine completă)",
+    heroLeft: "Banner stânga (printuri)", heroRight: "Banner dreapta (imprimantă)",
   };
   var SINGULAR = { pills: "Avantaj", items: "Produs", steps: "Pas", trust: "Garanție" };
   function label(key) {
@@ -286,9 +287,12 @@
 
   // asigură că produsele au câmp de preț (pentru conținut salvat înainte)
   function normalizeContent(c) {
-    if (c && c.products && Array.isArray(c.products.items)) {
+    if (!c) return;
+    if (c.products && Array.isArray(c.products.items)) {
       c.products.items.forEach(function (it) { if (it.price == null) it.price = 0; });
     }
+    var b = c.banners || {};
+    c.banners = { heroBg: b.heroBg || "", heroLeft: b.heroLeft || "", heroRight: b.heroRight || "" };
   }
 
   function showEditor() {

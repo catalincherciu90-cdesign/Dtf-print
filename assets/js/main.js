@@ -95,12 +95,11 @@
         "</em></div></div>";
     });
 
-    // Bannere hero
+    // Bannere hero (fundal complet + poze laterale; cele goale se ascund)
     if (c.banners) {
-      var bl = document.getElementById("heroImgLeft");
-      var br = document.getElementById("heroImgRight");
-      if (bl && c.banners.heroLeft) bl.src = c.banners.heroLeft;
-      if (br && c.banners.heroRight) br.src = c.banners.heroRight;
+      setBanner("heroImgBg", c.banners.heroBg);
+      setBanner("heroImgLeft", c.banners.heroLeft);
+      setBanner("heroImgRight", c.banners.heroRight);
     }
 
     // Contact (text + href)
@@ -121,6 +120,12 @@
   function fill(id, arr, tpl) {
     var el = document.getElementById(id);
     if (el && Array.isArray(arr)) el.innerHTML = arr.map(tpl).join("");
+  }
+  function setBanner(id, src) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    if (src) { el.src = src; el.style.display = ""; }
+    else { el.removeAttribute("src"); el.style.display = "none"; }
   }
   function setContact(id, val, scheme) {
     var el = document.getElementById(id);

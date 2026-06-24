@@ -88,6 +88,7 @@ const DEFAULT_CONTENT = {
     copyright: "© 2024 MrDTF — Print DTF Premium. Toate drepturile rezervate.",
   },
   banners: {
+    heroBg: "",
     heroLeft: "assets/img/hero-prints.jpg",
     heroRight: "assets/img/hero-printer.jpg",
   },
