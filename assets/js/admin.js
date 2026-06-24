@@ -34,6 +34,7 @@
     schedule: "Program", copyright: "Text copyright",
     banners: "Bannere", heroBg: "Fundal Hero (imagine completă)",
     heroLeft: "Banner stânga (printuri)", heroRight: "Banner dreapta (imprimantă)",
+    veilOpacity: "Opacitate val (0–100, întunecime peste imagini)",
   };
   var SINGULAR = { pills: "Avantaj", items: "Produs", steps: "Pas", trust: "Garanție" };
   function label(key) {
@@ -142,7 +143,7 @@
       }
     } else if (value && typeof value === "object") {
       Object.keys(value).forEach(function (k) { buildInto(parent, value[k], path + "." + k); });
-    } else if (keyOf(path) === "img" || path.indexOf("banners.") === 0) {
+    } else if (keyOf(path) === "img" || /^banners\.hero/.test(path)) {
       parent.appendChild(mediaField(value, path, label(keyOf(path))));
     } else {
       field(parent, label(keyOf(path)), scalarInput(value, path));
@@ -292,7 +293,10 @@
       c.products.items.forEach(function (it) { if (it.price == null) it.price = 0; });
     }
     var b = c.banners || {};
-    c.banners = { heroBg: b.heroBg || "", heroLeft: b.heroLeft || "", heroRight: b.heroRight || "" };
+    c.banners = {
+      heroBg: b.heroBg || "", heroLeft: b.heroLeft || "", heroRight: b.heroRight || "",
+      veilOpacity: b.veilOpacity != null ? b.veilOpacity : 100,
+    };
   }
 
   function showEditor() {
