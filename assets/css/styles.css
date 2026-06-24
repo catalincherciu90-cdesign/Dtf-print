@@ -120,8 +120,8 @@ img { max-width: 100%; display: block; }
   padding: 13px 24px; border-radius: 999px; font-weight: 600; font-size: 0.95rem;
   cursor: pointer; border: 1px solid transparent; transition: transform 0.2s var(--ease), box-shadow 0.2s, background 0.2s;
 }
-.btn--primary { background: var(--grad); color: #fff; box-shadow: 0 12px 30px -8px rgba(90, 80, 255, 0.7); }
-.btn--primary:hover { transform: translateY(-2px); box-shadow: 0 18px 40px -10px rgba(90, 80, 255, 0.85); }
+.btn--primary { background: var(--grad-orange); color: #fff; box-shadow: 0 12px 30px -8px rgba(249, 99, 30, 0.7); }
+.btn--primary:hover { transform: translateY(-2px); box-shadow: 0 18px 40px -10px rgba(249, 99, 30, 0.85); }
 .btn--ghost { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.12); color: var(--text); }
 .btn--ghost:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px); }
 .btn--block { width: 100%; }
@@ -468,13 +468,13 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
 }
 @keyframes neon-primary {
   0%, 42%, 46%, 48%, 82%, 84%, 100% {
-    box-shadow: 0 0 8px rgba(34, 211, 238, 0.7), 0 0 22px rgba(217, 70, 239, 0.5), 0 12px 30px -8px rgba(123, 92, 255, 0.5);
+    box-shadow: 0 0 8px rgba(255, 150, 70, 0.8), 0 0 22px rgba(249, 99, 30, 0.55), 0 12px 30px -8px rgba(249, 99, 30, 0.6);
   }
-  44%, 83% { box-shadow: 0 0 3px rgba(34, 211, 238, 0.35), 0 0 8px rgba(217, 70, 239, 0.25); }
-  47% { box-shadow: 0 0 5px rgba(34, 211, 238, 0.5), 0 0 14px rgba(217, 70, 239, 0.35); }
+  44%, 83% { box-shadow: 0 0 3px rgba(255, 150, 70, 0.35), 0 0 8px rgba(249, 99, 30, 0.25); }
+  47% { box-shadow: 0 0 5px rgba(255, 150, 70, 0.5), 0 0 14px rgba(249, 99, 30, 0.35); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .btn--cta { animation: none; box-shadow: 0 0 8px rgba(255, 150, 70, 0.7), 0 0 22px rgba(249, 99, 30, 0.5), 0 14px 34px -10px rgba(249, 99, 30, 0.7); }
-  .btn--primary:not(.btn--sm) { animation: none; box-shadow: 0 0 8px rgba(34, 211, 238, 0.6), 0 0 22px rgba(217, 70, 239, 0.45); }
+  .btn--primary:not(.btn--sm) { animation: none; box-shadow: 0 0 8px rgba(255, 150, 70, 0.6), 0 0 22px rgba(249, 99, 30, 0.45); }
 }
