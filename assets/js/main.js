@@ -71,7 +71,8 @@
     // Pași
     fill("stepsWrap", c.steps, function (s) {
       return "<div class=\"step\"><span class=\"step__ico\">" + esc(s.ico) +
-        "</span><h4>" + esc(s.title) + "</h4><p>" + esc(s.sub) + "</p></div>";
+        "</span><div class=\"step__txt\"><h4>" + esc(s.title) + "</h4><p>" + esc(s.sub) +
+        "</p></div></div>";
     });
 
     // Produse
