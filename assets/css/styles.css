@@ -300,6 +300,9 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
   background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); color: var(--text); font-size: 1rem; }
 .cart-item__del { background: none; border: none; color: #ff8a8a; cursor: pointer; font-size: 0.85rem; }
 .cart__foot { padding: 18px 22px 22px; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+.cart__summary { display: grid; gap: 5px; margin-bottom: 10px; }
+.cart__line { display: flex; align-items: center; justify-content: space-between; font-size: 0.9rem; color: var(--muted); }
+.cart__line--disc { color: #5fe0a0; font-weight: 600; }
 .cart__total { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .cart__total strong { font-family: "Poppins"; font-size: 1.4rem; }
 .cart__files { margin-bottom: 12px; display: grid; gap: 6px; }

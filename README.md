@@ -83,6 +83,9 @@ Site-ul funcționează imediat cu valorile implicite. Ca să poți **salva** din
   articolele, totalul, fișierele de design atașate și e legată de cont — vizibilă în
   „Comenzile mele” și în admin → Comenzi.
 - Prețul produselor se setează din **admin → Produse**.
+- **Reducere coș** (admin → Conținut → *Reducere coș*): activezi, alegi pragul după
+  valoare (RON) sau cantitate, plus procentul. Se aplică automat în coș și se
+  recalculează pe server la plasarea comenzii.
 
 ## Comenzi
 
