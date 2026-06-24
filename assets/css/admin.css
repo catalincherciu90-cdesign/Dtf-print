@@ -125,7 +125,16 @@
 .order-del:hover { background: rgba(255, 80, 80, 0.24); }
 
 @media (max-width: 560px) {
+  .admin__top { padding: 12px 16px; }
+  .admin__editor { padding-top: 18px; }
+  .tabs { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { white-space: nowrap; flex: none; padding: 11px 14px; }
+  .edit-section { padding: 18px; }
+  .editor-head { gap: 12px; }
+  .editor-actions { flex-wrap: wrap; }
   .editor-actions--bottom { justify-content: stretch; }
   .editor-actions--bottom .btn { width: 100%; }
-  .order-card__top { flex-direction: column; }
+  .order-card__top { flex-direction: column; align-items: stretch; }
+  .order-status { width: 100%; }
 }
