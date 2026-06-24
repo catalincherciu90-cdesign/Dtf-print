@@ -404,8 +404,11 @@
             return;
           }
           if (!res.ok) return setCartMsg(res.d.error || "Eroare la trimitere.", true);
+          var delivTxt = deliv === "ridicare"
+            ? "Ridici personal comanda."
+            : "Livrare la: " + address;
           cart = []; saveCart(); renderCart();
-          setCartMsg("✓ Comanda a fost trimisă! O găsești în contul tău.", false);
+          setCartMsg("✓ Comanda a fost trimisă! " + delivTxt + " O găsești în contul tău.", false);
         })
         .catch(function () { cartSubmit.disabled = false; setCartMsg("Eroare de rețea.", true); });
     });
