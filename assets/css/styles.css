@@ -334,6 +334,7 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
   .nav a { padding: 12px; }
   .burger { display: flex; }
   .header__inner { gap: 14px; }
+  .header__actions { margin-left: auto; }
   .hero__photo { opacity: 0.55; width: 50%; }
   .hero__photo--right { width: 55%; }
   .feature-pills--hero .pill { flex: 1 1 260px; }
