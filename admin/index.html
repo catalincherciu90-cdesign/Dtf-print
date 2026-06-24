@@ -39,6 +39,7 @@
       <button class="tab is-active" type="button" data-tab="content">📝 Conținut</button>
       <button class="tab" type="button" data-tab="banners">🖼️ Bannere</button>
       <button class="tab" type="button" data-tab="products">🛍️ Produse</button>
+      <button class="tab" type="button" data-tab="promo">🎟️ Promo</button>
       <button class="tab" type="button" data-tab="orders">📦 Comenzi <span class="tab-badge" id="ordersBadge" hidden>0</span></button>
       <button class="tab" type="button" data-tab="crm">📊 CRM</button>
     </div>
@@ -95,6 +96,24 @@
       <form id="productsForm" autocomplete="off"></form>
       <div class="editor-actions editor-actions--bottom">
         <button class="btn btn--primary" id="saveProductsBtn2" type="button">💾 Salvează</button>
+      </div>
+    </div>
+
+    <!-- Tab: Promo -->
+    <div class="tab-panel" id="tab-promo" hidden>
+      <div class="editor-head">
+        <div>
+          <h1>Promo</h1>
+          <p class="muted">Reducere automată la coș când se atinge un prag (valoare sau cantitate).</p>
+        </div>
+        <div class="editor-actions">
+          <button class="btn btn--primary" id="savePromoBtn" type="button">💾 Salvează</button>
+        </div>
+      </div>
+      <p class="form-msg" id="promoMsg" role="status"></p>
+      <form id="promoForm" autocomplete="off"></form>
+      <div class="editor-actions editor-actions--bottom">
+        <button class="btn btn--primary" id="savePromoBtn2" type="button">💾 Salvează</button>
       </div>
     </div>
 
