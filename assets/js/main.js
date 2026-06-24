@@ -351,7 +351,21 @@
   var cartMsg = document.getElementById("cartMsg");
   var cartNote = document.getElementById("cartNote");
   var cartFileInput = document.getElementById("cartFileInput");
+  var cartAddr = document.getElementById("cartAddr");
+  var cartAddress = document.getElementById("cartAddress");
   function setCartMsg(t, e) { if (cartMsg) { cartMsg.textContent = t; cartMsg.className = "order-msg" + (e ? " is-error" : " is-ok"); } }
+
+  function delivMethod() {
+    var r = document.querySelector('input[name="deliv"]:checked');
+    return r ? r.value : "livrare";
+  }
+  function syncDeliv() {
+    if (cartAddr) cartAddr.hidden = delivMethod() !== "livrare";
+  }
+  document.querySelectorAll('input[name="deliv"]').forEach(function (r) {
+    r.addEventListener("change", syncDeliv);
+  });
+  syncDeliv();
 
   if (cartSubmit) {
     cartSubmit.addEventListener("click", function () {
@@ -362,8 +376,15 @@
         setTimeout(function () { window.location.href = "/cont"; }, 1300);
         return;
       }
+      var deliv = delivMethod();
+      var address = cartAddress ? cartAddress.value.trim() : "";
+      if (deliv === "livrare" && !address) {
+        return setCartMsg("Completează adresa de livrare sau alege „Ridic personal”.", true);
+      }
       var fd = new FormData();
       fd.append("items", JSON.stringify(cart));
+      fd.append("deliveryMethod", deliv);
+      fd.append("address", deliv === "livrare" ? address : "");
       fd.append("note", cartNote ? cartNote.value : "");
       if (cartFileInput && cartFileInput.files) {
         for (var i = 0; i < cartFileInput.files.length; i++) {

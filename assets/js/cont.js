@@ -52,10 +52,16 @@
     $("myOrders").innerHTML = orders.map(function (o) {
       var items = (o.items || []).map(function (it) { return esc(it.name) + " ×" + esc(it.qty); }).join(", ");
       var total = o.total != null ? o.total : o.price;
+      var deliv = o.deliveryMethod === "ridicare"
+        ? "🏬 Ridicare personală"
+        : (o.deliveryMethod === "livrare" || o.address)
+          ? "🚚 Livrare" + (o.address ? ": " + esc(o.address) : "")
+          : "";
       return "<div class=\"order-card\" data-status=\"" + esc(o.status) + "\">" +
         "<div class=\"order-card__top\"><strong>" + new Date(o.createdAt).toLocaleString("ro-RO") + "</strong>" +
         "<span class=\"pill-status\">" + esc(o.status) + "</span></div>" +
         "<div class=\"muted\">" + (items || "—") + "</div>" +
+        (deliv ? "<div class=\"muted order-deliv\">" + deliv + "</div>" : "") +
         "<div class=\"order-total\">" + esc(total) + " RON</div></div>";
     }).join("");
   }

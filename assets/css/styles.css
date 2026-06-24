@@ -316,6 +316,18 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
   background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.12); color: var(--text);
   resize: vertical; margin-bottom: 12px; }
 
+.cart__deliv { margin-bottom: 10px; }
+.cart__deliv-label { display: block; font-size: 0.82rem; color: var(--muted); margin-bottom: 6px; }
+.cart__deliv-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.deliv-opt { display: flex; align-items: center; gap: 7px; flex: 1 1 140px; cursor: pointer;
+  padding: 9px 12px; border-radius: 10px; font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.12); }
+.deliv-opt:has(input:checked) { border-color: var(--orange); background: rgba(255, 138, 36, 0.12); }
+.deliv-opt input { accent-color: var(--orange); }
+.cart__addr[hidden] { display: none; }
+.order-deliv { margin: 6px 0; font-size: 0.9rem; }
+.order-addr { color: var(--muted); white-space: pre-wrap; }
+
 /* ---------- TikTok ---------- */
 .tiktok { padding: 40px 0; }
 .tiktok__head { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
