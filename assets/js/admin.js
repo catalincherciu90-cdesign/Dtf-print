@@ -509,7 +509,11 @@
   }
 
   /* ---------- CRM ---------- */
+  var crmAll = [], crmFiltered = [], crmTagFilter = "", crmDetailTags = [];
+  var COMMON_TAGS = ["Client fidel", "En-gros", "VIP", "Nou", "De urmărit"];
   $("crmRefresh").addEventListener("click", loadCRM);
+  $("crmSearch").addEventListener("input", applyCustomerFilter);
+  $("crmExport").addEventListener("click", exportCSV);
   function money(n) { return (Number(n) || 0).toFixed(2) + " RON"; }
 
   function loadCRM() {
@@ -521,9 +525,58 @@
     ]).then(function (res) {
       if (!res[0] || !res[1]) { showLogin("Sesiune expirată. Autentifică-te din nou."); return; }
       renderStats(res[0]);
-      renderCustomers(res[1].customers || []);
+      crmAll = res[1].customers || [];
+      renderFilters();
+      applyCustomerFilter();
       setMsg("crmMsg", "", false);
     }).catch(function () { setMsg("crmMsg", "Eroare la încărcare.", true); });
+  }
+
+  function renderFilters() {
+    var counts = {};
+    crmAll.forEach(function (c) { (c.tags || []).forEach(function (t) { counts[t] = (counts[t] || 0) + 1; }); });
+    var keys = Object.keys(counts).sort();
+    var el = $("crmFilters");
+    if (!keys.length) { el.innerHTML = ""; return; }
+    el.innerHTML = "<button type=\"button\" class=\"crm-filter" + (crmTagFilter === "" ? " is-active" : "") + "\" data-tag=\"\">Toți</button>" +
+      keys.map(function (t) {
+        return "<button type=\"button\" class=\"crm-filter" + (crmTagFilter === t ? " is-active" : "") + "\" data-tag=\"" + esc(t) + "\">" + esc(t) + " (" + counts[t] + ")</button>";
+      }).join("");
+    el.querySelectorAll(".crm-filter").forEach(function (b) {
+      b.addEventListener("click", function () { crmTagFilter = b.dataset.tag; renderFilters(); applyCustomerFilter(); });
+    });
+  }
+
+  function applyCustomerFilter() {
+    var q = ($("crmSearch").value || "").trim().toLowerCase();
+    crmFiltered = crmAll.filter(function (c) {
+      if (crmTagFilter && (c.tags || []).indexOf(crmTagFilter) < 0) return false;
+      if (!q) return true;
+      return (c.name || "").toLowerCase().indexOf(q) >= 0 ||
+        (c.email || "").toLowerCase().indexOf(q) >= 0 ||
+        (c.phone || "").toLowerCase().indexOf(q) >= 0;
+    });
+    renderCustomers(crmFiltered);
+  }
+
+  function exportCSV() {
+    var src = crmFiltered.length || $("crmSearch").value || crmTagFilter ? crmFiltered : crmAll;
+    var head = ["Nume", "Email", "Telefon", "Comenzi", "Total (RON)", "Ultima comandă", "Etichete"];
+    var rows = [head].concat(src.map(function (c) {
+      return [c.name || "", c.email || "", c.phone || "", c.orderCount || 0,
+        (Number(c.totalSpent) || 0).toFixed(2),
+        c.lastOrderAt ? new Date(c.lastOrderAt).toLocaleString("ro-RO") : "",
+        (c.tags || []).join(" | ")];
+    }));
+    var csv = "\uFEFF" + rows.map(function (r) {
+      return r.map(function (f) { return "\"" + String(f).replace(/"/g, "\"\"") + "\""; }).join(";");
+    }).join("\r\n");
+    var blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = "clienti-mrdtf.csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
   }
 
   function crmCard(ico, label, val) {
@@ -550,9 +603,12 @@
   function renderCustomers(list) {
     if (!list.length) { $("crmCustomers").innerHTML = "<p class=\"order-meta\">Niciun client încă.</p>"; return; }
     $("crmCustomers").innerHTML = list.map(function (c) {
+      var tags = (c.tags || []).length
+        ? "<span class=\"crm-tags\">" + c.tags.map(function (t) { return "<span class=\"crm-tag\">" + esc(t) + "</span>"; }).join("") + "</span>"
+        : "";
       return "<button type=\"button\" class=\"crm-row\" data-email=\"" + esc(c.email) + "\">" +
         "<span class=\"crm-row__main\"><strong>" + esc(c.name || "—") + "</strong>" +
-          "<em>" + esc(c.email) + (c.phone ? " · " + esc(c.phone) : "") + "</em></span>" +
+          "<em>" + esc(c.email) + (c.phone ? " · " + esc(c.phone) : "") + "</em>" + tags + "</span>" +
         "<span class=\"crm-row__meta\">" +
           "<span class=\"crm-kv\">" + esc(c.orderCount) + " com.</span>" +
           "<strong>" + money(c.totalSpent) + "</strong>" +
@@ -577,6 +633,7 @@
 
   function renderDetail(d) {
     var c = d.customer || {};
+    crmDetailTags = (d.tags || []).slice();
     var orders = (d.orders || []).map(function (o) {
       var items = (o.items || []).map(function (it) { return esc(it.qty) + "× " + esc(it.name); }).join(", ");
       return "<div class=\"crm-order\"><div><strong>" + fmtDate(o.createdAt) + "</strong> " +
@@ -584,28 +641,58 @@
         "<div class=\"order-meta\">" + (items || "—") + "</div>" +
         "<div class=\"crm-order__total\"><strong>" + money(o.total != null ? o.total : o.price) + "</strong></div></div>";
     }).join("") || "<p class=\"order-meta\">Nicio comandă.</p>";
+    var sugg = COMMON_TAGS.map(function (t) { return "<button type=\"button\" class=\"crm-tagsugg\" data-t=\"" + esc(t) + "\">+ " + esc(t) + "</button>"; }).join("");
     var el = $("crmDetail");
     el.hidden = false;
     el.innerHTML =
       "<div class=\"crm-detail__head\"><div><h2>" + esc(c.name || "Client") + "</h2>" +
         "<p class=\"order-meta\">" + esc(c.email) + (c.phone ? " · " + esc(c.phone) : "") + "</p></div>" +
         "<button class=\"btn btn--ghost btn--sm\" id=\"crmBack\" type=\"button\">← Înapoi</button></div>" +
+      "<div class=\"crm-tagedit\"><span class=\"crm-lbl\">Etichete</span>" +
+        "<div class=\"crm-tagedit__chips\" id=\"crmTagChips\"></div>" +
+        "<div class=\"crm-tagedit__add\"><input type=\"text\" id=\"crmTagInput\" placeholder=\"Adaugă etichetă\" />" +
+          "<button class=\"btn btn--ghost btn--sm\" id=\"crmTagAdd\" type=\"button\">+ Adaugă</button></div>" +
+        "<div class=\"crm-tagsugg-row\">" + sugg + "</div></div>" +
       "<label class=\"crm-notes\"><span>Note interne (CRM)</span>" +
         "<textarea id=\"crmNotes\" rows=\"4\" placeholder=\"Observații despre client, preferințe, follow-up…\">" + esc(d.notes || "") + "</textarea></label>" +
-      "<div class=\"crm-notes__actions\"><button class=\"btn btn--primary btn--sm\" id=\"crmSaveNotes\" type=\"button\">💾 Salvează notele</button>" +
-        "<span class=\"form-msg\" id=\"crmNotesMsg\"></span></div>" +
+      "<div class=\"crm-notes__actions\"><button class=\"btn btn--primary btn--sm\" id=\"crmSave\" type=\"button\">💾 Salvează</button>" +
+        "<span class=\"form-msg\" id=\"crmSaveMsg\"></span></div>" +
       "<h3 class=\"crm-h\">Comenzi (" + (d.orders || []).length + ")</h3><div class=\"crm-orders\">" + orders + "</div>";
     el.scrollIntoView({ behavior: "smooth", block: "start" });
+    renderTagChips();
     $("crmBack").addEventListener("click", closeCustomer);
-    $("crmSaveNotes").addEventListener("click", function () {
-      api("PUT", "/api/admin/customers/" + encodeURIComponent(c.email) + "/notes", { notes: $("crmNotes").value }, true)
-        .then(function (r) {
-          if (r.status === 401) { showLogin("Sesiune expirată."); return; }
-          var m = $("crmNotesMsg");
-          if (r.ok) { m.textContent = "✓ Salvat."; m.className = "form-msg is-ok"; }
-          else { m.textContent = "Eroare la salvare."; m.className = "form-msg is-error"; }
-        });
+    $("crmTagAdd").addEventListener("click", function () { addTag($("crmTagInput").value); $("crmTagInput").value = ""; });
+    $("crmTagInput").addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { e.preventDefault(); addTag($("crmTagInput").value); $("crmTagInput").value = ""; }
     });
+    el.querySelectorAll(".crm-tagsugg").forEach(function (b) { b.addEventListener("click", function () { addTag(b.dataset.t); }); });
+    $("crmSave").addEventListener("click", function () { saveCrm(c.email); });
+  }
+
+  function renderTagChips() {
+    var el = $("crmTagChips");
+    el.innerHTML = crmDetailTags.length
+      ? crmDetailTags.map(function (t, i) { return "<span class=\"crm-tag crm-tag--rm\" data-i=\"" + i + "\">" + esc(t) + " ✕</span>"; }).join("")
+      : "<span class=\"order-meta\">Nicio etichetă</span>";
+    el.querySelectorAll(".crm-tag--rm").forEach(function (s) {
+      s.addEventListener("click", function () { crmDetailTags.splice(Number(s.dataset.i), 1); renderTagChips(); });
+    });
+  }
+  function addTag(t) {
+    t = (t || "").trim();
+    if (t && crmDetailTags.indexOf(t) < 0) { crmDetailTags.push(t); renderTagChips(); }
+  }
+  function saveCrm(email) {
+    api("PUT", "/api/admin/customers/" + encodeURIComponent(email) + "/crm", { notes: $("crmNotes").value, tags: crmDetailTags }, true)
+      .then(function (r) {
+        if (r.status === 401) { showLogin("Sesiune expirată."); return; }
+        var m = $("crmSaveMsg");
+        if (!r.ok) { m.textContent = "Eroare la salvare."; m.className = "form-msg is-error"; return; }
+        m.textContent = "✓ Salvat."; m.className = "form-msg is-ok";
+        var cust = crmAll.filter(function (x) { return x.email === email; })[0];
+        if (cust) cust.tags = crmDetailTags.slice();
+        renderFilters(); applyCustomerFilter();
+      });
   }
 
   /* ---------- Start ---------- */
