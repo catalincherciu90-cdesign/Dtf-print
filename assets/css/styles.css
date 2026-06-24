@@ -382,3 +382,63 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
   .hero__chevron { animation: none; }
   html { scroll-behavior: auto; }
 }
+
+/* =================================================================
+   Liquid glass — frosted blur + specular highlight + inner glow
+   ================================================================= */
+:root {
+  --lg-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.028) 55%, rgba(255, 255, 255, 0.06) 100%);
+  --lg-border: rgba(255, 255, 255, 0.16);
+  --lg-hi: inset 0 1px 0 rgba(255, 255, 255, 0.34), inset 0 -1px 1px rgba(255, 255, 255, 0.05);
+}
+
+.panel {
+  background: var(--lg-bg);
+  border-color: var(--lg-border);
+  -webkit-backdrop-filter: blur(24px) saturate(185%);
+  backdrop-filter: blur(24px) saturate(185%);
+  box-shadow: var(--shadow), var(--lg-hi);
+}
+/* gloss accent — un colț luminat, în spatele conținutului */
+.panel { position: relative; isolation: isolate; }
+.panel::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(130% 90% at 0% 0%, rgba(255, 255, 255, 0.12), transparent 48%);
+}
+
+.pill, .product, .step {
+  background: var(--lg-bg);
+  border: 1px solid var(--lg-border);
+  border-radius: var(--radius-sm);
+  -webkit-backdrop-filter: blur(16px) saturate(170%);
+  backdrop-filter: blur(16px) saturate(170%);
+  box-shadow: var(--lg-hi);
+}
+
+.icon-btn, .btn--ghost {
+  background: var(--lg-bg);
+  border: 1px solid var(--lg-border);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  backdrop-filter: blur(12px) saturate(160%);
+  box-shadow: var(--lg-hi);
+}
+
+.badge {
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  backdrop-filter: blur(12px) saturate(160%);
+  box-shadow: var(--lg-hi);
+}
+
+.header {
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  backdrop-filter: blur(18px) saturate(180%);
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.cart__panel {
+  background: linear-gradient(135deg, rgba(24, 24, 48, 0.72), rgba(10, 10, 26, 0.82));
+  border-left: 1px solid var(--lg-border);
+  -webkit-backdrop-filter: blur(30px) saturate(170%);
+  backdrop-filter: blur(30px) saturate(170%);
+  box-shadow: -24px 0 70px rgba(0, 0, 0, 0.55), inset 1px 0 0 rgba(255, 255, 255, 0.18);
+}
