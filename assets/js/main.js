@@ -78,12 +78,19 @@
     // Produse
     fill("productGrid", c.products && c.products.items, function (p) {
       var price = Number(p.price) || 0;
-      var priceHtml = price ? "<div class=\"product-price\">" + price.toFixed(2) + " RON</div>" : "";
+      var red = Math.max(0, Math.min(100, Number(p.reducere) || 0));
+      var fin = red > 0 ? Number((price * (1 - red / 100)).toFixed(2)) : price;
+      var priceHtml = price
+        ? (red > 0
+            ? "<div class=\"product-price\"><span class=\"product-price__old\">" + price.toFixed(2) + " RON</span>" + fin.toFixed(2) + " RON</div>"
+            : "<div class=\"product-price\">" + price.toFixed(2) + " RON</div>")
+        : "";
+      var badge = red > 0 ? "<span class=\"product-badge\">-" + red + "%</span>" : "";
       var btn = price
         ? "<button class=\"btn btn--primary btn--sm add-cart\" data-name=\"" + esc(p.name) +
-          "\" data-price=\"" + price + "\" data-img=\"" + esc(p.img) + "\">Adaugă în coș</button>"
+          "\" data-price=\"" + fin + "\" data-img=\"" + esc(p.img) + "\">Adaugă în coș</button>"
         : "";
-      return "<article class=\"product\"><div class=\"product__img\"><img src=\"" +
+      return "<article class=\"product\">" + badge + "<div class=\"product__img\"><img src=\"" +
         esc(p.img) + "\" alt=\"" + esc(p.name) + "\" loading=\"lazy\" /></div><h4>" +
         esc(p.name) + "</h4><p>" + esc(p.desc) + "</p>" + priceHtml + btn + "</article>";
     });
