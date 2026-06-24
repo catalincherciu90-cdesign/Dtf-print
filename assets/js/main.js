@@ -100,6 +100,10 @@
       setBanner("heroImgBg", c.banners.heroBg);
       setBanner("heroImgLeft", c.banners.heroLeft);
       setBanner("heroImgRight", c.banners.heroRight);
+      var veil = document.getElementById("heroVeil");
+      if (veil && c.banners.veilOpacity != null) {
+        veil.style.opacity = String(Math.max(0, Math.min(100, Number(c.banners.veilOpacity))) / 100);
+      }
     }
 
     // Contact (text + href)

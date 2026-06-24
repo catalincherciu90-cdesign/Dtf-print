@@ -91,6 +91,7 @@ const DEFAULT_CONTENT = {
     heroBg: "",
     heroLeft: "assets/img/hero-prints.jpg",
     heroRight: "assets/img/hero-printer.jpg",
+    veilOpacity: 100,
   },
 };
 
