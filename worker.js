@@ -99,6 +99,12 @@ const DEFAULT_CONTENT = {
     prag: 0,
     procent: 0,
   },
+  tiktok: {
+    enabled: false,
+    title: "Urmărește-ne pe TikTok",
+    profileUrl: "",
+    videos: [],
+  },
 };
 
 // ---- Helpers HTTP ----
