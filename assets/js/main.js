@@ -128,6 +128,22 @@
       var sch = document.getElementById("footerSchedule");
       if (sch && c.footer.schedule) sch.textContent = "🕘 " + c.footer.schedule;
     }
+
+    // Social media (footer)
+    if (c.social) {
+      setSocial("socialFacebook", c.social.facebook);
+      setSocial("socialInstagram", c.social.instagram);
+      setSocial("socialTiktok", c.social.tiktok);
+      setSocial("socialYoutube", c.social.youtube);
+    }
+  }
+
+  function setSocial(id, url) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    url = (url || "").trim();
+    if (url) { el.href = url; el.hidden = false; }
+    else { el.removeAttribute("href"); el.hidden = true; }
   }
 
   function listLi(id, arr) {

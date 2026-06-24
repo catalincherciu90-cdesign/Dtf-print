@@ -41,6 +41,7 @@
       <button class="tab" type="button" data-tab="products">🛍️ Produse</button>
       <button class="tab" type="button" data-tab="promo">🎟️ Promo</button>
       <button class="tab" type="button" data-tab="tiktok">📱 TikTok</button>
+      <button class="tab" type="button" data-tab="social">🔗 Social</button>
       <button class="tab" type="button" data-tab="orders">📦 Comenzi <span class="tab-badge" id="ordersBadge" hidden>0</span></button>
       <button class="tab" type="button" data-tab="crm">📊 CRM</button>
     </div>
@@ -134,6 +135,24 @@
       <form id="tiktokForm" autocomplete="off"></form>
       <div class="editor-actions editor-actions--bottom">
         <button class="btn btn--primary" id="saveTiktokBtn2" type="button">💾 Salvează</button>
+      </div>
+    </div>
+
+    <!-- Tab: Social -->
+    <div class="tab-panel" id="tab-social" hidden>
+      <div class="editor-head">
+        <div>
+          <h1>Social media</h1>
+          <p class="muted">Pune linkurile către paginile voastre. Iconițele apar în footer doar dacă completezi linkul.</p>
+        </div>
+        <div class="editor-actions">
+          <button class="btn btn--primary" id="saveSocialBtn" type="button">💾 Salvează</button>
+        </div>
+      </div>
+      <p class="form-msg" id="socialMsg" role="status"></p>
+      <form id="socialForm" autocomplete="off"></form>
+      <div class="editor-actions editor-actions--bottom">
+        <button class="btn btn--primary" id="saveSocialBtn2" type="button">💾 Salvează</button>
       </div>
     </div>
 

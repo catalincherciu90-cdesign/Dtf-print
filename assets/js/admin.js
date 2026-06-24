@@ -39,6 +39,7 @@
     discount: "Reducere coș", enabled: "Activă", tipPrag: "Tip prag",
     prag: "Prag (RON sau bucăți)", procent: "Procent reducere (%)",
     tiktok: "TikTok", profileUrl: "Link profil TikTok", videos: "Linkuri video (unul pe linie)",
+    social: "Social media", facebook: "Facebook", instagram: "Instagram", youtube: "YouTube",
   };
   var SINGULAR = { pills: "Avantaj", items: "Produs", steps: "Pas", trust: "Garanție" };
   function label(key) {
@@ -77,7 +78,7 @@
     var form = $("form");
     form.innerHTML = "";
     Object.keys(content).forEach(function (key) {
-      if (key === "products" || key === "banners" || key === "discount" || key === "tiktok") return; // au tab-uri proprii
+      if (key === "products" || key === "banners" || key === "discount" || key === "tiktok" || key === "social") return; // au tab-uri proprii
       var section = document.createElement("section");
       section.className = "edit-section";
       var h = document.createElement("h2");
@@ -139,6 +140,19 @@
     buildInto(section, content.tiktok, "tiktok");
     form.appendChild(section);
     loadTiktokStatus();
+  }
+
+  function buildSocial() {
+    var form = $("socialForm");
+    if (!form || !content.social) return;
+    form.innerHTML = "";
+    var section = document.createElement("section");
+    section.className = "edit-section";
+    var h = document.createElement("h2");
+    h.textContent = "Linkuri social media";
+    section.appendChild(h);
+    buildInto(section, content.social, "social");
+    form.appendChild(section);
   }
 
   function loadTiktokStatus() {
@@ -207,6 +221,7 @@
     else if ($("tab-products") && !$("tab-products").hidden) buildProducts();
     else if ($("tab-promo") && !$("tab-promo").hidden) buildPromo();
     else if ($("tab-tiktok") && !$("tab-tiktok").hidden) buildTiktok();
+    else if ($("tab-social") && !$("tab-social").hidden) buildSocial();
     else buildForm();
   }
 
@@ -436,6 +451,11 @@
       enabled: !!tk.enabled, title: tk.title || "Urmărește-ne pe TikTok",
       profileUrl: tk.profileUrl || "", videos: Array.isArray(tk.videos) ? tk.videos : [],
     };
+    var s = c.social || {};
+    c.social = {
+      facebook: s.facebook || "", instagram: s.instagram || "",
+      tiktok: s.tiktok || "", youtube: s.youtube || "",
+    };
   }
 
   function showEditor() {
@@ -495,6 +515,8 @@
   $("savePromoBtn2").addEventListener("click", function () { save("promoMsg"); });
   $("saveTiktokBtn").addEventListener("click", function () { save("tiktokMsg"); });
   $("saveTiktokBtn2").addEventListener("click", function () { save("tiktokMsg"); });
+  $("saveSocialBtn").addEventListener("click", function () { save("socialMsg"); });
+  $("saveSocialBtn2").addEventListener("click", function () { save("socialMsg"); });
 
   /* ---------- Reset ---------- */
   $("resetBtn").addEventListener("click", function () {
@@ -523,6 +545,7 @@
       $("tab-products").hidden = which !== "products";
       $("tab-promo").hidden = which !== "promo";
       $("tab-tiktok").hidden = which !== "tiktok";
+      $("tab-social").hidden = which !== "social";
       $("tab-orders").hidden = which !== "orders";
       $("tab-crm").hidden = which !== "crm";
       if (which === "orders") loadOrders();
@@ -530,6 +553,7 @@
       else if (which === "banners") buildBanners();
       else if (which === "promo") buildPromo();
       else if (which === "tiktok") buildTiktok();
+      else if (which === "social") buildSocial();
       else if (which === "crm") loadCRM();
       else buildForm();
     });
