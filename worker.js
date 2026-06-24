@@ -334,6 +334,120 @@ async function handleAdmin(request, env, segs) {
   return err("Endpoint inexistent.", 404);
 }
 
+// ---- TikTok Display API ----
+async function tiktokExchange(env, params) {
+  const body = new URLSearchParams({
+    client_key: env.TIKTOK_CLIENT_KEY, client_secret: env.TIKTOK_CLIENT_SECRET, ...params,
+  });
+  const r = await fetch("https://open.tiktokapis.com/v2/oauth/token/", {
+    method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: body.toString(),
+  });
+  return r.json();
+}
+async function tiktokValidAccess(env) {
+  let t = await env.CONTENT.get("tiktok:tokens", "json");
+  if (!t) return null;
+  const now = Math.floor(Date.now() / 1000);
+  if (t.expires_at && t.expires_at - 60 > now) return t;
+  const res = await tiktokExchange(env, { grant_type: "refresh_token", refresh_token: t.refresh_token });
+  if (res.error && res.error !== "ok" && !res.access_token) return null;
+  if (!res.access_token) return null;
+  t = {
+    access_token: res.access_token, refresh_token: res.refresh_token || t.refresh_token,
+    expires_at: now + (res.expires_in || 86400),
+    refresh_expires_at: now + (res.refresh_expires_in || 31536000),
+    open_id: res.open_id || t.open_id,
+  };
+  await env.CONTENT.put("tiktok:tokens", JSON.stringify(t));
+  return t;
+}
+async function tiktokSyncVideos(env) {
+  if (!env.CONTENT) return { error: "no_kv" };
+  const t = await tiktokValidAccess(env);
+  if (!t) return { error: "not_connected" };
+  const r = await fetch("https://open.tiktokapis.com/v2/video/list/?fields=id,share_url,embed_link,cover_image_url,title", {
+    method: "POST", headers: { Authorization: "Bearer " + t.access_token, "Content-Type": "application/json" },
+    body: JSON.stringify({ max_count: 12 }),
+  });
+  const data = await r.json().catch(() => ({}));
+  const list = (data && data.data && data.data.videos) || [];
+  const vids = list.map((v) => ({
+    id: v.id, url: v.share_url || v.embed_link || "", cover: v.cover_image_url || "", title: v.title || "",
+  })).filter((v) => v.url);
+  await env.CONTENT.put("tiktok:videos", JSON.stringify({ videos: vids, syncedAt: new Date().toISOString() }));
+  return { ok: true, count: vids.length };
+}
+
+async function handleTikTok(request, env, segs, url) {
+  const action = segs[1];
+
+  // public — videoclipuri din cache
+  if (action === "videos" && request.method === "GET") {
+    const rec = env.CONTENT ? await env.CONTENT.get("tiktok:videos", "json") : null;
+    return json({ videos: (rec && rec.videos) || [], syncedAt: rec && rec.syncedAt });
+  }
+
+  // callback OAuth — public (verificat prin state)
+  if (action === "callback" && request.method === "GET") {
+    if (!env.TIKTOK_CLIENT_KEY || !env.TIKTOK_CLIENT_SECRET || !env.CONTENT) {
+      return Response.redirect(url.origin + "/admin?tiktok=error", 302);
+    }
+    const code = url.searchParams.get("code");
+    const state = url.searchParams.get("state");
+    const saved = await env.CONTENT.get("tiktok:state");
+    if (!code || !state || state !== saved) return Response.redirect(url.origin + "/admin?tiktok=error", 302);
+    const res = await tiktokExchange(env, {
+      code, grant_type: "authorization_code", redirect_uri: url.origin + "/api/tiktok/callback",
+    });
+    if (!res.access_token) return Response.redirect(url.origin + "/admin?tiktok=error", 302);
+    const now = Math.floor(Date.now() / 1000);
+    await env.CONTENT.put("tiktok:tokens", JSON.stringify({
+      access_token: res.access_token, refresh_token: res.refresh_token,
+      expires_at: now + (res.expires_in || 86400),
+      refresh_expires_at: now + (res.refresh_expires_in || 31536000),
+      open_id: res.open_id,
+    }));
+    await env.CONTENT.delete("tiktok:state");
+    await tiktokSyncVideos(env);
+    return Response.redirect(url.origin + "/admin?tiktok=ok", 302);
+  }
+
+  // de aici — doar admin
+  if (!(await requireAuth(request, env))) return err("Neautorizat.", 401);
+  if (!env.CONTENT) return err("KV neconfigurat.", 503);
+
+  if (action === "connect" && request.method === "GET") {
+    if (!env.TIKTOK_CLIENT_KEY) return err("Setează TIKTOK_CLIENT_KEY și TIKTOK_CLIENT_SECRET.", 503);
+    const state = genId() + genId();
+    await env.CONTENT.put("tiktok:state", state, { expirationTtl: 600 });
+    const auth = "https://www.tiktok.com/v2/auth/authorize/?" + new URLSearchParams({
+      client_key: env.TIKTOK_CLIENT_KEY, scope: "user.info.basic,video.list",
+      response_type: "code", redirect_uri: url.origin + "/api/tiktok/callback", state,
+    }).toString();
+    return json({ url: auth });
+  }
+  if (action === "status" && request.method === "GET") {
+    const t = await env.CONTENT.get("tiktok:tokens", "json");
+    const rec = await env.CONTENT.get("tiktok:videos", "json");
+    return json({
+      configured: !!(env.TIKTOK_CLIENT_KEY && env.TIKTOK_CLIENT_SECRET),
+      connected: !!t, openId: t && t.open_id,
+      videoCount: (rec && rec.videos && rec.videos.length) || 0, syncedAt: rec && rec.syncedAt,
+    });
+  }
+  if (action === "sync" && request.method === "POST") {
+    const r = await tiktokSyncVideos(env);
+    if (r.error) return err(r.error === "not_connected" ? "Reconectează contul TikTok." : "Eroare la sincronizare.", 400);
+    return json(r);
+  }
+  if (action === "disconnect" && request.method === "POST") {
+    await env.CONTENT.delete("tiktok:tokens");
+    await env.CONTENT.delete("tiktok:videos");
+    return json({ ok: true });
+  }
+  return err("Endpoint inexistent.", 404);
+}
+
 async function handleOrders(request, env, segs) {
   // segs: ["orders"] | ["orders", id] | ["orders", id, "file"]
   const id = segs[1];
@@ -547,6 +661,8 @@ export default {
 
         if (segs[0] === "auth") return handleAuth(request, env, segs);
 
+        if (segs[0] === "tiktok") return handleTikTok(request, env, segs, url);
+
         if (segs[0] === "admin") return handleAdmin(request, env, segs);
 
         if (segs[0] === "orders") return handleOrders(request, env, segs);
@@ -588,5 +704,10 @@ export default {
       if (!path.startsWith("/api/")) return env.ASSETS.fetch(request);
       return err("Eroare server: " + (e && e.message), 500);
     }
+  },
+
+  // Cron — reîmprospătează videoclipurile TikTok (dacă e conectat)
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(tiktokSyncVideos(env).catch(() => {}));
   },
 };

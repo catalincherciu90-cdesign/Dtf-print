@@ -98,6 +98,21 @@ Totul se stochează în **KV** (cel pe care îl ai deja, fără infrastructură 
 
 Fișierele mai mari de 20 MB sunt respinse cu mesaj (clientul le poate trimite separat pe email).
 
+## TikTok (sincronizare automată)
+
+Modul opțional care afișează videoclipurile de pe profilul vostru, sincronizate prin
+**TikTok Display API**. Manual funcționează fără nimic (admin → TikTok → linkuri video).
+Pentru varianta automată:
+
+1. **Aplicație** pe [developers.tiktok.com](https://developers.tiktok.com): adaugă produsele
+   *Login Kit* + *Display API* (scope `user.info.basic`, `video.list`). Redirect URI:
+   `https://<site>/api/tiktok/callback`. Obține **Client Key** + **Client Secret** (după aprobare).
+2. **Secrete** în Worker: `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET`.
+3. În **admin → TikTok** apeși **„Conectează TikTok”** (OAuth o singură dată).
+4. Un **Cron zilnic** (`0 6 * * *`, în `wrangler.jsonc`) reîmprospătează lista; poți sincroniza și manual.
+
+Endpoint-uri: `GET /api/tiktok/videos` (public), `connect`/`status`/`sync`/`disconnect` (admin), `callback` (OAuth).
+
 ## Rulare locală
 
 Pentru tot (inclusiv API/admin) folosește Wrangler:
