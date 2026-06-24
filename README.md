@@ -73,7 +73,7 @@ Site-ul funcționează imediat cu valorile implicite. Ca să poți **salva** din
 | GET | `/api/admin/stats` | admin | statistici CRM (clienți, comenzi, venit, status) |
 | GET | `/api/admin/customers` | admin | listă clienți agregată |
 | GET | `/api/admin/customers/:email` | admin | fișa clientului (date, comenzi, note) |
-| PUT | `/api/admin/customers/:email/notes` | admin | salvează note interne CRM |
+| PUT | `/api/admin/customers/:email/crm` | admin | salvează note interne + etichete CRM |
 
 ## Magazin (conturi + coș)
 

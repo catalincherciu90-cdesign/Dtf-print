@@ -282,29 +282,39 @@ async function handleAdmin(request, env, segs) {
       if (!map[k].lastOrderAt || (o.createdAt || "") > map[k].lastOrderAt) map[k].lastOrderAt = o.createdAt;
     }
     const list = Object.values(map).map((c) => ({ ...c, totalSpent: Number(c.totalSpent.toFixed(2)) }));
+    // atașează etichetele CRM
+    for (const c of list) {
+      const rec = await env.CONTENT.get("crmnote:" + c.email, "json");
+      c.tags = (rec && Array.isArray(rec.tags)) ? rec.tags : [];
+    }
     list.sort((a, b) => (b.lastOrderAt || "").localeCompare(a.lastOrderAt || ""));
     return json({ customers: list });
   }
 
-  // /api/admin/customers/:email[/notes]
+  // /api/admin/customers/:email[/crm]
   if (sub === "customers" && segs[2]) {
     const email = decodeURIComponent(segs[2]);
-    if (segs[3] === "notes" && request.method === "PUT") {
+    if (segs[3] === "crm" && request.method === "PUT") {
       const b = await request.json().catch(() => ({}));
-      await env.CONTENT.put("crmnote:" + email, JSON.stringify({ notes: String(b.notes || "").slice(0, 5000) }));
+      const tags = Array.isArray(b.tags)
+        ? [...new Set(b.tags.map((t) => String(t).trim().slice(0, 40)).filter(Boolean))].slice(0, 20)
+        : [];
+      await env.CONTENT.put("crmnote:" + email, JSON.stringify({ notes: String(b.notes || "").slice(0, 5000), tags }));
       return json({ ok: true });
     }
     if (request.method === "GET") {
       const user = await env.CONTENT.get(USER_PREFIX + email, "json");
       const all = await listOrders(env);
       const orders = all.filter((o) => (o.userId || o.email) === email);
-      const noteRec = await env.CONTENT.get("crmnote:" + email, "json");
+      const rec = await env.CONTENT.get("crmnote:" + email, "json");
       const fallback = orders[0] || {};
       return json({
         customer: user
           ? { email: user.email, name: user.name, phone: user.phone, createdAt: user.createdAt }
           : { email, name: fallback.name || "", phone: fallback.phone || "", createdAt: null },
-        orders, notes: (noteRec && noteRec.notes) || "",
+        orders,
+        notes: (rec && rec.notes) || "",
+        tags: (rec && Array.isArray(rec.tags)) ? rec.tags : [],
       });
     }
   }
