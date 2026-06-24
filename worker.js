@@ -512,6 +512,9 @@ async function handleOrders(request, env, segs) {
       fi++;
     }
 
+    const deliveryMethod = f.deliveryMethod === "ridicare" ? "ridicare" : "livrare";
+    const address = deliveryMethod === "livrare" ? String(f.address || "").slice(0, 600) : "";
+
     const user = await env.CONTENT.get(USER_PREFIX + cust.sub, "json");
     const order = {
       id: oid, createdAt: new Date().toISOString(), status: "Nouă",
@@ -519,6 +522,7 @@ async function handleOrders(request, env, segs) {
       name: (user && user.name) || cust.name || "",
       email: cust.sub,
       phone: (user && user.phone) || "",
+      deliveryMethod, address,
       note: String(f.note || "").slice(0, 2000),
       items: cleanItems, subtotal, discount, discountPercent, total, files: storedFiles,
     };

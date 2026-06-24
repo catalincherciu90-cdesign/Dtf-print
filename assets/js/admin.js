@@ -623,6 +623,13 @@
       var discNote = (o.discount && o.discount > 0)
         ? " <span class=\"order-meta\">(−" + esc(o.discountPercent) + "% · −" + esc(o.discount) + " RON)</span>" : "";
       var note = o.note || o.message;
+      var delivHtml = "";
+      if (o.deliveryMethod === "ridicare") {
+        delivHtml = "<p class=\"order-deliv\">🏬 <strong>Ridicare personală</strong></p>";
+      } else if (o.deliveryMethod === "livrare" || o.address) {
+        delivHtml = "<p class=\"order-deliv\">🚚 <strong>Livrare la adresă</strong>" +
+          (o.address ? "<br><span class=\"order-addr\">" + esc(o.address) + "</span>" : "") + "</p>";
+      }
 
       return "<div class=\"order-card\" data-status=\"" + esc(o.status) + "\">" +
         "<div class=\"order-card__top\">" +
@@ -634,6 +641,7 @@
           "<span>💰 <strong>" + esc(total) + " RON</strong>" + discNote + "</span>" +
         "</div>" +
         itemsHtml +
+        delivHtml +
         (note ? "<p class=\"order-message\">„" + esc(note) + "”</p>" : "") +
         "<div class=\"order-card__foot\"><div class=\"order-files\">" + filesHtml + "</div>" +
           "<button class=\"order-del\" data-id=\"" + esc(o.id) + "\" title=\"Șterge comanda\">🗑</button>" +

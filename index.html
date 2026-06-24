@@ -340,7 +340,17 @@
             <label for="cartFileInput">Atașează fișierele de design</label>
             <input type="file" id="cartFileInput" multiple accept=".pdf,.png,.tiff,.tif,image/*" />
           </div>
-          <textarea id="cartNote" rows="2" placeholder="Mesaj / detalii livrare (opțional)"></textarea>
+          <div class="cart__deliv">
+            <span class="cart__deliv-label">Livrare</span>
+            <div class="cart__deliv-opts">
+              <label class="deliv-opt"><input type="radio" name="deliv" value="livrare" checked /> 🚚 Livrare la adresă</label>
+              <label class="deliv-opt"><input type="radio" name="deliv" value="ridicare" /> 🏬 Ridic personal</label>
+            </div>
+          </div>
+          <div class="cart__addr" id="cartAddr">
+            <textarea id="cartAddress" rows="2" placeholder="Adresa de livrare (nume destinatar, stradă, nr., bloc/ap., oraș, județ, cod poștal, telefon)"></textarea>
+          </div>
+          <textarea id="cartNote" rows="2" placeholder="Mesaj / detalii suplimentare (opțional)"></textarea>
           <button class="btn btn--cta btn--block" id="cartSubmit">Trimite comanda</button>
           <p class="order-msg" id="cartMsg" role="status"></p>
         </div>
