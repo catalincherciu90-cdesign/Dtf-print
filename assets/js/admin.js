@@ -77,7 +77,7 @@
     var form = $("form");
     form.innerHTML = "";
     Object.keys(content).forEach(function (key) {
-      if (key === "products" || key === "banners" || key === "discount") return; // au tab-uri proprii
+      if (key === "products" || key === "banners" || key === "discount" || key === "tiktok") return; // au tab-uri proprii
       var section = document.createElement("section");
       section.className = "edit-section";
       var h = document.createElement("h2");
@@ -127,11 +127,86 @@
     form.appendChild(section);
   }
 
+  function buildTiktok() {
+    var form = $("tiktokForm");
+    if (!form || !content.tiktok) return;
+    form.innerHTML = "";
+    var section = document.createElement("section");
+    section.className = "edit-section";
+    var h = document.createElement("h2");
+    h.textContent = "Setări secțiune";
+    section.appendChild(h);
+    buildInto(section, content.tiktok, "tiktok");
+    form.appendChild(section);
+    loadTiktokStatus();
+  }
+
+  function loadTiktokStatus() {
+    var el = $("ttApi");
+    if (!el) return;
+    el.innerHTML = "<div class=\"edit-section\"><h2>Sincronizare automată (API)</h2><p class=\"muted\">Se încarcă…</p></div>";
+    api("GET", "/api/tiktok/status", null, true).then(function (r) { return r.status === 401 ? null : r.json(); })
+      .then(function (s) {
+        if (!s) { showLogin("Sesiune expirată."); return; }
+        var txt, btns;
+        if (!s.configured) {
+          txt = "⚠️ Neconfigurat — setează secretele TIKTOK_CLIENT_KEY și TIKTOK_CLIENT_SECRET în Worker.";
+          btns = "";
+        } else if (!s.connected) {
+          txt = "Cont neconectat.";
+          btns = "<button class=\"btn btn--primary\" id=\"ttConnect\" type=\"button\">🔗 Conectează TikTok</button>";
+        } else {
+          txt = "✓ Conectat — " + s.videoCount + " clipuri" + (s.syncedAt ? " · sincronizat " + fmtDate(s.syncedAt) : "");
+          btns = "<button class=\"btn btn--ghost btn--sm\" id=\"ttSync\" type=\"button\">↻ Sincronizează acum</button> " +
+            "<button class=\"btn btn--ghost btn--sm\" id=\"ttDisconnect\" type=\"button\">Deconectează</button>";
+        }
+        el.innerHTML = "<div class=\"edit-section\"><h2>Sincronizare automată (API)</h2>" +
+          "<p class=\"muted\" style=\"margin-bottom:12px\">" + esc(txt) + "</p>" + btns +
+          "<p class=\"form-msg\" id=\"ttApiMsg\"></p></div>";
+        if ($("ttConnect")) $("ttConnect").addEventListener("click", ttConnect);
+        if ($("ttSync")) $("ttSync").addEventListener("click", ttSync);
+        if ($("ttDisconnect")) $("ttDisconnect").addEventListener("click", ttDisconnect);
+      }).catch(function () { el.innerHTML = "<div class=\"edit-section\"><p class=\"form-msg is-error\">Eroare la status TikTok.</p></div>"; });
+  }
+  function ttApiMsg(text, err) { var m = $("ttApiMsg"); if (m) { m.textContent = text; m.className = "form-msg" + (err ? " is-error" : " is-ok"); } }
+  function ttConnect() {
+    api("GET", "/api/tiktok/connect", null, true).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        if (!res.ok) return ttApiMsg(res.d.error || "Eroare.", true);
+        window.location.href = res.d.url;
+      });
+  }
+  function ttSync() {
+    ttApiMsg("Se sincronizează…", false);
+    api("POST", "/api/tiktok/sync", null, true).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        if (res.ok) { loadTiktokStatus(); }
+        else ttApiMsg(res.d.error || "Eroare la sincronizare.", true);
+      });
+  }
+  function ttDisconnect() {
+    if (!confirm("Deconectezi contul TikTok?")) return;
+    api("POST", "/api/tiktok/disconnect", null, true).then(function () { loadTiktokStatus(); });
+  }
+  function handleTiktokReturn() {
+    var p = new URLSearchParams(location.search).get("tiktok");
+    if (!p) return;
+    history.replaceState(null, "", location.pathname);
+    var tab = document.querySelector(".tab[data-tab=\"tiktok\"]");
+    if (tab) tab.click();
+    var m = $("tiktokMsg");
+    if (m) {
+      if (p === "ok") { m.textContent = "✓ Cont TikTok conectat!"; m.className = "form-msg is-ok"; }
+      else { m.textContent = "Conectarea TikTok a eșuat. Încearcă din nou."; m.className = "form-msg is-error"; }
+    }
+  }
+
   // reconstruiește tab-ul activ
   function rerender() {
     if ($("tab-banners") && !$("tab-banners").hidden) buildBanners();
     else if ($("tab-products") && !$("tab-products").hidden) buildProducts();
     else if ($("tab-promo") && !$("tab-promo").hidden) buildPromo();
+    else if ($("tab-tiktok") && !$("tab-tiktok").hidden) buildTiktok();
     else buildForm();
   }
 
@@ -369,6 +444,7 @@
       content = data; normalizeContent(content);
       templates = {}; captureTemplates(content, "");
       buildForm();
+      handleTiktokReturn();
     });
   }
   function showLogin(msg) {
@@ -417,6 +493,8 @@
   $("saveBannersBtn2").addEventListener("click", function () { save("bannersMsg"); });
   $("savePromoBtn").addEventListener("click", function () { save("promoMsg"); });
   $("savePromoBtn2").addEventListener("click", function () { save("promoMsg"); });
+  $("saveTiktokBtn").addEventListener("click", function () { save("tiktokMsg"); });
+  $("saveTiktokBtn2").addEventListener("click", function () { save("tiktokMsg"); });
 
   /* ---------- Reset ---------- */
   $("resetBtn").addEventListener("click", function () {
@@ -444,12 +522,14 @@
       $("tab-banners").hidden = which !== "banners";
       $("tab-products").hidden = which !== "products";
       $("tab-promo").hidden = which !== "promo";
+      $("tab-tiktok").hidden = which !== "tiktok";
       $("tab-orders").hidden = which !== "orders";
       $("tab-crm").hidden = which !== "crm";
       if (which === "orders") loadOrders();
       else if (which === "products") buildProducts();
       else if (which === "banners") buildBanners();
       else if (which === "promo") buildPromo();
+      else if (which === "tiktok") buildTiktok();
       else if (which === "crm") loadCRM();
       else buildForm();
     });

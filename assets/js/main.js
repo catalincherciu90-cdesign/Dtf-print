@@ -151,8 +151,18 @@
   function renderTikTok(tk) {
     var sec = document.getElementById("tiktok");
     if (!sec) return;
-    var vids = (tk && Array.isArray(tk.videos) ? tk.videos : []).filter(function (u) { return String(u).trim(); });
-    if (!tk || !tk.enabled || !vids.length) { sec.hidden = true; return; }
+    if (!tk || !tk.enabled) { sec.hidden = true; return; }
+    var manual = (Array.isArray(tk.videos) ? tk.videos : []).map(String).filter(function (u) { return u.trim(); });
+    fetch("/api/tiktok/videos").then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        var apiVids = (d && d.videos) ? d.videos.map(function (v) { return v.url; }).filter(Boolean) : [];
+        showTikTok(tk, apiVids.length ? apiVids : manual);
+      })
+      .catch(function () { showTikTok(tk, manual); });
+  }
+  function showTikTok(tk, vids) {
+    var sec = document.getElementById("tiktok");
+    if (!vids.length) { sec.hidden = true; return; }
     sec.hidden = false;
     var t = document.getElementById("tiktokTitle");
     if (t) t.textContent = tk.title || "TikTok";
@@ -160,8 +170,7 @@
     if (link) {
       if (tk.profileUrl) { link.href = tk.profileUrl; link.hidden = false; } else link.hidden = true;
     }
-    var grid = document.getElementById("tiktokGrid");
-    grid.innerHTML = vids.map(function (url) {
+    document.getElementById("tiktokGrid").innerHTML = vids.map(function (url) {
       url = String(url).trim();
       var id = (url.match(/\/video\/(\d+)/) || [])[1] || (url.match(/(\d{6,})/) || [])[1] || "";
       return "<blockquote class=\"tiktok-embed\" cite=\"" + esc(url) + "\"" +

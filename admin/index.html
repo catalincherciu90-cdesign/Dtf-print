@@ -40,6 +40,7 @@
       <button class="tab" type="button" data-tab="banners">🖼️ Bannere</button>
       <button class="tab" type="button" data-tab="products">🛍️ Produse</button>
       <button class="tab" type="button" data-tab="promo">🎟️ Promo</button>
+      <button class="tab" type="button" data-tab="tiktok">📱 TikTok</button>
       <button class="tab" type="button" data-tab="orders">📦 Comenzi <span class="tab-badge" id="ordersBadge" hidden>0</span></button>
       <button class="tab" type="button" data-tab="crm">📊 CRM</button>
     </div>
@@ -114,6 +115,25 @@
       <form id="promoForm" autocomplete="off"></form>
       <div class="editor-actions editor-actions--bottom">
         <button class="btn btn--primary" id="savePromoBtn2" type="button">💾 Salvează</button>
+      </div>
+    </div>
+
+    <!-- Tab: TikTok -->
+    <div class="tab-panel" id="tab-tiktok" hidden>
+      <div class="editor-head">
+        <div>
+          <h1>TikTok</h1>
+          <p class="muted">Afișează videoclipuri pe site — automat (API) sau manual (linkuri).</p>
+        </div>
+        <div class="editor-actions">
+          <button class="btn btn--primary" id="saveTiktokBtn" type="button">💾 Salvează</button>
+        </div>
+      </div>
+      <p class="form-msg" id="tiktokMsg" role="status"></p>
+      <div class="tt-api" id="ttApi"></div>
+      <form id="tiktokForm" autocomplete="off"></form>
+      <div class="editor-actions editor-actions--bottom">
+        <button class="btn btn--primary" id="saveTiktokBtn2" type="button">💾 Salvează</button>
       </div>
     </div>
 
