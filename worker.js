@@ -16,6 +16,7 @@ const ORDER_PREFIX = "order:";
 const FILE_PREFIX = "orderfile:";
 const MEDIA_PREFIX = "media:";
 const USER_PREFIX = "user:";
+const MSG_PREFIX = "msg:";
 const MAX_FILE_MB = 20;
 const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
 const MAX_IMG_MB = 5;
@@ -631,6 +632,85 @@ async function handleAuth(request, env, segs) {
   return err("Endpoint inexistent.", 404);
 }
 
+// ---- Mesaje contact ----
+async function listMessages(env) {
+  if (!env.CONTENT) return [];
+  const out = [];
+  let cursor;
+  do {
+    const res = await env.CONTENT.list({ prefix: MSG_PREFIX, cursor });
+    for (const k of res.keys) {
+      const m = await env.CONTENT.get(k.name, "json");
+      if (m) out.push(m);
+    }
+    cursor = res.list_complete ? null : res.cursor;
+  } while (cursor);
+  out.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+  return out;
+}
+
+async function handleMessages(request, env, segs) {
+  // segs: ["messages"] | ["messages", id] | ["messages", "count"]
+  const id = segs[1];
+
+  // POST /api/messages — trimitere mesaj din formularul de contact (public)
+  if (!id && request.method === "POST") {
+    if (!env.CONTENT) return err("Stocare neconfigurată.", 503);
+    const b = await request.json().catch(() => ({}));
+    const name = String(b.name || "").trim().slice(0, 120);
+    const email = normEmail(b.email);
+    const message = String(b.message || "").trim().slice(0, 4000);
+    if (!name) return err("Numele este obligatoriu.");
+    if (!validEmail(email)) return err("Email invalid.");
+    if (!message) return err("Mesajul este obligatoriu.");
+    const mid = genId();
+    const msg = {
+      id: mid, createdAt: new Date().toISOString(), read: false,
+      name, email,
+      phone: String(b.phone || "").trim().slice(0, 40),
+      subject: String(b.subject || "").trim().slice(0, 160),
+      message,
+    };
+    await env.CONTENT.put(MSG_PREFIX + mid, JSON.stringify(msg));
+    return json({ ok: true });
+  }
+
+  // de aici încolo — doar admin
+  if (!(await requireAuth(request, env))) return err("Neautorizat.", 401);
+  if (!env.CONTENT) return err("KV neconfigurat.", 503);
+
+  // GET /api/messages/count — doar numărul de mesaje noi (pentru badge)
+  if (id === "count" && request.method === "GET") {
+    const all = await listMessages(env);
+    const unread = all.filter((m) => !m.read).length;
+    return json({ unread, total: all.length });
+  }
+
+  // GET /api/messages — listă completă
+  if (!id && request.method === "GET") {
+    const messages = await listMessages(env);
+    return json({ messages, unread: messages.filter((m) => !m.read).length });
+  }
+
+  // PATCH /api/messages/:id — marchează citit/necitit
+  if (id && request.method === "PATCH") {
+    const m = await env.CONTENT.get(MSG_PREFIX + id, "json");
+    if (!m) return err("Mesaj inexistent.", 404);
+    const b = await request.json().catch(() => ({}));
+    if (typeof b.read === "boolean") m.read = b.read;
+    await env.CONTENT.put(MSG_PREFIX + id, JSON.stringify(m));
+    return json({ ok: true, message: m });
+  }
+
+  // DELETE /api/messages/:id
+  if (id && request.method === "DELETE") {
+    await env.CONTENT.delete(MSG_PREFIX + id);
+    return json({ ok: true });
+  }
+
+  return err("Endpoint inexistent.", 404);
+}
+
 // Servește asset-urile statice cu revalidare, ca schimbările (HTML/CSS/JS) să apară
 // imediat după deploy, fără să rămână versiuni vechi în cache-ul browserului.
 async function serveAsset(request, env) {
@@ -689,6 +769,8 @@ export default {
         if (segs[0] === "admin") return handleAdmin(request, env, segs);
 
         if (segs[0] === "orders") return handleOrders(request, env, segs);
+
+        if (segs[0] === "messages") return handleMessages(request, env, segs);
 
         if (segs[0] === "media") {
           const mid = segs[1];

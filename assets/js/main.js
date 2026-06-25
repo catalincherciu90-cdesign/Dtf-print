@@ -127,6 +127,13 @@
       setContact("footerEmail", c.footer.email, "mailto:");
       var sch = document.getElementById("footerSchedule");
       if (sch && c.footer.schedule) sch.textContent = "🕘 " + c.footer.schedule;
+      // Secțiunea Contact (lista de info)
+      var cp = document.getElementById("contactPhone");
+      if (cp && c.footer.phone) cp.textContent = "📞 " + c.footer.phone;
+      var ce = document.getElementById("contactEmail");
+      if (ce && c.footer.email) ce.textContent = "✉️ " + c.footer.email;
+      var cs = document.getElementById("contactSchedule");
+      if (cs && c.footer.schedule) cs.textContent = "🕘 " + c.footer.schedule;
     }
 
     // Social media (footer)
@@ -415,6 +422,45 @@
   }
 
   renderCart();
+
+  /* ---------- Formular contact ---------- */
+  var contactForm = document.getElementById("contactForm");
+  var contactMsg = document.getElementById("contactMsg");
+  function setContactMsg(t, e) {
+    if (contactMsg) { contactMsg.textContent = t; contactMsg.className = "order-msg" + (e ? " is-error" : " is-ok"); }
+  }
+  if (contactForm) {
+    contactForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var name = (document.getElementById("contactName").value || "").trim();
+      var email = (document.getElementById("contactFormEmail").value || "").trim();
+      var message = (document.getElementById("contactMessage").value || "").trim();
+      if (!name || !email || !message) {
+        return setContactMsg("Completează numele, emailul și mesajul.", true);
+      }
+      var btn = document.getElementById("contactSubmit");
+      var body = {
+        name: name, email: email, message: message,
+        phone: (document.getElementById("contactFormPhone").value || "").trim(),
+        subject: (document.getElementById("contactSubject").value || "").trim(),
+      };
+      if (btn) btn.disabled = true;
+      setContactMsg("Se trimite mesajul…", false);
+      fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      })
+        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+        .then(function (res) {
+          if (btn) btn.disabled = false;
+          if (!res.ok) return setContactMsg(res.d.error || "Eroare la trimitere.", true);
+          contactForm.reset();
+          setContactMsg("✓ Mesajul a fost trimis! Îți răspundem în curând.", false);
+        })
+        .catch(function () { if (btn) btn.disabled = false; setContactMsg("Eroare de rețea.", true); });
+    });
+  }
 
   /* ---------- Meniu mobil ---------- */
   var burger = document.getElementById("burger");

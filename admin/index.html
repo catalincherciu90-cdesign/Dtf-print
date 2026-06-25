@@ -43,6 +43,7 @@
       <button class="tab" type="button" data-tab="tiktok">📱 TikTok</button>
       <button class="tab" type="button" data-tab="social">🔗 Social</button>
       <button class="tab" type="button" data-tab="orders">📦 Comenzi <span class="tab-badge" id="ordersBadge" hidden>0</span></button>
+      <button class="tab" type="button" data-tab="messages">💬 Mesaje <span class="tab-badge" id="messagesBadge" hidden>0</span></button>
       <button class="tab" type="button" data-tab="crm">📊 CRM</button>
     </div>
 
@@ -169,6 +170,21 @@
       </div>
       <p class="form-msg" id="ordersMsg" role="status"></p>
       <div id="ordersList"></div>
+    </div>
+
+    <!-- Tab: Mesaje -->
+    <div class="tab-panel" id="tab-messages" hidden>
+      <div class="editor-head">
+        <div>
+          <h1>Mesaje</h1>
+          <p class="muted">Mesajele primite prin formularul de contact de pe site.</p>
+        </div>
+        <div class="editor-actions">
+          <button class="btn btn--ghost" id="messagesRefresh" type="button">↻ Reîmprospătează</button>
+        </div>
+      </div>
+      <p class="form-msg" id="messagesMsg" role="status"></p>
+      <div id="messagesList"></div>
     </div>
 
     <!-- Tab: CRM -->
