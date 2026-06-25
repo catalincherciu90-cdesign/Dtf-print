@@ -213,6 +213,8 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
 
 .calc__total { display: flex; flex-direction: column; gap: 4px; margin: 8px 0 22px; }
 .calc__total span { font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+.calc__vat { font-style: normal; letter-spacing: 0.5px; font-size: 0.62rem; font-weight: 600; color: var(--blue);
+  background: var(--grad-soft); border: 1px solid var(--panel-border); border-radius: 999px; padding: 2px 8px; margin-left: 8px; }
 .calc__total strong { font-family: "Poppins"; font-size: 2.4rem; font-weight: 800; color: var(--text); }
 .calc__note { text-align: center; font-size: 0.78rem; color: var(--muted); margin-top: 12px; }
 
@@ -354,8 +356,17 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
 .contact-list { list-style: none; display: grid; gap: 12px; margin-top: 2px; }
 .contact-list li { display: flex; align-items: center; gap: 10px; color: #d4d4ec; font-size: 0.95rem; }
 .deliv-opt .mr-ico { margin-right: 1px; }
-.footer__contact a, .footer__contact #footerSchedule { display: inline-flex; align-items: center; gap: 8px; }
-.footer__contact .mr-ico { color: var(--blue); }
+.footer__contact a, .footer__contact #footerSchedule {
+  display: inline-flex; align-items: center; gap: 8px; line-height: 1.3;
+}
+/* anulează display:block + margin moștenite din `.footer__col span`
+   ca iconița și textul să rămână aliniate pe aceeași linie */
+.footer__contact a .mr-ico,
+.footer__contact #footerSchedule .mr-ico,
+.footer__contact .footer__contact-txt {
+  display: inline-flex; align-items: center; margin: 0;
+}
+.footer__contact .mr-ico { color: var(--blue); flex: none; }
 
 
 /* ---------- Footer ---------- */
@@ -572,4 +583,68 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
 }
 @media (prefers-reduced-motion: reduce) {
   .panel { animation: none; }
+}
+
+/* =================================================================
+   GDPR — popup consimțământ cookie-uri + checkbox consimțământ
+   ================================================================= */
+.cookie-pop {
+  position: fixed; inset: 0; z-index: 300;
+  display: grid; place-items: center; padding: 20px;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.3s var(--ease), visibility 0.3s var(--ease);
+}
+.cookie-pop.is-visible { opacity: 1; visibility: visible; }
+.cookie-pop__overlay {
+  position: absolute; inset: 0; background: rgba(4, 4, 12, 0.6);
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+}
+.cookie-pop__modal {
+  position: relative; width: 100%; max-width: 440px; text-align: center;
+  padding: 30px 28px 26px; border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(28, 28, 56, 0.82), rgba(10, 10, 26, 0.9));
+  border: 1px solid var(--lg-border);
+  -webkit-backdrop-filter: blur(34px) saturate(190%);
+  backdrop-filter: blur(34px) saturate(190%);
+  box-shadow: 0 36px 90px -28px rgba(0, 0, 0, 0.75), var(--lg-hi);
+  transform: translateY(14px) scale(0.96);
+  transition: transform 0.32s var(--ease);
+}
+.cookie-pop.is-visible .cookie-pop__modal { transform: none; }
+.cookie-pop__x {
+  position: absolute; top: 12px; right: 12px; width: 30px; height: 30px;
+  border-radius: 9px; background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1); color: var(--muted);
+  cursor: pointer; font-size: 0.85rem; transition: color 0.2s, background 0.2s;
+}
+.cookie-pop__x:hover { color: var(--text); background: rgba(255, 255, 255, 0.12); }
+.cookie-pop__icon { font-size: 2.4rem; line-height: 1; margin-bottom: 10px; }
+.cookie-pop__title { font-size: 1.25rem; font-weight: 700; margin-bottom: 10px; }
+.cookie-pop__text { color: var(--muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 22px; }
+.cookie-pop__text a { color: var(--blue); }
+.cookie-pop__text a:hover { text-decoration: underline; }
+.cookie-pop__actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.cookie-pop__btn { padding: 12px 22px; font-size: 0.92rem; flex: 1 1 150px; }
+.cookie-pop .btn--cta { animation: none; }
+
+@media (max-width: 540px) {
+  .cookie-pop__modal { padding: 26px 20px 22px; }
+  .cookie-pop__actions { flex-direction: column-reverse; }
+  .cookie-pop__btn { flex: none; width: 100%; }
+}
+
+/* Checkbox consimțământ GDPR pe formulare */
+.consent {
+  display: flex; align-items: flex-start; gap: 9px; margin-top: 12px;
+  font-size: 0.82rem; color: var(--muted); line-height: 1.5; cursor: pointer;
+}
+.consent input[type="checkbox"] {
+  appearance: auto; -webkit-appearance: auto; width: 17px; height: 17px;
+  margin-top: 1px; flex: none; accent-color: var(--orange); cursor: pointer;
+}
+.consent a { color: var(--blue); }
+.consent a:hover { text-decoration: underline; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cookie-pop, .cookie-pop__modal { transition: opacity 0.2s linear; transform: none; }
 }

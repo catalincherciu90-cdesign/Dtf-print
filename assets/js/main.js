@@ -403,6 +403,10 @@
   if (cartSubmit) {
     cartSubmit.addEventListener("click", function () {
       if (!cart.length) return setCartMsg("Coșul este gol.", true);
+      var cartConsent = document.getElementById("cartConsent");
+      if (cartConsent && !cartConsent.checked) {
+        return setCartMsg("Bifează acordul privind prelucrarea datelor pentru a continua.", true);
+      }
       var token = localStorage.getItem(CUST_KEY);
       if (!token) {
         setCartMsg("Trebuie să ai cont. Te ducem spre autentificare…", true);
@@ -463,6 +467,10 @@
       var message = (document.getElementById("contactMessage").value || "").trim();
       if (!name || !email || !message) {
         return setContactMsg("Completează numele, emailul și mesajul.", true);
+      }
+      var consent = document.getElementById("contactConsent");
+      if (consent && !consent.checked) {
+        return setContactMsg("Bifează acordul privind prelucrarea datelor pentru a continua.", true);
       }
       var btn = document.getElementById("contactSubmit");
       var body = {
