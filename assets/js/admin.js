@@ -466,6 +466,7 @@
       buildForm();
       handleTiktokReturn();
     });
+    refreshMessagesBadge();
   }
   function showLogin(msg) {
     editorView.hidden = true; topActions.hidden = true; loginView.hidden = false;
@@ -547,8 +548,10 @@
       $("tab-tiktok").hidden = which !== "tiktok";
       $("tab-social").hidden = which !== "social";
       $("tab-orders").hidden = which !== "orders";
+      $("tab-messages").hidden = which !== "messages";
       $("tab-crm").hidden = which !== "crm";
       if (which === "orders") loadOrders();
+      else if (which === "messages") loadMessages();
       else if (which === "products") buildProducts();
       else if (which === "banners") buildBanners();
       else if (which === "promo") buildPromo();
@@ -559,6 +562,7 @@
     });
   });
   $("ordersRefresh").addEventListener("click", loadOrders);
+  $("messagesRefresh").addEventListener("click", loadMessages);
 
   /* ---------- Comenzi ---------- */
   function esc(s) {
@@ -687,6 +691,80 @@
     api("DELETE", "/api/orders/" + id, null, true).then(function (r) {
       if (r.status === 401) { showLogin("Sesiune expirată."); return; }
       if (r.ok) loadOrders();
+    });
+  }
+
+  /* ---------- Mesaje contact ---------- */
+  var BASE_TITLE = "Admin — MrDTF";
+  function updateMessagesBadge(unread) {
+    var badge = $("messagesBadge");
+    var n = Number(unread) || 0;
+    if (badge) { badge.textContent = n; badge.hidden = n === 0; }
+    document.title = n > 0 ? "(" + n + ") " + BASE_TITLE : BASE_TITLE;
+  }
+  function refreshMessagesBadge() {
+    api("GET", "/api/messages/count", null, true).then(function (r) {
+      return r.status === 401 ? null : r.json();
+    }).then(function (d) { if (d) updateMessagesBadge(d.unread); }).catch(function () {});
+  }
+
+  function loadMessages() {
+    setMsg("messagesMsg", "Se încarcă…", false);
+    api("GET", "/api/messages", null, true).then(function (r) {
+      if (r.status === 401) { showLogin("Sesiune expirată. Autentifică-te din nou."); return null; }
+      return r.json();
+    }).then(function (d) {
+      if (!d) return;
+      renderMessages(d.messages || []);
+      updateMessagesBadge(d.unread);
+      setMsg("messagesMsg", (d.messages || []).length ? "" : "Niciun mesaj încă.", false);
+    }).catch(function () { setMsg("messagesMsg", "Eroare la încărcare.", true); });
+  }
+
+  function renderMessages(messages) {
+    var list = $("messagesList");
+    list.innerHTML = messages.map(function (m) {
+      var contact = [];
+      if (m.email) contact.push("<a href=\"mailto:" + esc(m.email) + "\">✉️ " + esc(m.email) + "</a>");
+      if (m.phone) contact.push("<a href=\"tel:" + esc(m.phone) + "\">📞 " + esc(m.phone) + "</a>");
+      var unread = !m.read;
+      return "<div class=\"msg-card" + (unread ? " msg-card--unread" : "") + "\">" +
+        "<div class=\"order-card__top\">" +
+          "<div><strong>" + esc(m.name || "—") + "</strong>" +
+            (unread ? " <span class=\"msg-new\">NOU</span>" : "") +
+            "<div class=\"order-meta\">" + fmtDate(m.createdAt) + "</div></div>" +
+        "</div>" +
+        (m.subject ? "<div class=\"order-grid\"><span>📌 <strong>" + esc(m.subject) + "</strong></span></div>" : "") +
+        "<div class=\"order-grid\">" + (contact.join(" · ") || "<span class='order-meta'>—</span>") + "</div>" +
+        "<p class=\"order-message\">" + esc(m.message).replace(/\n/g, "<br>") + "</p>" +
+        "<div class=\"order-card__foot\">" +
+          "<button class=\"btn btn--ghost btn--sm msg-read\" data-id=\"" + esc(m.id) + "\" data-read=\"" + (unread ? "1" : "0") + "\">" +
+            (unread ? "✓ Marchează citit" : "↩ Marchează necitit") + "</button>" +
+          "<button class=\"order-del msg-del\" data-id=\"" + esc(m.id) + "\" title=\"Șterge mesajul\">🗑</button>" +
+        "</div>" +
+      "</div>";
+    }).join("");
+
+    list.querySelectorAll(".msg-read").forEach(function (b) {
+      b.addEventListener("click", function () { markMessageRead(b.dataset.id, b.dataset.read === "1"); });
+    });
+    list.querySelectorAll(".msg-del").forEach(function (b) {
+      b.addEventListener("click", function () { deleteMessage(b.dataset.id); });
+    });
+  }
+
+  function markMessageRead(id, read) {
+    api("PATCH", "/api/messages/" + id, { read: read }, true).then(function (r) {
+      if (r.status === 401) { showLogin("Sesiune expirată."); return; }
+      if (r.ok) loadMessages();
+    }).catch(function () { setMsg("messagesMsg", "Eroare de rețea.", true); });
+  }
+
+  function deleteMessage(id) {
+    if (!confirm("Ștergi definitiv acest mesaj?")) return;
+    api("DELETE", "/api/messages/" + id, null, true).then(function (r) {
+      if (r.status === 401) { showLogin("Sesiune expirată."); return; }
+      if (r.ok) loadMessages();
     });
   }
 

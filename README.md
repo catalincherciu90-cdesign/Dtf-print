@@ -113,6 +113,23 @@ Pentru varianta automată:
 
 Endpoint-uri: `GET /api/tiktok/videos` (public), `connect`/`status`/`sync`/`disconnect` (admin), `callback` (OAuth).
 
+## Mesaje contact
+
+Formularul din secțiunea **Contact** trimite mesajele la `POST /api/messages` (public).
+Le vezi în **admin → Mesaje**, cu numărul de mesaje noi afișat pe tab și în titlul paginii.
+
+**Notificare pe email (opțională, dormantă):** mesajele se salvează mereu în panou.
+Dacă vrei să primești și un email la fiecare mesaj nou, setează în Worker secretele:
+
+- `RESEND_API_KEY` — cheia API de la [resend.com](https://resend.com)
+- `NOTIFY_EMAIL` — adresa unde vrei să primești notificările
+- `NOTIFY_FROM` *(opțional)* — expeditor verificat, ex. `MrDTF <contact@domeniul-tau.ro>`
+  (implicit `onboarding@resend.dev`, bun pentru test)
+
+Fără aceste secrete nu se trimite niciun email — restul funcționează normal.
+
+Endpoint-uri: `POST /api/messages` (public), `GET`/`PATCH`/`DELETE /api/messages/:id` și `GET /api/messages/count` (admin).
+
 ## Rulare locală
 
 Pentru tot (inclusiv API/admin) folosește Wrangler:
