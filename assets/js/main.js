@@ -21,6 +21,23 @@
       .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
   }
+  /* Iconiță SVG dintr-un nume sau emoji; revine la text dacă nu există setul. */
+  function ico(val, size) {
+    if (window.MrIcons) return window.MrIcons.iconOrText(val, { size: size || 22 });
+    return "<span class=\"mr-emoji\">" + esc(val) + "</span>";
+  }
+  /* Desparte un text de forma „<emoji/nume> restul" în iconiță + restul. */
+  function iconLead(str, size) {
+    str = String(str == null ? "" : str);
+    var sp = str.indexOf(" ");
+    var head = sp >= 0 ? str.slice(0, sp) : str;
+    var rest = sp >= 0 ? str.slice(sp + 1) : "";
+    if (window.MrIcons && window.MrIcons.resolve(head)) {
+      return "<span class=\"mr-ico\">" + window.MrIcons.svg(window.MrIcons.resolve(head), { size: size || 18 }) +
+        "</span> " + esc(rest);
+    }
+    return esc(str);
+  }
 
   /* ---------- Randare conținut ---------- */
   function render(c) {
@@ -40,13 +57,13 @@
       var s = document.getElementById("heroSub");
       if (s) s.innerHTML = esc(c.hero.subPre) + " <span class=\"grad-text\">" +
         esc(c.hero.subHi) + "</span>";
-      listLi("heroStats", c.hero.stats);
+      fillLi("heroStats", c.hero.stats, function (x) { return iconLead(x, 18); });
       listLi("heroChecks", c.hero.checks);
     }
 
     // Pills hero
     fill("heroPills", c.pills, function (p) {
-      return "<li class=\"pill\"><span class=\"pill__ico\">" + esc(p.ico) +
+      return "<li class=\"pill\"><span class=\"pill__ico\">" + ico(p.ico, 20) +
         "</span><span><strong>" + esc(p.title) + "</strong><em>" + esc(p.sub) +
         "</em></span></li>";
     });
@@ -70,7 +87,7 @@
 
     // Pași
     fill("stepsWrap", c.steps, function (s) {
-      return "<div class=\"step\"><span class=\"step__ico\">" + esc(s.ico) +
+      return "<div class=\"step\"><span class=\"step__ico\">" + ico(s.ico, 24) +
         "</span><div class=\"step__txt\"><h4>" + esc(s.title) + "</h4><p>" + esc(s.sub) +
         "</p></div></div>";
     });
@@ -98,7 +115,7 @@
 
     // Trust badges
     fill("trustWrap", c.trust, function (t) {
-      return "<div class=\"trust__item\"><span class=\"trust__ico\">" + esc(t.ico) +
+      return "<div class=\"trust__item\"><span class=\"trust__ico\">" + ico(t.ico, 24) +
         "</span><div><strong>" + esc(t.title) + "</strong><em>" + esc(t.sub) +
         "</em></div></div>";
     });
@@ -126,14 +143,17 @@
       setContact("footerPhone", c.footer.phone, "tel:");
       setContact("footerEmail", c.footer.email, "mailto:");
       var sch = document.getElementById("footerSchedule");
-      if (sch && c.footer.schedule) sch.textContent = "🕘 " + c.footer.schedule;
-      // Secțiunea Contact (lista de info)
+      if (sch && c.footer.schedule) {
+        var schTxt = sch.querySelector(".footer__contact-txt");
+        if (schTxt) schTxt.textContent = c.footer.schedule; else sch.textContent = c.footer.schedule;
+      }
+      // Secțiunea Contact (lista de info — doar textul, iconița e separată)
       var cp = document.getElementById("contactPhone");
-      if (cp && c.footer.phone) cp.textContent = "📞 " + c.footer.phone;
+      if (cp && c.footer.phone) cp.textContent = c.footer.phone;
       var ce = document.getElementById("contactEmail");
-      if (ce && c.footer.email) ce.textContent = "✉️ " + c.footer.email;
+      if (ce && c.footer.email) ce.textContent = c.footer.email;
       var cs = document.getElementById("contactSchedule");
-      if (cs && c.footer.schedule) cs.textContent = "🕘 " + c.footer.schedule;
+      if (cs && c.footer.schedule) cs.textContent = c.footer.schedule;
     }
 
     // Social media (footer)
@@ -157,6 +177,12 @@
     var el = document.getElementById(id);
     if (el && Array.isArray(arr)) el.innerHTML = arr.map(function (x) {
       return "<li>" + esc(x) + "</li>";
+    }).join("");
+  }
+  function fillLi(id, arr, tpl) {
+    var el = document.getElementById(id);
+    if (el && Array.isArray(arr)) el.innerHTML = arr.map(function (x) {
+      return "<li>" + tpl(x) + "</li>";
     }).join("");
   }
   function fill(id, arr, tpl) {
@@ -214,8 +240,8 @@
   function setContact(id, val, scheme) {
     var el = document.getElementById(id);
     if (!el || !val) return;
-    var icon = scheme === "tel:" ? "📞 " : "✉️ ";
-    el.textContent = icon + val;
+    var txt = el.querySelector(".footer__contact-txt");
+    if (txt) txt.textContent = val; else el.textContent = val;
     el.href = scheme + (scheme === "tel:" ? val.replace(/\s/g, "") : val);
   }
 
@@ -291,7 +317,7 @@
       if (elCheckout) elCheckout.style.display = "";
       elItems.innerHTML = cart.map(function (it, i) {
         var sub = it.type === "dtf" ? ("Print " + it.width + "×" + it.length + " m") : "";
-        var img = it.img ? "<img src=\"" + esc(it.img) + "\" alt=\"\" />" : "<span class=\"cart-item__ico\">🧾</span>";
+        var img = it.img ? "<img src=\"" + esc(it.img) + "\" alt=\"\" />" : "<span class=\"cart-item__ico\">" + ico("receipt", 22) + "</span>";
         return "<div class=\"cart-item\">" +
           "<div class=\"cart-item__img\">" + img + "</div>" +
           "<div class=\"cart-item__info\"><strong>" + esc(it.name) + "</strong>" +

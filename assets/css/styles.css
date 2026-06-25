@@ -344,6 +344,20 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
 .trust__item strong { display: block; font-size: 0.95rem; }
 .trust__item em { font-style: normal; color: var(--muted); font-size: 0.82rem; }
 
+/* ---------- Iconițe (SVG, înlocuiesc emoji-urile) ---------- */
+.mr-icon { display: block; }
+.mr-ico { display: inline-flex; align-items: center; justify-content: center; flex: none; line-height: 0; }
+.mr-emoji { font-style: normal; }
+.pill__ico .mr-icon, .step__ico .mr-icon, .trust__ico .mr-icon { display: block; }
+.hero__stats li { display: inline-flex; align-items: center; gap: 6px; }
+.hero__stats .mr-ico { color: var(--blue); }
+.contact-list { list-style: none; display: grid; gap: 12px; margin-top: 2px; }
+.contact-list li { display: flex; align-items: center; gap: 10px; color: #d4d4ec; font-size: 0.95rem; }
+.deliv-opt .mr-ico { margin-right: 1px; }
+.footer__contact a, .footer__contact #footerSchedule { display: inline-flex; align-items: center; gap: 8px; }
+.footer__contact .mr-ico { color: var(--blue); }
+
+
 /* ---------- Footer ---------- */
 .footer { margin-top: 30px; border-top: 1px solid rgba(255, 255, 255, 0.06); background: rgba(7, 7, 18, 0.6); }
 .footer__grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1.2fr 1fr; gap: 30px; padding: 50px 22px 36px; }

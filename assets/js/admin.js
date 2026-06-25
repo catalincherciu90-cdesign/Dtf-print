@@ -22,7 +22,7 @@
     subPre: "Subtitlu — text", subHi: "Subtitlu — accent",
     stats: "Statistici (o linie fiecare)", checks: "Bife (o linie fiecare)",
     cta: "Text buton", hint: "Text sub buton",
-    pills: "Carduri avantaje", ico: "Emoji / iconiță", title: "Titlu", sub: "Subtitlu",
+    pills: "Carduri avantaje", ico: "Iconiță", title: "Titlu", sub: "Subtitlu",
     order: "Secțiunea Comandă", eyebrow: "Etichetă mică", desc: "Descriere",
     checklist: "Listă avantaje (o linie fiecare)",
     calcTitle: "Titlu calculator", pricePerMeter: "Preț pe metru liniar (RON)",
@@ -258,6 +258,8 @@
         [["valoare", "După valoarea coșului (RON)"], ["cantitate", "După cantitatea de produse"]]));
     } else if (keyOf(path) === "img" || /^banners\.hero/.test(path)) {
       parent.appendChild(mediaField(value, path, label(keyOf(path))));
+    } else if (keyOf(path) === "ico") {
+      parent.appendChild(iconField(value, path));
     } else {
       field(parent, label(keyOf(path)), scalarInput(value, path));
     }
@@ -339,6 +341,53 @@
     row.className = "media-row";
     row.appendChild(btn); row.appendChild(input);
     wrap.appendChild(prev); wrap.appendChild(row); wrap.appendChild(file);
+    return wrap;
+  }
+
+  /* câmp iconiță: previzualizare + input (nume/emoji) + grilă de iconițe */
+  function iconField(value, path) {
+    var wrap = document.createElement("div");
+    wrap.className = "edit-field icon-field";
+    var span = document.createElement("span");
+    span.textContent = "Iconiță";
+    wrap.appendChild(span);
+
+    var prev = document.createElement("span");
+    prev.className = "icon-prev";
+    var input = el("input", { type: "text" });
+    input.value = value == null ? "" : value;
+    input.placeholder = "nume (ex. truck) sau emoji";
+
+    function renderPrev() {
+      var name = window.MrIcons ? window.MrIcons.resolve(input.value) : null;
+      prev.innerHTML = name ? window.MrIcons.svg(name, { size: 24 }) : "<span class=\"icon-prev__none\">—</span>";
+      if (grid) grid.querySelectorAll(".icon-grid__btn").forEach(function (b) {
+        b.classList.toggle("is-active", b.dataset.name === name);
+      });
+    }
+    input.addEventListener("input", function () { setPath(content, path, input.value); renderPrev(); });
+
+    var row = document.createElement("div");
+    row.className = "icon-field__row";
+    row.appendChild(prev); row.appendChild(input);
+    wrap.appendChild(row);
+
+    var grid = null;
+    if (window.MrIcons) {
+      grid = document.createElement("div");
+      grid.className = "icon-grid";
+      window.MrIcons.names.forEach(function (n) {
+        var b = document.createElement("button");
+        b.type = "button"; b.className = "icon-grid__btn"; b.title = n; b.dataset.name = n;
+        b.innerHTML = window.MrIcons.svg(n, { size: 22 });
+        b.addEventListener("click", function () {
+          input.value = n; setPath(content, path, n); renderPrev();
+        });
+        grid.appendChild(b);
+      });
+      wrap.appendChild(grid);
+    }
+    renderPrev();
     return wrap;
   }
 

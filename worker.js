@@ -29,16 +29,16 @@ const DEFAULT_CONTENT = {
   hero: {
     line1: "PRINT", hi: "DTF", line2: "LA METRU LINIAR",
     subPre: "LĂȚIME DE", subHi: "90 CM",
-    stats: ["🏷️ De la 6,50 lei/ml", "📏 Lățime 90 cm", "🚚 Livrare 24-48h"],
+    stats: ["tag De la 6,50 lei/ml", "ruler Lățime 90 cm", "truck Livrare 24-48h"],
     checks: ["Comandă online", "Livrare rapidă", "Culori vibrante"],
     cta: "COMANDĂ ACUM",
     hint: "Încarcă fișierele în 2 minute",
   },
   pills: [
-    { ico: "🛡️", title: "Culori vibrante", sub: "Calitate premium" },
-    { ico: "📏", title: "Lățime 90 cm", sub: "Print la metru liniar" },
-    { ico: "⚡", title: "Livrare rapidă", sub: "Termene scurte" },
-    { ico: "🏅", title: "Rezistență maximă", sub: "Spălări multiple" },
+    { ico: "shield", title: "Culori vibrante", sub: "Calitate premium" },
+    { ico: "ruler", title: "Lățime 90 cm", sub: "Print la metru liniar" },
+    { ico: "bolt", title: "Livrare rapidă", sub: "Termene scurte" },
+    { ico: "award", title: "Rezistență maximă", sub: "Spălări multiple" },
   ],
   order: {
     eyebrow: "Comandă rapid și ușor",
@@ -58,10 +58,10 @@ const DEFAULT_CONTENT = {
     calcNote: "Upload PDF, PNG, TIFF (300dpi recomandat)",
   },
   steps: [
-    { ico: "📤", title: "1. Încarcă design", sub: "Trimite fișierul tău" },
-    { ico: "🖨️", title: "2. Noi printăm", sub: "Calitate premium" },
-    { ico: "🔍", title: "3. Verificare", sub: "Control calitate" },
-    { ico: "🚚", title: "4. Livrare rapidă", sub: "Ambalare sigură" },
+    { ico: "upload", title: "1. Încarcă design", sub: "Trimite fișierul tău" },
+    { ico: "printer", title: "2. Noi printăm", sub: "Calitate premium" },
+    { ico: "search", title: "3. Verificare", sub: "Control calitate" },
+    { ico: "truck", title: "4. Livrare rapidă", sub: "Ambalare sigură" },
   ],
   products: {
     eyebrow: "Textile și accesorii",
@@ -76,10 +76,10 @@ const DEFAULT_CONTENT = {
     ],
   },
   trust: [
-    { ico: "🏅", title: "Calitate garantată", sub: "Materiale și print premium" },
-    { ico: "🚚", title: "Livrare rapidă", sub: "2-3 zile lucrătoare oriunde în țară" },
-    { ico: "🔒", title: "Plăți securizate", sub: "Datele tale sunt în siguranță" },
-    { ico: "💬", title: "Suport dedicat", sub: "Suntem aici să te ajutăm" },
+    { ico: "award", title: "Calitate garantată", sub: "Materiale și print premium" },
+    { ico: "truck", title: "Livrare rapidă", sub: "2-3 zile lucrătoare oriunde în țară" },
+    { ico: "lock", title: "Plăți securizate", sub: "Datele tale sunt în siguranță" },
+    { ico: "message", title: "Suport dedicat", sub: "Suntem aici să te ajutăm" },
   ],
   footer: {
     tagline: "Specialiști în print DTF premium la metru liniar și produse blank pentru personalizare.",
