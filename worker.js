@@ -649,7 +649,45 @@ async function listMessages(env) {
   return out;
 }
 
-async function handleMessages(request, env, segs) {
+// Notificare email la mesaj nou — DORMANTĂ până se setează secretele.
+// Necesită (setate ca secrets în Worker, când vrei să activezi):
+//   RESEND_API_KEY – cheia API de la resend.com
+//   NOTIFY_EMAIL   – adresa unde vrei să primești notificările
+//   NOTIFY_FROM    – (opțional) expeditor verificat, ex. "MrDTF <contact@domeniul-tau.ro>"
+// Dacă lipsesc RESEND_API_KEY sau NOTIFY_EMAIL, funcția nu face nimic.
+async function notifyNewMessage(env, msg) {
+  try {
+    const to = env.NOTIFY_EMAIL;
+    const apiKey = env.RESEND_API_KEY;
+    if (!to || !apiKey) return; // neconfigurat — nu trimite nimic
+    const from = env.NOTIFY_FROM || "MrDTF <onboarding@resend.dev>";
+    const esc = (s) => String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const subject = "📨 Mesaj nou de contact — " + (msg.name || msg.email);
+    const rows = [
+      ["Nume", msg.name],
+      ["Email", msg.email],
+      ["Telefon", msg.phone || "—"],
+      ["Subiect", msg.subject || "—"],
+    ].map((r) => "<tr><td style=\"padding:4px 12px 4px 0;color:#666\">" + esc(r[0]) +
+      "</td><td style=\"padding:4px 0\"><strong>" + esc(r[1]) + "</strong></td></tr>").join("");
+    const html = "<div style=\"font-family:Arial,sans-serif;font-size:15px;color:#222\">" +
+      "<h2 style=\"margin:0 0 12px\">Mesaj nou de pe site</h2>" +
+      "<table style=\"border-collapse:collapse;margin-bottom:14px\">" + rows + "</table>" +
+      "<div style=\"padding:14px;background:#f5f5f7;border-radius:8px;white-space:pre-wrap\">" +
+      esc(msg.message) + "</div>" +
+      "<p style=\"margin-top:16px;color:#888;font-size:13px\">Vezi toate mesajele în panoul admin → Mesaje.</p></div>";
+    const text = "Mesaj nou de contact\n\nNume: " + (msg.name || "") + "\nEmail: " + (msg.email || "") +
+      "\nTelefon: " + (msg.phone || "—") + "\nSubiect: " + (msg.subject || "—") + "\n\n" + (msg.message || "");
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + apiKey, "Content-Type": "application/json" },
+      body: JSON.stringify({ from, to: [to], reply_to: msg.email, subject, html, text }),
+    });
+  } catch { /* best-effort — nu blocăm răspunsul către client */ }
+}
+
+async function handleMessages(request, env, segs, ctx) {
   // segs: ["messages"] | ["messages", id] | ["messages", "count"]
   const id = segs[1];
 
@@ -672,6 +710,9 @@ async function handleMessages(request, env, segs) {
       message,
     };
     await env.CONTENT.put(MSG_PREFIX + mid, JSON.stringify(msg));
+    // notificare email (best-effort, dormantă dacă secretele nu sunt setate)
+    if (ctx && ctx.waitUntil) ctx.waitUntil(notifyNewMessage(env, msg));
+    else await notifyNewMessage(env, msg);
     return json({ ok: true });
   }
 
@@ -725,7 +766,7 @@ async function serveAsset(request, env) {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const path = url.pathname;
 
@@ -770,7 +811,7 @@ export default {
 
         if (segs[0] === "orders") return handleOrders(request, env, segs);
 
-        if (segs[0] === "messages") return handleMessages(request, env, segs);
+        if (segs[0] === "messages") return handleMessages(request, env, segs, ctx);
 
         if (segs[0] === "media") {
           const mid = segs[1];
