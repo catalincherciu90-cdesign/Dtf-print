@@ -36,15 +36,15 @@
   <!-- Editor -->
   <main class="admin__editor container" id="editorView" hidden>
     <div class="tabs" id="tabs">
-      <button class="tab is-active" type="button" data-tab="content">📝 Conținut</button>
-      <button class="tab" type="button" data-tab="banners">🖼️ Bannere</button>
-      <button class="tab" type="button" data-tab="products">🛍️ Produse</button>
-      <button class="tab" type="button" data-tab="promo">🎟️ Promo</button>
-      <button class="tab" type="button" data-tab="tiktok">📱 TikTok</button>
-      <button class="tab" type="button" data-tab="social">🔗 Social</button>
-      <button class="tab" type="button" data-tab="orders">📦 Comenzi <span class="tab-badge" id="ordersBadge" hidden>0</span></button>
-      <button class="tab" type="button" data-tab="messages">💬 Mesaje <span class="tab-badge" id="messagesBadge" hidden>0</span></button>
-      <button class="tab" type="button" data-tab="crm">📊 CRM</button>
+      <button class="tab is-active" type="button" data-tab="content"><span class="mr-ico tab__ico" data-icon="edit" data-icon-size="16"></span> Conținut</button>
+      <button class="tab" type="button" data-tab="banners"><span class="mr-ico tab__ico" data-icon="image" data-icon-size="16"></span> Bannere</button>
+      <button class="tab" type="button" data-tab="products"><span class="mr-ico tab__ico" data-icon="bag" data-icon-size="16"></span> Produse</button>
+      <button class="tab" type="button" data-tab="promo"><span class="mr-ico tab__ico" data-icon="ticket" data-icon-size="16"></span> Promo</button>
+      <button class="tab" type="button" data-tab="tiktok"><span class="mr-ico tab__ico" data-icon="smartphone" data-icon-size="16"></span> TikTok</button>
+      <button class="tab" type="button" data-tab="social"><span class="mr-ico tab__ico" data-icon="link" data-icon-size="16"></span> Social</button>
+      <button class="tab" type="button" data-tab="orders"><span class="mr-ico tab__ico" data-icon="box" data-icon-size="16"></span> Comenzi <span class="tab-badge" id="ordersBadge" hidden>0</span></button>
+      <button class="tab" type="button" data-tab="messages"><span class="mr-ico tab__ico" data-icon="message" data-icon-size="16"></span> Mesaje <span class="tab-badge" id="messagesBadge" hidden>0</span></button>
+      <button class="tab" type="button" data-tab="crm"><span class="mr-ico tab__ico" data-icon="chart" data-icon-size="16"></span> CRM</button>
     </div>
 
     <!-- Tab: Conținut -->
@@ -56,13 +56,13 @@
         </div>
         <div class="editor-actions">
           <button class="btn btn--ghost" id="resetBtn" type="button">Resetează</button>
-          <button class="btn btn--primary" id="saveBtn" type="button">💾 Salvează</button>
+          <button class="btn btn--primary" id="saveBtn" type="button"><span class="mr-ico" data-icon="save" data-icon-size="15"></span> Salvează</button>
         </div>
       </div>
       <p class="form-msg" id="editorMsg" role="status"></p>
       <form id="form" autocomplete="off"></form>
       <div class="editor-actions editor-actions--bottom">
-        <button class="btn btn--primary" id="saveBtn2" type="button">💾 Salvează</button>
+        <button class="btn btn--primary" id="saveBtn2" type="button"><span class="mr-ico" data-icon="save" data-icon-size="15"></span> Salvează</button>
       </div>
     </div>
 
@@ -74,13 +74,13 @@
           <p class="muted">Schimbă imaginile mari din partea de sus a paginii (hero). Recomandat: imagini de bună calitate, max 5 MB.</p>
         </div>
         <div class="editor-actions">
-          <button class="btn btn--primary" id="saveBannersBtn" type="button">💾 Salvează</button>
+          <button class="btn btn--primary" id="saveBannersBtn" type="button"><span class="mr-ico" data-icon="save" data-icon-size="15"></span> Salvează</button>
         </div>
       </div>
       <p class="form-msg" id="bannersMsg" role="status"></p>
       <form id="bannersForm" autocomplete="off"></form>
       <div class="editor-actions editor-actions--bottom">
-        <button class="btn btn--primary" id="saveBannersBtn2" type="button">💾 Salvează</button>
+        <button class="btn btn--primary" id="saveBannersBtn2" type="button"><span class="mr-ico" data-icon="save" data-icon-size="15"></span> Salvează</button>
       </div>
     </div>
 
@@ -92,13 +92,13 @@
           <p class="muted">Adaugă, editează sau șterge produsele afișate pe site. Pentru poză, pune calea fișierului (ex. <code>assets/img/prod-x.jpg</code>).</p>
         </div>
         <div class="editor-actions">
-          <button class="btn btn--primary" id="saveProductsBtn" type="button">💾 Salvează</button>
+          <button class="btn btn--primary" id="saveProductsBtn" type="button"><span class="mr-ico" data-icon="save" data-icon-size="15"></span> Salvează</button>
         </div>
       </div>
       <p class="form-msg" id="productsMsg" role="status"></p>
       <form id="productsForm" autocomplete="off"></form>
       <div class="editor-actions editor-actions--bottom">
-        <button class="btn btn--primary" id="saveProductsBtn2" type="button">💾 Salvează</button>
+        <button class="btn btn--primary" id="saveProductsBtn2" type="button"><span class="mr-ico" data-icon="save" data-icon-size="15"></span> Salvează</button>
       </div>
     </div>
 
@@ -110,13 +110,13 @@
           <p class="muted">Reducere automată la coș când se atinge un prag (valoare sau cantitate).</p>
         </div>
         <div class="editor-actions">
-          <button class="btn btn--primary" id="savePromoBtn" type="button">💾 Salvează</button>
+          <button class="btn btn--primary" id="savePromoBtn" type="button"><span class="mr-ico" data-icon="save" data-icon-size="15"></span> Salvează</button>
         </div>
       </div>
       <p class="form-msg" id="promoMsg" role="status"></p>
       <form id="promoForm" autocomplete="off"></form>
       <div class="editor-actions editor-actions--bottom">
-        <button class="btn btn--primary" id="savePromoBtn2" type="button">💾 Salvează</button>
+        <button class="btn btn--primary" id="savePromoBtn2" type="button"><span class="mr-ico" data-icon="save" data-icon-size="15"></span> Salvează</button>
       </div>
     </div>
 
@@ -128,14 +128,14 @@
           <p class="muted">Afișează videoclipuri pe site — automat (API) sau manual (linkuri).</p>
         </div>
         <div class="editor-actions">
-          <button class="btn btn--primary" id="saveTiktokBtn" type="button">💾 Salvează</button>
+          <button class="btn btn--primary" id="saveTiktokBtn" type="button"><span class="mr-ico" data-icon="save" data-icon-size="15"></span> Salvează</button>
         </div>
       </div>
       <p class="form-msg" id="tiktokMsg" role="status"></p>
       <div class="tt-api" id="ttApi"></div>
       <form id="tiktokForm" autocomplete="off"></form>
       <div class="editor-actions editor-actions--bottom">
-        <button class="btn btn--primary" id="saveTiktokBtn2" type="button">💾 Salvează</button>
+        <button class="btn btn--primary" id="saveTiktokBtn2" type="button"><span class="mr-ico" data-icon="save" data-icon-size="15"></span> Salvează</button>
       </div>
     </div>
 
@@ -147,13 +147,13 @@
           <p class="muted">Pune linkurile către paginile voastre. Iconițele apar în footer doar dacă completezi linkul.</p>
         </div>
         <div class="editor-actions">
-          <button class="btn btn--primary" id="saveSocialBtn" type="button">💾 Salvează</button>
+          <button class="btn btn--primary" id="saveSocialBtn" type="button"><span class="mr-ico" data-icon="save" data-icon-size="15"></span> Salvează</button>
         </div>
       </div>
       <p class="form-msg" id="socialMsg" role="status"></p>
       <form id="socialForm" autocomplete="off"></form>
       <div class="editor-actions editor-actions--bottom">
-        <button class="btn btn--primary" id="saveSocialBtn2" type="button">💾 Salvează</button>
+        <button class="btn btn--primary" id="saveSocialBtn2" type="button"><span class="mr-ico" data-icon="save" data-icon-size="15"></span> Salvează</button>
       </div>
     </div>
 
