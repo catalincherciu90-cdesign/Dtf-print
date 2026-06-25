@@ -354,8 +354,17 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
 .contact-list { list-style: none; display: grid; gap: 12px; margin-top: 2px; }
 .contact-list li { display: flex; align-items: center; gap: 10px; color: #d4d4ec; font-size: 0.95rem; }
 .deliv-opt .mr-ico { margin-right: 1px; }
-.footer__contact a, .footer__contact #footerSchedule { display: inline-flex; align-items: center; gap: 8px; }
-.footer__contact .mr-ico { color: var(--blue); }
+.footer__contact a, .footer__contact #footerSchedule {
+  display: inline-flex; align-items: center; gap: 8px; line-height: 1.3;
+}
+/* anulează display:block + margin moștenite din `.footer__col span`
+   ca iconița și textul să rămână aliniate pe aceeași linie */
+.footer__contact a .mr-ico,
+.footer__contact #footerSchedule .mr-ico,
+.footer__contact .footer__contact-txt {
+  display: inline-flex; align-items: center; margin: 0;
+}
+.footer__contact .mr-ico { color: var(--blue); flex: none; }
 
 
 /* ---------- Footer ---------- */
