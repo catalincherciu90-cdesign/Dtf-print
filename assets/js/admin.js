@@ -22,7 +22,7 @@
     subPre: "Subtitlu — text", subHi: "Subtitlu — accent",
     stats: "Statistici (o linie fiecare)", checks: "Bife (o linie fiecare)",
     cta: "Text buton", hint: "Text sub buton",
-    pills: "Carduri avantaje", ico: "Emoji / iconiță", title: "Titlu", sub: "Subtitlu",
+    pills: "Carduri avantaje", ico: "Iconiță", title: "Titlu", sub: "Subtitlu",
     order: "Secțiunea Comandă", eyebrow: "Etichetă mică", desc: "Descriere",
     checklist: "Listă avantaje (o linie fiecare)",
     calcTitle: "Titlu calculator", pricePerMeter: "Preț pe metru liniar (RON)",
@@ -164,11 +164,11 @@
         if (!s) { showLogin("Sesiune expirată."); return; }
         var txt, btns;
         if (!s.configured) {
-          txt = "⚠️ Neconfigurat — setează secretele TIKTOK_CLIENT_KEY și TIKTOK_CLIENT_SECRET în Worker.";
+          txt = "Neconfigurat — setează secretele TIKTOK_CLIENT_KEY și TIKTOK_CLIENT_SECRET în Worker.";
           btns = "";
         } else if (!s.connected) {
           txt = "Cont neconectat.";
-          btns = "<button class=\"btn btn--primary\" id=\"ttConnect\" type=\"button\">🔗 Conectează TikTok</button>";
+          btns = "<button class=\"btn btn--primary\" id=\"ttConnect\" type=\"button\">" + icName("link", 16) + " Conectează TikTok</button>";
         } else {
           txt = "✓ Conectat — " + s.videoCount + " clipuri" + (s.syncedAt ? " · sincronizat " + fmtDate(s.syncedAt) : "");
           btns = "<button class=\"btn btn--ghost btn--sm\" id=\"ttSync\" type=\"button\">↻ Sincronizează acum</button> " +
@@ -258,6 +258,8 @@
         [["valoare", "După valoarea coșului (RON)"], ["cantitate", "După cantitatea de produse"]]));
     } else if (keyOf(path) === "img" || /^banners\.hero/.test(path)) {
       parent.appendChild(mediaField(value, path, label(keyOf(path))));
+    } else if (keyOf(path) === "ico") {
+      parent.appendChild(iconField(value, path));
     } else {
       field(parent, label(keyOf(path)), scalarInput(value, path));
     }
@@ -339,6 +341,53 @@
     row.className = "media-row";
     row.appendChild(btn); row.appendChild(input);
     wrap.appendChild(prev); wrap.appendChild(row); wrap.appendChild(file);
+    return wrap;
+  }
+
+  /* câmp iconiță: previzualizare + input (nume/emoji) + grilă de iconițe */
+  function iconField(value, path) {
+    var wrap = document.createElement("div");
+    wrap.className = "edit-field icon-field";
+    var span = document.createElement("span");
+    span.textContent = "Iconiță";
+    wrap.appendChild(span);
+
+    var prev = document.createElement("span");
+    prev.className = "icon-prev";
+    var input = el("input", { type: "text" });
+    input.value = value == null ? "" : value;
+    input.placeholder = "nume (ex. truck) sau emoji";
+
+    function renderPrev() {
+      var name = window.MrIcons ? window.MrIcons.resolve(input.value) : null;
+      prev.innerHTML = name ? window.MrIcons.svg(name, { size: 24 }) : "<span class=\"icon-prev__none\">—</span>";
+      if (grid) grid.querySelectorAll(".icon-grid__btn").forEach(function (b) {
+        b.classList.toggle("is-active", b.dataset.name === name);
+      });
+    }
+    input.addEventListener("input", function () { setPath(content, path, input.value); renderPrev(); });
+
+    var row = document.createElement("div");
+    row.className = "icon-field__row";
+    row.appendChild(prev); row.appendChild(input);
+    wrap.appendChild(row);
+
+    var grid = null;
+    if (window.MrIcons) {
+      grid = document.createElement("div");
+      grid.className = "icon-grid";
+      window.MrIcons.names.forEach(function (n) {
+        var b = document.createElement("button");
+        b.type = "button"; b.className = "icon-grid__btn"; b.title = n; b.dataset.name = n;
+        b.innerHTML = window.MrIcons.svg(n, { size: 22 });
+        b.addEventListener("click", function () {
+          input.value = n; setPath(content, path, n); renderPrev();
+        });
+        grid.appendChild(b);
+      });
+      wrap.appendChild(grid);
+    }
+    renderPrev();
     return wrap;
   }
 
@@ -569,6 +618,13 @@
     return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;")
       .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
+  /* Iconiță SVG după nume/emoji (revine la text dacă lipsește setul). */
+  function ic(val, size) {
+    return window.MrIcons ? window.MrIcons.iconOrText(val, { size: size || 16 }) : esc(val);
+  }
+  function icName(name, size) {
+    return window.MrIcons ? window.MrIcons.svg(name, { size: size || 16 }) : "";
+  }
   function fmtDate(iso) {
     try { return new Date(iso).toLocaleString("ro-RO", { dateStyle: "medium", timeStyle: "short" }); }
     catch (e) { return iso || ""; }
@@ -617,21 +673,21 @@
           return "<button class=\"btn btn--ghost btn--sm order-dl\" data-id=\"" + esc(o.id) +
             "\" data-i=\"" + idx + "\" data-name=\"" + esc(f.name) + "\">⬇ " + esc(f.name) + "</button>";
         }
-        return "<span class=\"order-file-pending\">📎 " + esc(f.name) + "</span>";
+        return "<span class=\"order-file-pending\"><span class=\"adm-ic\">" + icName("paperclip", 14) + "</span> " + esc(f.name) + "</span>";
       }).join(" ") : "<span class=\"order-meta\">Fără fișiere</span>";
 
       var contact = [];
-      if (o.email) contact.push("✉️ " + esc(o.email));
-      if (o.phone) contact.push("📞 " + esc(o.phone));
+      if (o.email) contact.push("<span class=\"adm-ic\">" + icName("mail", 15) + "</span> " + esc(o.email));
+      if (o.phone) contact.push("<span class=\"adm-ic\">" + icName("phone", 15) + "</span> " + esc(o.phone));
       var total = o.total != null ? o.total : o.price;
       var discNote = (o.discount && o.discount > 0)
         ? " <span class=\"order-meta\">(−" + esc(o.discountPercent) + "% · −" + esc(o.discount) + " RON)</span>" : "";
       var note = o.note || o.message;
       var delivHtml = "";
       if (o.deliveryMethod === "ridicare") {
-        delivHtml = "<p class=\"order-deliv\">🏬 <strong>Ridicare personală</strong></p>";
+        delivHtml = "<p class=\"order-deliv\"><span class=\"adm-ic\">" + icName("store", 16) + "</span> <strong>Ridicare personală</strong></p>";
       } else if (o.deliveryMethod === "livrare" || o.address) {
-        delivHtml = "<p class=\"order-deliv\">🚚 <strong>Livrare la adresă</strong>" +
+        delivHtml = "<p class=\"order-deliv\"><span class=\"adm-ic\">" + icName("truck", 16) + "</span> <strong>Livrare la adresă</strong>" +
           (o.address ? "<br><span class=\"order-addr\">" + esc(o.address) + "</span>" : "") + "</p>";
       }
 
@@ -642,13 +698,13 @@
         "</div>" +
         "<div class=\"order-grid\">" +
           "<span>" + (contact.join(" · ") || "<span class='order-meta'>—</span>") + "</span>" +
-          "<span>💰 <strong>" + esc(total) + " RON</strong>" + discNote + "</span>" +
+          "<span><span class=\"adm-ic\">" + icName("wallet", 15) + "</span> <strong>" + esc(total) + " RON</strong>" + discNote + "</span>" +
         "</div>" +
         itemsHtml +
         delivHtml +
         (note ? "<p class=\"order-message\">„" + esc(note) + "”</p>" : "") +
         "<div class=\"order-card__foot\"><div class=\"order-files\">" + filesHtml + "</div>" +
-          "<button class=\"order-del\" data-id=\"" + esc(o.id) + "\" title=\"Șterge comanda\">🗑</button>" +
+          "<button class=\"order-del\" data-id=\"" + esc(o.id) + "\" title=\"Șterge comanda\">" + icName("trash", 17) + "</button>" +
         "</div>" +
       "</div>";
     }).join("");
@@ -725,8 +781,8 @@
     var list = $("messagesList");
     list.innerHTML = messages.map(function (m) {
       var contact = [];
-      if (m.email) contact.push("<a href=\"mailto:" + esc(m.email) + "\">✉️ " + esc(m.email) + "</a>");
-      if (m.phone) contact.push("<a href=\"tel:" + esc(m.phone) + "\">📞 " + esc(m.phone) + "</a>");
+      if (m.email) contact.push("<a href=\"mailto:" + esc(m.email) + "\"><span class=\"adm-ic\">" + icName("mail", 15) + "</span> " + esc(m.email) + "</a>");
+      if (m.phone) contact.push("<a href=\"tel:" + esc(m.phone) + "\"><span class=\"adm-ic\">" + icName("phone", 15) + "</span> " + esc(m.phone) + "</a>");
       var unread = !m.read;
       return "<div class=\"msg-card" + (unread ? " msg-card--unread" : "") + "\">" +
         "<div class=\"order-card__top\">" +
@@ -734,13 +790,13 @@
             (unread ? " <span class=\"msg-new\">NOU</span>" : "") +
             "<div class=\"order-meta\">" + fmtDate(m.createdAt) + "</div></div>" +
         "</div>" +
-        (m.subject ? "<div class=\"order-grid\"><span>📌 <strong>" + esc(m.subject) + "</strong></span></div>" : "") +
+        (m.subject ? "<div class=\"order-grid\"><span><span class=\"adm-ic\">" + icName("pin", 15) + "</span> <strong>" + esc(m.subject) + "</strong></span></div>" : "") +
         "<div class=\"order-grid\">" + (contact.join(" · ") || "<span class='order-meta'>—</span>") + "</div>" +
         "<p class=\"order-message\">" + esc(m.message).replace(/\n/g, "<br>") + "</p>" +
         "<div class=\"order-card__foot\">" +
           "<button class=\"btn btn--ghost btn--sm msg-read\" data-id=\"" + esc(m.id) + "\" data-read=\"" + (unread ? "1" : "0") + "\">" +
-            (unread ? "✓ Marchează citit" : "↩ Marchează necitit") + "</button>" +
-          "<button class=\"order-del msg-del\" data-id=\"" + esc(m.id) + "\" title=\"Șterge mesajul\">🗑</button>" +
+            (unread ? icName("check", 15) + " Marchează citit" : "Marchează necitit") + "</button>" +
+          "<button class=\"order-del msg-del\" data-id=\"" + esc(m.id) + "\" title=\"Șterge mesajul\">" + icName("trash", 17) + "</button>" +
         "</div>" +
       "</div>";
     }).join("");
@@ -839,16 +895,16 @@
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
   }
 
-  function crmCard(ico, label, val) {
-    return "<div class=\"crm-card\"><span class=\"crm-card__ico\">" + ico + "</span>" +
+  function crmCard(icoName, label, val) {
+    return "<div class=\"crm-card\"><span class=\"crm-card__ico\">" + icName(icoName, 22) + "</span>" +
       "<div><strong>" + esc(val) + "</strong><em>" + esc(label) + "</em></div></div>";
   }
   function renderStats(s) {
     var chips = Object.keys(s.byStatus || {}).map(function (k) {
       return "<span class=\"crm-chip\" data-status=\"" + esc(k) + "\">" + esc(k) + ": <strong>" + esc(s.byStatus[k]) + "</strong></span>";
     }).join("");
-    var cards = crmCard("👥", "Clienți", s.totalCustomers) + crmCard("📦", "Comenzi", s.totalOrders) +
-      crmCard("💰", "Venit", money(s.revenue)) + crmCard("🧾", "Produse vândute", s.units || 0);
+    var cards = crmCard("users", "Clienți", s.totalCustomers) + crmCard("box", "Comenzi", s.totalOrders) +
+      crmCard("wallet", "Venit", money(s.revenue)) + crmCard("receipt", "Produse vândute", s.units || 0);
     var recent = (s.recent || []).map(function (o) {
       return "<div class=\"crm-recent__row\"><span class=\"order-meta\">" + fmtDate(o.createdAt) + "</span>" +
         "<span>" + esc(o.name || o.email || "—") + "</span>" +
@@ -915,7 +971,7 @@
         "<div class=\"crm-tagsugg-row\">" + sugg + "</div></div>" +
       "<label class=\"crm-notes\"><span>Note interne (CRM)</span>" +
         "<textarea id=\"crmNotes\" rows=\"4\" placeholder=\"Observații despre client, preferințe, follow-up…\">" + esc(d.notes || "") + "</textarea></label>" +
-      "<div class=\"crm-notes__actions\"><button class=\"btn btn--primary btn--sm\" id=\"crmSave\" type=\"button\">💾 Salvează</button>" +
+      "<div class=\"crm-notes__actions\"><button class=\"btn btn--primary btn--sm\" id=\"crmSave\" type=\"button\">" + icName("save", 15) + " Salvează</button>" +
         "<span class=\"form-msg\" id=\"crmSaveMsg\"></span></div>" +
       "<h3 class=\"crm-h\">Comenzi (" + (d.orders || []).length + ")</h3><div class=\"crm-orders\">" + orders + "</div>";
     el.scrollIntoView({ behavior: "smooth", block: "start" });
