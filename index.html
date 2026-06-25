@@ -297,6 +297,10 @@
               <input type="text" id="contactSubject" name="subject" placeholder="Subiect (opțional)" />
               <textarea id="contactMessage" name="message" rows="4" placeholder="Mesajul tău *" required></textarea>
             </div>
+            <label class="consent">
+              <input type="checkbox" id="contactConsent" required />
+              <span>Sunt de acord cu prelucrarea datelor mele conform <a href="/confidentialitate" target="_blank" rel="noopener">Politicii de confidențialitate</a>.</span>
+            </label>
             <button type="submit" class="btn btn--cta btn--block" id="contactSubmit">
               Trimite mesajul
               <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M2 21l21-9L2 3v7l15 2-15 2v7Z"/></svg>
@@ -332,6 +336,7 @@
         <h5>Informații</h5>
         <a href="/intrebari-frecvente">Întrebări frecvente</a>
         <a href="/termeni">Termeni și condiții</a>
+        <a href="/confidentialitate">Politică de confidențialitate</a>
         <a href="/livrare">Politica de livrare</a>
         <a href="/retur">Politica de retur</a>
       </div>
@@ -389,6 +394,10 @@
             <textarea id="cartAddress" rows="2" placeholder="Adresa de livrare (nume destinatar, stradă, nr., bloc/ap., oraș, județ, cod poștal, telefon)"></textarea>
           </div>
           <textarea id="cartNote" rows="2" placeholder="Mesaj / detalii suplimentare (opțional)"></textarea>
+          <label class="consent">
+            <input type="checkbox" id="cartConsent" />
+            <span>Sunt de acord cu prelucrarea datelor mele conform <a href="/confidentialitate" target="_blank" rel="noopener">Politicii de confidențialitate</a>.</span>
+          </label>
           <button class="btn btn--cta btn--block" id="cartSubmit">Trimite comanda</button>
           <p class="order-msg" id="cartMsg" role="status"></p>
         </div>
@@ -398,5 +407,6 @@
 
   <script src="assets/js/icons.js"></script>
   <script src="assets/js/main.js"></script>
+  <script src="assets/js/consent.js" defer></script>
 </body>
 </html>

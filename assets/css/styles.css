@@ -582,3 +582,54 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
 @media (prefers-reduced-motion: reduce) {
   .panel { animation: none; }
 }
+
+/* =================================================================
+   GDPR — banner consimțământ cookie-uri + checkbox consimțământ
+   ================================================================= */
+.cookie-banner {
+  position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 300;
+  max-width: 920px; margin-inline: auto;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, rgba(28, 28, 56, 0.72), rgba(10, 10, 26, 0.82));
+  border: 1px solid var(--lg-border);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  backdrop-filter: blur(28px) saturate(190%);
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.6), var(--lg-hi);
+  transform: translateY(140%); opacity: 0;
+  transition: transform 0.35s var(--ease), opacity 0.35s var(--ease);
+}
+.cookie-banner.is-visible { transform: none; opacity: 1; }
+.cookie-banner__inner {
+  display: flex; align-items: center; gap: 20px; padding: 16px 20px; flex-wrap: wrap;
+}
+.cookie-banner__text { flex: 1 1 360px; min-width: 240px; }
+.cookie-banner__text strong { display: block; font-size: 0.98rem; margin-bottom: 4px; }
+.cookie-banner__text p { color: var(--muted); font-size: 0.86rem; line-height: 1.55; }
+.cookie-banner__text a { color: var(--blue); }
+.cookie-banner__text a:hover { text-decoration: underline; }
+.cookie-banner__actions { display: flex; gap: 10px; flex: 0 0 auto; }
+.cookie-banner__btn { padding: 11px 20px; font-size: 0.9rem; }
+.cookie-banner .btn--cta { animation: none; }
+
+@media (max-width: 540px) {
+  .cookie-banner { left: 10px; right: 10px; bottom: 10px; }
+  .cookie-banner__inner { padding: 14px 16px; gap: 14px; }
+  .cookie-banner__actions { width: 100%; }
+  .cookie-banner__btn { flex: 1; }
+}
+
+/* Checkbox consimțământ GDPR pe formulare */
+.consent {
+  display: flex; align-items: flex-start; gap: 9px; margin-top: 12px;
+  font-size: 0.82rem; color: var(--muted); line-height: 1.5; cursor: pointer;
+}
+.consent input[type="checkbox"] {
+  appearance: auto; -webkit-appearance: auto; width: 17px; height: 17px;
+  margin-top: 1px; flex: none; accent-color: var(--orange); cursor: pointer;
+}
+.consent a { color: var(--blue); }
+.consent a:hover { text-decoration: underline; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cookie-banner { transition: opacity 0.2s linear; transform: none; }
+}
