@@ -728,6 +728,7 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
 .pdp__note a { color: var(--blue); }
 .pdp__missing { text-align: center; color: var(--muted); padding: 60px 0; }
 .pdp__missing a { color: var(--blue); }
+.pdp__missing-list { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: center; margin-top: 14px; }
 
 @media (max-width: 860px) {
   .pdp__grid { grid-template-columns: 1fr; gap: 22px; }

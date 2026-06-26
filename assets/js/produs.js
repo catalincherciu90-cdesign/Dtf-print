@@ -27,12 +27,36 @@
   var parts = location.pathname.replace(/\/+$/, "").split("/");
   var slug = decodeURIComponent(parts[parts.length - 1] || "");
 
+  function findProduct(items, s) {
+    items = items.filter(Boolean);
+    var p = items.find(function (x) { return (x.slug && x.slug === s) || slugify(x.name) === s; });
+    if (p) return p;
+    // potrivire normalizată (fără cratime) — toleră diferențe minore
+    var sn = s.replace(/-/g, "");
+    p = items.find(function (x) { return slugify(x.name).replace(/-/g, "") === sn; });
+    if (p) return p;
+    // potrivire pe prefix (ex. „tricouri" pentru „tricouri-personalizate")
+    p = items.find(function (x) { var ps = slugify(x.name); return ps && (ps.indexOf(s) === 0 || s.indexOf(ps) === 0); });
+    return p || null;
+  }
+
+  function showMissing(items) {
+    var el = $("pdpMissing");
+    el.hidden = false;
+    var list = (items || []).filter(Boolean);
+    if (list.length) {
+      el.innerHTML = "Produsul nu a fost găsit. Alege unul disponibil:<span class=\"pdp__missing-list\">" +
+        list.map(function (p) { return '<a class="inline" href="/produs/' + slugify(p.name) + '">' + esc(p.name) + "</a>"; }).join("") +
+        "</span>";
+    }
+  }
+
   fetch("/api/content", { headers: { Accept: "application/json" } })
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (data) {
       var items = (data && data.products && data.products.items) || [];
-      var prod = items.filter(Boolean).find(function (p) { return slugify(p.name) === slug; });
-      if (!prod) { $("pdpMissing").hidden = false; return; }
+      var prod = findProduct(items, slug);
+      if (!prod) { showMissing(items); return; }
       renderProduct(prod);
     })
     .catch(function () { $("pdpMissing").hidden = false; });
