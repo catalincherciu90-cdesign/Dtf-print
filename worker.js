@@ -53,6 +53,12 @@ const DEFAULT_CONTENT = {
     ],
     calcTitle: "Calculează prețul",
     pricePerMeter: 25,
+    priceTiers: [
+      { dela: 5, pretMl: 23 },
+      { dela: 20, pretMl: 21 },
+      { dela: 50, pretMl: 19 },
+      { dela: 100, pretMl: 17 },
+    ],
     maxWidth: 60,
     uploadText: "Încarcă design",
     calcNote: "Upload PDF, PNG, TIFF (300dpi recomandat)",

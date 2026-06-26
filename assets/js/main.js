@@ -8,7 +8,19 @@
 
   /* Valori implicite pentru calculator (suprascrise de conținutul din CMS). */
   var PRICE_PER_METER = 25;
+  var PRICE_TIERS = []; // praguri cantitate: [{ dela, pretMl }] sortate crescător
   var MAX_WIDTH = 60;
+
+  /* Prețul pe metru aplicabil pentru o lungime dată, în funcție de praguri.
+     Sub primul prag se folosește PRICE_PER_METER (preț de bază). */
+  function pricePerM(len) {
+    var p = PRICE_PER_METER;
+    for (var i = 0; i < PRICE_TIERS.length; i++) {
+      var t = PRICE_TIERS[i];
+      if (len >= t.dela && t.pretMl > 0) p = t.pretMl;
+    }
+    return p;
+  }
 
   /* ---------- Helpers ---------- */
   function get(obj, path) {
@@ -81,6 +93,12 @@
     // Calculator
     if (c.order) {
       if (c.order.pricePerMeter != null) PRICE_PER_METER = Number(c.order.pricePerMeter);
+      if (Array.isArray(c.order.priceTiers)) {
+        PRICE_TIERS = c.order.priceTiers
+          .map(function (t) { return { dela: Number(t.dela) || 0, pretMl: Number(t.pretMl) || 0 }; })
+          .filter(function (t) { return t.dela > 0 && t.pretMl > 0; })
+          .sort(function (a, b) { return a.dela - b.dela; });
+      }
       if (c.order.maxWidth != null) {
         MAX_WIDTH = Number(c.order.maxWidth);
         var w = document.getElementById("width");
@@ -264,14 +282,21 @@
   var widthOut = document.getElementById("widthOut");
   var lengthOut = document.getElementById("lengthOut");
   var priceEl = document.getElementById("price");
+  var unitEl = document.getElementById("calcUnit");
 
   function recalc() {
     if (!width || !length) return;
     var w = parseInt(width.value, 10);
     var l = parseInt(length.value, 10);
+    var pm = pricePerM(l);
     widthOut.textContent = w + " cm";
     lengthOut.textContent = l + " m";
-    priceEl.textContent = (l * PRICE_PER_METER).toFixed(2) + " RON";
+    priceEl.textContent = (l * pm).toFixed(2) + " RON";
+    if (unitEl) {
+      unitEl.textContent = pm < PRICE_PER_METER
+        ? l + " m × " + pm.toFixed(2) + " RON/ml (preț redus la cantitate)"
+        : l + " m × " + pm.toFixed(2) + " RON/ml";
+    }
   }
 
   if (width && length) {
@@ -387,7 +412,7 @@
     dtfAddCart.addEventListener("click", function () {
       var w = width ? parseInt(width.value, 10) : 0;
       var l = length ? parseInt(length.value, 10) : 0;
-      cartAdd({ type: "dtf", name: "Print DTF la metru", width: w, length: l, price: Number((l * PRICE_PER_METER).toFixed(2)), qty: 1 });
+      cartAdd({ type: "dtf", name: "Print DTF la metru", width: w, length: l, price: Number((l * pricePerM(l)).toFixed(2)), qty: 1 });
       openCart();
     });
   }

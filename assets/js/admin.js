@@ -25,7 +25,8 @@
     pills: "Carduri avantaje", ico: "Iconiță", title: "Titlu", sub: "Subtitlu",
     order: "Secțiunea Comandă", eyebrow: "Etichetă mică", desc: "Descriere",
     checklist: "Listă avantaje (o linie fiecare)",
-    calcTitle: "Titlu calculator", pricePerMeter: "Preț pe metru liniar (RON)",
+    calcTitle: "Titlu calculator", pricePerMeter: "Preț pe metru liniar — de bază (RON)",
+    priceTiers: "Reduceri la cantitate (preț/ml pe praguri)", dela: "De la (metri liniari)", pretMl: "Preț (RON / ml)",
     maxWidth: "Lățime maximă (cm)", uploadText: "Text buton upload", calcNote: "Notă sub buton",
     steps: "Pași (cum funcționează)",
     products: "Secțiunea Produse", items: "Produse", img: "Cale imagine (ex. assets/img/x.jpg)", name: "Nume",
@@ -43,7 +44,7 @@
     tiktok: "TikTok", profileUrl: "Link profil TikTok", videos: "Linkuri video (unul pe linie)",
     social: "Social media", facebook: "Facebook", instagram: "Instagram", youtube: "YouTube",
   };
-  var SINGULAR = { pills: "Avantaj", items: "Produs", steps: "Pas", trust: "Garanție" };
+  var SINGULAR = { pills: "Avantaj", items: "Produs", steps: "Pas", trust: "Garanție", priceTiers: "prag" };
   function label(key) {
     return LABELS[key] || key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, " $1");
   }
@@ -486,6 +487,13 @@
         if (it.price == null) it.price = 0;
         if (it.reducere == null) it.reducere = 0;
       });
+    }
+    // praguri preț DTF (pentru conținut salvat înainte de această funcție)
+    if (c.order && !Array.isArray(c.order.priceTiers)) {
+      c.order.priceTiers = [
+        { dela: 5, pretMl: 23 }, { dela: 20, pretMl: 21 },
+        { dela: 50, pretMl: 19 }, { dela: 100, pretMl: 17 },
+      ];
     }
     var b = c.banners || {};
     c.banners = {
