@@ -30,7 +30,7 @@
 
       <nav class="nav" id="nav">
         <a href="/">Acasă</a>
-        <a href="#comanda">Comandă DTF</a>
+        <a href="/#comanda">Comandă DTF</a>
         <a href="/produse" class="is-active">Produse Blank</a>
         <a href="/#despre">Despre noi</a>
         <a href="/#contact">Contact</a>
@@ -101,75 +101,6 @@
                 <p>Diverse modele</p>
                 <a href="/#contact" class="product__arrow" aria-label="Șepci">→</a>
               </article>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== Comandă / Calculator ===== -->
-    <section class="order" id="comanda">
-      <div class="container">
-        <div class="panel order__panel">
-          <div class="order__info">
-            <span class="eyebrow" data-edit="order.eyebrow">Comandă rapid și ușor</span>
-            <h2 class="order__title grad-text" data-edit="order.title">Comandă DTF</h2>
-            <p class="order__desc" data-edit="order.desc">
-              Încarci designul, alegi dimensiunea și primești printul DTF la
-              metru liniar, gata de aplicat.
-            </p>
-            <ul class="check-list" id="orderChecklist">
-              <li>Preț afișat la metru liniar</li>
-              <li>Lățime maximă print: 60 cm</li>
-              <li>Print de înaltă rezoluție</li>
-              <li>Folie premium, cerneală certificată</li>
-              <li>Ideal pentru textile din bumbac, poliester și mix</li>
-            </ul>
-          </div>
-
-          <!-- Formular comandă -->
-          <form class="calc" id="calc" novalidate>
-            <h3 class="calc__title" data-edit="order.calcTitle">Calculează prețul</h3>
-
-            <div class="calc__row">
-              <label for="width">Lățime print (cm) <output id="widthOut">58 cm</output></label>
-              <input type="range" id="width" min="10" max="60" step="1" value="58" />
-            </div>
-
-            <div class="calc__row">
-              <label for="length">Lungime (m liniari) <output id="lengthOut">5 m</output></label>
-              <input type="range" id="length" min="1" max="50" step="1" value="5" />
-            </div>
-
-            <div class="calc__total">
-              <span>Preț total <em class="calc__vat">TVA inclus</em></span>
-              <strong id="price">125.00 RON</strong>
-            </div>
-
-            <button type="button" class="btn btn--cta btn--block" id="dtfAddCart">
-              Adaugă în coș
-              <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M7 4h-2L4 2H1v2h2l3.6 7.6-1.35 2.45A2 2 0 0 0 7 17h12v-2H7.4l1.1-2h7a2 2 0 0 0 1.8-1.1L21 4H7Zm0 15a2 2 0 1 0 2 2 2 2 0 0 0-2-2Zm10 0a2 2 0 1 0 2 2 2 2 0 0 0-2-2Z"/></svg>
-            </button>
-            <p class="calc__note">Vei putea atașa fișierul de design la finalizarea comenzii.</p>
-          </form>
-        </div>
-
-        <!-- Steps -->
-        <div class="steps" id="stepsWrap">
-          <div class="step">
-            <span class="step__ico" data-icon="upload" data-icon-size="24"></span>
-            <div class="step__txt"><h4>1. Încarcă design</h4><p>Trimite fișierul tău</p></div>
-          </div>
-          <div class="step">
-            <span class="step__ico" data-icon="printer" data-icon-size="24"></span>
-            <div class="step__txt"><h4>2. Noi printăm</h4><p>Calitate premium</p></div>
-          </div>
-          <div class="step">
-            <span class="step__ico" data-icon="search" data-icon-size="24"></span>
-            <div class="step__txt"><h4>3. Verificare</h4><p>Control calitate</p></div>
-          </div>
-          <div class="step">
-            <span class="step__ico" data-icon="truck" data-icon-size="24"></span>
-            <div class="step__txt"><h4>4. Livrare rapidă</h4><p>Ambalare sigură</p></div>
           </div>
         </div>
       </div>
