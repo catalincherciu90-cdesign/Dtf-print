@@ -773,6 +773,40 @@ async function serveAsset(request, env) {
   return res;
 }
 
+// Normalizează o cale „assets/…" la absolută (URL-urile http / „/…" rămân la fel).
+function absUrlW(u) {
+  u = String(u || "");
+  if (!u) return "";
+  return /^(https?:|\/)/.test(u) ? u : "/" + u;
+}
+
+// Servește homepage-ul injectând imaginea hero (LCP) direct în HTML + un
+// <link rel=preload>, ca browserul s-o descopere imediat (nu după ce rulează JS).
+async function serveHome(request, env) {
+  const res = await serveAsset(request, env);
+  if (!/text\/html/.test(res.headers.get("Content-Type") || "")) return res;
+  let bg = "";
+  try { const c = await getContent(env); bg = absUrlW(c.banners && c.banners.heroBg); } catch { /* fallback */ }
+
+  class HeroBg {
+    element(el) {
+      el.setAttribute("fetchpriority", "high");
+      el.setAttribute("decoding", "async");
+      el.setAttribute("loading", "eager");
+      if (bg) { el.setAttribute("src", bg); el.setAttribute("style", ""); }
+    }
+  }
+  class Head {
+    element(el) {
+      if (bg) el.append('<link rel="preload" as="image" href="' + bg + '" fetchpriority="high" />', { html: true });
+    }
+  }
+  return new HTMLRewriter()
+    .on("img#heroImgBg", new HeroBg())
+    .on("head", new Head())
+    .transform(res);
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -853,6 +887,7 @@ export default {
         return err("Endpoint inexistent.", 404);
       }
 
+      if (path === "/" || path === "/index.html") return serveHome(request, env);
       return serveAsset(request, env);
     } catch (e) {
       if (!path.startsWith("/api/")) return env.ASSETS.fetch(request);
