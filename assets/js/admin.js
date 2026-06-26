@@ -36,6 +36,7 @@
     trust: "Garanții (jos)",
     footer: "Footer", tagline: "Descriere footer", phone: "Telefon", email: "Email",
     schedule: "Program", copyright: "Text copyright",
+    maintenance: "Mod mentenanță (site în construcție)", mesaj: "Mesaj afișat vizitatorilor",
     banners: "Bannere", heroBg: "Fundal Hero (imagine completă)",
     heroLeft: "Banner stânga (printuri)", heroRight: "Banner dreapta (imprimantă)",
     veilOpacity: "Opacitate val (0–100, întunecime peste imagini)",
