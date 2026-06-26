@@ -135,7 +135,7 @@
         ? "<button class=\"btn btn--primary btn--sm add-cart\" data-name=\"" + esc(p.name) +
           "\" data-price=\"" + fin + "\" data-img=\"" + esc(imgUrl) + "\">Adaugă în coș</button>"
         : "";
-      var slug = slugify(p.name);
+      var slug = slugify(p.cod || p.name);
       return "<article class=\"product\">" + badge +
         "<a class=\"product__link\" href=\"/produs/" + slug + "\">" +
         "<div class=\"product__img\"><img src=\"" + esc(imgUrl) + "\" alt=\"" + esc(p.name) + "\" loading=\"lazy\" /></div>" +
