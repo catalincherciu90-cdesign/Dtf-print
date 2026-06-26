@@ -130,7 +130,7 @@
             </p>
             <ul class="check-list" id="orderChecklist">
               <li>Preț afișat la metru liniar</li>
-              <li>Lățime maximă print: 60 cm</li>
+              <li>Lățime print: 90 cm</li>
               <li>Print de înaltă rezoluție</li>
               <li>Folie premium, cerneală certificată</li>
               <li>Ideal pentru textile din bumbac, poliester și mix</li>
@@ -141,9 +141,9 @@
           <form class="calc" id="calc" novalidate>
             <h3 class="calc__title" data-edit="order.calcTitle">Calculează prețul</h3>
 
-            <div class="calc__row">
-              <label for="width">Lățime print (cm) <output id="widthOut">58 cm</output></label>
-              <input type="range" id="width" min="10" max="60" step="1" value="58" />
+            <div class="calc__row calc__row--fixed">
+              <span class="calc__fixed-label">Lățime print</span>
+              <span class="calc__fixed-val" id="widthFixed">90 cm</span>
             </div>
 
             <div class="calc__row">
