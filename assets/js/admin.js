@@ -29,7 +29,7 @@
     maxWidth: "Lățime maximă (cm)", uploadText: "Text buton upload", calcNote: "Notă sub buton",
     steps: "Pași (cum funcționează)",
     products: "Secțiunea Produse", items: "Produse", img: "Cale imagine (ex. assets/img/x.jpg)", name: "Nume",
-    reducere: "Reducere produs (%)",
+    price: "Preț (RON)", reducere: "Reducere produs (%)",
     trust: "Garanții (jos)",
     footer: "Footer", tagline: "Descriere footer", phone: "Telefon", email: "Email",
     schedule: "Program", copyright: "Text copyright",
