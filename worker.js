@@ -917,8 +917,19 @@ export default {
     const path = url.pathname;
 
     try {
-      // Mod mentenanță — blochează paginile publice; admin, API și asset-urile rămân accesibile.
-      if (request.method === "GET" && !isMaintenanceExempt(path)) {
+      // Preview pentru proprietar: /?preview=on setează un cookie care ocolește
+      // mentenanța (publicul rămâne pe pagina de construcție). /?preview=off iese.
+      const pv = url.searchParams.get("preview");
+      if (pv === "on") {
+        return new Response(null, { status: 302, headers: { "Location": url.origin + path, "Set-Cookie": "mrdtf_preview=1; Path=/; Max-Age=604800; SameSite=Lax" } });
+      }
+      if (pv === "off") {
+        return new Response(null, { status: 302, headers: { "Location": url.origin + path, "Set-Cookie": "mrdtf_preview=; Path=/; Max-Age=0" } });
+      }
+      const hasPreview = (request.headers.get("Cookie") || "").indexOf("mrdtf_preview=1") !== -1;
+
+      // Mod mentenanță — blochează paginile publice; admin, API, asset-urile și preview rămân accesibile.
+      if (request.method === "GET" && !isMaintenanceExempt(path) && !hasPreview) {
         const m = await maintenanceState(env);
         if (m.enabled) return maintenancePage(m);
       }
