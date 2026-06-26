@@ -37,6 +37,7 @@
   <main class="admin__editor container" id="editorView" hidden>
     <div class="tabs" id="tabs">
       <button class="tab is-active" type="button" data-tab="content"><span class="mr-ico tab__ico" data-icon="edit" data-icon-size="16"></span> Conținut</button>
+      <button class="tab" type="button" data-tab="order"><span class="mr-ico tab__ico" data-icon="ruler" data-icon-size="16"></span> Calculator DTF</button>
       <button class="tab" type="button" data-tab="banners"><span class="mr-ico tab__ico" data-icon="image" data-icon-size="16"></span> Bannere</button>
       <button class="tab" type="button" data-tab="products"><span class="mr-ico tab__ico" data-icon="bag" data-icon-size="16"></span> Produse</button>
       <button class="tab" type="button" data-tab="promo"><span class="mr-ico tab__ico" data-icon="ticket" data-icon-size="16"></span> Promo</button>
@@ -63,6 +64,24 @@
       <form id="form" autocomplete="off"></form>
       <div class="editor-actions editor-actions--bottom">
         <button class="btn btn--primary" id="saveBtn2" type="button"><span class="mr-ico" data-icon="save" data-icon-size="15"></span> Salvează</button>
+      </div>
+    </div>
+
+    <!-- Tab: Calculator DTF -->
+    <div class="tab-panel" id="tab-order" hidden>
+      <div class="editor-head">
+        <div>
+          <h1>Calculator DTF</h1>
+          <p class="muted">Textele secțiunii „Comandă DTF", prețul pe metru de bază și reducerile la cantitate (praguri).</p>
+        </div>
+        <div class="editor-actions">
+          <button class="btn btn--primary" id="saveOrderBtn" type="button"><span class="mr-ico" data-icon="save" data-icon-size="15"></span> Salvează</button>
+        </div>
+      </div>
+      <p class="form-msg" id="orderMsg" role="status"></p>
+      <form id="orderForm" autocomplete="off"></form>
+      <div class="editor-actions editor-actions--bottom">
+        <button class="btn btn--primary" id="saveOrderBtn2" type="button"><span class="mr-ico" data-icon="save" data-icon-size="15"></span> Salvează</button>
       </div>
     </div>
 

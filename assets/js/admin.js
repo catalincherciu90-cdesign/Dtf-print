@@ -81,7 +81,7 @@
     var form = $("form");
     form.innerHTML = "";
     Object.keys(content).forEach(function (key) {
-      if (key === "products" || key === "banners" || key === "discount" || key === "tiktok" || key === "social") return; // au tab-uri proprii
+      if (key === "order" || key === "products" || key === "banners" || key === "discount" || key === "tiktok" || key === "social") return; // au tab-uri proprii
       var section = document.createElement("section");
       section.className = "edit-section";
       var h = document.createElement("h2");
@@ -115,6 +115,19 @@
     h.textContent = "Imagini hero";
     section.appendChild(h);
     buildInto(section, content.banners, "banners");
+    form.appendChild(section);
+  }
+
+  function buildOrder() {
+    var form = $("orderForm");
+    if (!form || !content.order) return;
+    form.innerHTML = "";
+    var section = document.createElement("section");
+    section.className = "edit-section";
+    var h = document.createElement("h2");
+    h.textContent = "Comandă DTF / Calculator";
+    section.appendChild(h);
+    buildInto(section, content.order, "order");
     form.appendChild(section);
   }
 
@@ -220,7 +233,8 @@
 
   // reconstruiește tab-ul activ
   function rerender() {
-    if ($("tab-banners") && !$("tab-banners").hidden) buildBanners();
+    if ($("tab-order") && !$("tab-order").hidden) buildOrder();
+    else if ($("tab-banners") && !$("tab-banners").hidden) buildBanners();
     else if ($("tab-products") && !$("tab-products").hidden) buildProducts();
     else if ($("tab-promo") && !$("tab-promo").hidden) buildPromo();
     else if ($("tab-tiktok") && !$("tab-tiktok").hidden) buildTiktok();
@@ -569,6 +583,8 @@
   }
   $("saveBtn").addEventListener("click", function () { save("editorMsg"); });
   $("saveBtn2").addEventListener("click", function () { save("editorMsg"); });
+  $("saveOrderBtn").addEventListener("click", function () { save("orderMsg"); });
+  $("saveOrderBtn2").addEventListener("click", function () { save("orderMsg"); });
   $("saveProductsBtn").addEventListener("click", function () { save("productsMsg"); });
   $("saveProductsBtn2").addEventListener("click", function () { save("productsMsg"); });
   $("saveBannersBtn").addEventListener("click", function () { save("bannersMsg"); });
@@ -603,6 +619,7 @@
       btn.classList.add("is-active");
       var which = btn.dataset.tab;
       $("tab-content").hidden = which !== "content";
+      $("tab-order").hidden = which !== "order";
       $("tab-banners").hidden = which !== "banners";
       $("tab-products").hidden = which !== "products";
       $("tab-promo").hidden = which !== "promo";
@@ -613,6 +630,7 @@
       $("tab-crm").hidden = which !== "crm";
       if (which === "orders") loadOrders();
       else if (which === "messages") loadMessages();
+      else if (which === "order") buildOrder();
       else if (which === "products") buildProducts();
       else if (which === "banners") buildBanners();
       else if (which === "promo") buildPromo();
