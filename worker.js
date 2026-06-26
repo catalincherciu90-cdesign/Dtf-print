@@ -507,7 +507,23 @@ async function handleOrders(request, env, segs) {
         qty: Math.max(1, Math.min(999, Math.round(Number(it.qty) || 1))),
         price: Math.max(0, Number(it.price) || 0),
       };
-      if (o.type === "dtf") { o.width = Math.max(0, Number(it.width) || 0); o.length = Math.max(0, Number(it.length) || 0); }
+      if (o.type === "dtf") {
+        o.width = Math.max(0, Number(it.width) || 0); o.length = Math.max(0, Number(it.length) || 0);
+      } else {
+        if (it.cod) o.cod = String(it.cod).slice(0, 60);
+        if (it.marime) o.marime = String(it.marime).slice(0, 40);
+        if (it.img) o.img = String(it.img).slice(0, 400);
+        if (it.design && it.design.url) {
+          o.design = {
+            url: String(it.design.url).slice(0, 400),
+            name: String(it.design.name || "design").slice(0, 120),
+            x: Math.round(Number(it.design.x) || 0),
+            y: Math.round(Number(it.design.y) || 0),
+            size: Math.round(Number(it.design.size) || 0),
+            rot: Math.round(Number(it.design.rot) || 0),
+          };
+        }
+      }
       return o;
     });
     const subtotal = Number(cleanItems.reduce((s, it) => s + it.price * it.qty, 0).toFixed(2));
@@ -976,6 +992,20 @@ export default {
             return json({ ok: true, id, url: "/api/media/" + id });
           }
           return err("Endpoint inexistent.", 404);
+        }
+
+        // POST /api/design — upload design client (public, doar imagini). Stocat ca media.
+        if (segs[0] === "design" && !segs[1] && request.method === "POST") {
+          if (!env.CONTENT) return err("Stocare neconfigurată.", 503);
+          const form = await request.formData();
+          const file = form.get("file");
+          if (!file || typeof file === "string" || !file.size) return err("Fără fișier.");
+          if (!/^image\//.test(file.type || "")) return err("Doar imagini sunt permise.");
+          if (file.size > MAX_IMG_BYTES) return err("Imagine prea mare (max " + MAX_IMG_MB + " MB).");
+          const id = genId();
+          await env.CONTENT.put(MEDIA_PREFIX + id, await file.arrayBuffer(),
+            { metadata: { type: file.type, name: String(file.name || "design").slice(0, 80) } });
+          return json({ ok: true, id, url: "/api/media/" + id });
         }
 
         return err("Endpoint inexistent.", 404);

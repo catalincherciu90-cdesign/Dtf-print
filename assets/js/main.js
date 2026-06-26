@@ -323,8 +323,13 @@
   var cart = loadCart();
 
   function cartAdd(line) {
-    if (line.type === "product") {
-      var ex = cart.find(function (x) { return x.type === "product" && x.name === line.name && x.price === line.price; });
+    // unim doar produsele identice FĂRĂ design (cu design fiecare e unic)
+    if (line.type === "product" && !line.design) {
+      var ex = cart.find(function (x) {
+        return x.type === "product" && !x.design
+          && (x.cod || x.name) === (line.cod || line.name)
+          && (x.marime || "") === (line.marime || "") && x.price === line.price;
+      });
       if (ex) { ex.qty += line.qty; saveCart(); renderCart(); return; }
     }
     cart.push(line); saveCart(); renderCart();
@@ -364,7 +369,15 @@
     } else {
       if (elCheckout) elCheckout.style.display = "";
       elItems.innerHTML = cart.map(function (it, i) {
-        var sub = it.type === "dtf" ? ("Print lățime " + it.width + " cm × " + it.length + " m") : "";
+        var sub = "";
+        if (it.type === "dtf") {
+          sub = "Print lățime " + it.width + " cm × " + it.length + " m";
+        } else {
+          var sp = [];
+          if (it.marime) sp.push("Mărime: " + it.marime);
+          if (it.design) sp.push("design atașat");
+          sub = sp.join(" · ");
+        }
         var img = it.img ? "<img src=\"" + esc(absUrl(it.img)) + "\" alt=\"\" />" : "<span class=\"cart-item__ico\">" + ico("receipt", 22) + "</span>";
         return "<div class=\"cart-item\">" +
           "<div class=\"cart-item__img\">" + img + "</div>" +

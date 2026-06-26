@@ -87,8 +87,8 @@
     $("pdpGrid").hidden = false;
     $("pdpName").textContent = p.name || "Produs";
     $("pdpDesc").textContent = p.descriereLunga || p.desc || "";
-    $("pdpSizes").textContent = p.marimi || p.desc || "—";
     $("pdpDims").textContent = p.dimensiuni || "—";
+    populateSizes(p.marimi);
 
     var img = $("pdpImg");
     var hint = $("pdpStageHint");
@@ -114,13 +114,73 @@
     if (!price) { addBtn.disabled = true; addBtn.textContent = "Indisponibil online"; }
     addBtn.addEventListener("click", function () {
       if (!price) return;
-      if (window.MrCart && window.MrCart.add) {
-        window.MrCart.add({ type: "product", name: p.name, price: fin, img: imgUrl, qty: 1 });
+      if (!(window.MrCart && window.MrCart.add)) { setMsg("Coșul nu e disponibil momentan.", true); return; }
+      var marime = $("pdpSizeWrap").hidden ? "" : $("pdpSizeSel").value;
+      var qty = Math.max(1, Math.min(999, Math.round(Number($("pdpQty").value) || 1)));
+
+      function addLine(designObj) {
+        window.MrCart.add({
+          type: "product", cod: p.cod || slugify(p.name), name: p.name,
+          marime: marime, price: fin, img: imgUrl, qty: qty, design: designObj || null,
+        });
         if (window.MrCart.open) window.MrCart.open();
+        addBtn.disabled = false; addBtn.textContent = "Adaugă în coș";
         setMsg("✓ Adăugat în coș.", false);
-      } else {
-        setMsg("Coșul nu e disponibil momentan.", true);
       }
+
+      if (designFile) {
+        addBtn.disabled = true; addBtn.textContent = "Se urcă designul…";
+        uploadDesign(designFile).then(function (res) {
+          if (!res) { addBtn.disabled = false; addBtn.textContent = "Adaugă în coș"; setMsg("Designul nu a putut fi urcat. Încearcă din nou.", true); return; }
+          addLine({ url: res.url, name: designFile.name || "design",
+            x: Math.round(state.x), y: Math.round(state.y), size: Math.round(state.size), rot: Math.round(state.rot) });
+        });
+      } else {
+        addLine(null);
+      }
+    });
+  }
+
+  function populateSizes(marimi) {
+    var sel = $("pdpSizeSel"), wrap = $("pdpSizeWrap");
+    var sizes = String(marimi || "").split(/[,;\/]/).map(function (s) { return s.trim(); }).filter(Boolean);
+    if (!sizes.length) { wrap.hidden = true; sel.innerHTML = ""; return; }
+    wrap.hidden = false;
+    sel.innerHTML = sizes.map(function (s) { return '<option value="' + esc(s) + '">' + esc(s) + "</option>"; }).join("");
+  }
+
+  // Optimizează designul (max 2000px, WebP 0.92) păstrând calitatea; fallback original.
+  function optimizeImage(file) {
+    return new Promise(function (resolve) {
+      if (!/^image\//.test(file.type || "") || /gif|svg/.test(file.type || "")) return resolve(file);
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        try {
+          var MAXD = 2000;
+          var scale = Math.min(1, MAXD / Math.max(img.naturalWidth, img.naturalHeight));
+          var cw = Math.max(1, Math.round(img.naturalWidth * scale));
+          var ch = Math.max(1, Math.round(img.naturalHeight * scale));
+          var c = document.createElement("canvas"); c.width = cw; c.height = ch;
+          c.getContext("2d").drawImage(img, 0, 0, cw, ch);
+          URL.revokeObjectURL(url);
+          c.toBlob(function (b) { resolve(b && b.size > 0 && b.size < file.size ? b : file); }, "image/webp", 0.92);
+        } catch (e) { URL.revokeObjectURL(url); resolve(file); }
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    });
+  }
+
+  function uploadDesign(file) {
+    return optimizeImage(file).then(function (blob) {
+      if (blob.size > 5 * 1024 * 1024) return null;
+      var fd = new FormData();
+      fd.append("file", blob, String(file.name || "design").replace(/\.[^.]+$/, "") + (blob.type === "image/webp" ? ".webp" : ""));
+      return fetch("/api/design", { method: "POST", body: fd })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) { return d && d.url ? d : null; })
+        .catch(function () { return null; });
     });
   }
 
@@ -133,6 +193,7 @@
   var stage = $("pdpStage");
   var input = $("pdpDesignInput");
   var design = null;
+  var designFile = null;
   var state = { x: 50, y: 50, size: 40, rot: 0 }; // x/y = procent centru; size = % din lățimea stage-ului
 
   $("pdpUpload").addEventListener("click", function () { input.click(); });
@@ -140,8 +201,8 @@
     if (!input.files || !input.files.length) return;
     var f = input.files[0];
     if (!/^image\//.test(f.type)) { setMsg("Te rugăm încarcă o imagine.", true); return; }
-    var url = URL.createObjectURL(f);
-    addDesign(url);
+    designFile = f;
+    addDesign(URL.createObjectURL(f));
   });
 
   function addDesign(url) {
@@ -173,6 +234,7 @@
   $("pdpRot").addEventListener("input", function () { state.rot = Number(this.value); updateDesign(); });
   $("pdpRemove").addEventListener("click", function () {
     if (design) { design.remove(); design = null; }
+    designFile = null;
     $("pdpControls").hidden = true;
     var hint = $("pdpStageHint"); if (hint) hint.style.display = "";
   });
