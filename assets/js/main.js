@@ -195,8 +195,15 @@
     var el = document.getElementById(id);
     if (!el) return;
     url = (url || "").trim();
-    if (url) { el.href = url; el.hidden = false; }
-    else { el.removeAttribute("href"); el.hidden = true; }
+    if (url) {
+      el.href = url; el.hidden = false;
+      var lbl = el.getAttribute("data-label");
+      if (lbl) el.setAttribute("aria-label", lbl);
+    } else {
+      // fără href => rol generic; aria-label nu e permis, deci îl scoatem
+      el.removeAttribute("href"); el.hidden = true;
+      el.removeAttribute("aria-label");
+    }
   }
 
   function listLi(id, arr) {
