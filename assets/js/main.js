@@ -21,6 +21,13 @@
       .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
   }
+  /* Normalizează o cale relativă „assets/..." la absolută, ca să meargă
+     și pe paginile din subdirectoare (ex. /produse). URL-urile absolute
+     (http..., /...) rămân neschimbate. */
+  function absUrl(u) {
+    u = String(u == null ? "" : u);
+    return /^(https?:|\/|data:)/.test(u) ? u : "/" + u;
+  }
   /* Iconiță SVG dintr-un nume sau emoji; revine la text dacă nu există setul. */
   function ico(val, size) {
     if (window.MrIcons) return window.MrIcons.iconOrText(val, { size: size || 22 });
@@ -128,6 +135,12 @@
       var veil = document.getElementById("heroVeil");
       if (veil && c.banners.veilOpacity != null) {
         veil.style.opacity = String(Math.max(0, Math.min(100, Number(c.banners.veilOpacity))) / 100);
+      }
+      // Banner pagina Produse Blank (elementele există doar pe /produse)
+      setBanner("produseBanner", absUrl(c.banners.produseBg || "assets/img/hero-prints.jpg"));
+      var pVeil = document.getElementById("produseVeil");
+      if (pVeil && c.banners.produseVeilOpacity != null) {
+        pVeil.style.opacity = String(Math.max(0, Math.min(100, Number(c.banners.produseVeilOpacity))) / 100);
       }
     }
 
