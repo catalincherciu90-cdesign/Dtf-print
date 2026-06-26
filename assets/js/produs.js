@@ -52,7 +52,7 @@
   function showMissing(items) {
     var el = $("pdpMissing");
     el.hidden = false;
-    var list = (items || []).filter(Boolean);
+    var list = (items || []).filter(function (p) { return p && String(p.name || "").trim(); });
     el.innerHTML = "Produsul „" + esc(slug || "(gol)") + "” nu a fost găsit." +
       (list.length
         ? " Alege unul disponibil:<span class=\"pdp__missing-list\">" +
