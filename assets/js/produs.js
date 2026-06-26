@@ -37,18 +37,28 @@
     if (p) return p;
     // potrivire pe prefix (ex. „tricouri" pentru „tricouri-personalizate")
     p = items.find(function (x) { var ps = slugify(x.name); return ps && (ps.indexOf(s) === 0 || s.indexOf(ps) === 0); });
-    return p || null;
+    if (p) return p;
+    // ultim resort: cel mai lung prefix comun (≥4 caractere) — toleră linkuri
+    // vechi rămase după o redenumire (ex. „tricouri" -> „tricou-personalizat")
+    var best = null, bestLen = 0;
+    items.forEach(function (x) {
+      var ps = slugify(x.name), n = 0;
+      while (n < ps.length && n < s.length && ps.charAt(n) === s.charAt(n)) n++;
+      if (n > bestLen) { bestLen = n; best = x; }
+    });
+    return bestLen >= 4 ? best : null;
   }
 
   function showMissing(items) {
     var el = $("pdpMissing");
     el.hidden = false;
     var list = (items || []).filter(Boolean);
-    if (list.length) {
-      el.innerHTML = "Produsul nu a fost găsit. Alege unul disponibil:<span class=\"pdp__missing-list\">" +
-        list.map(function (p) { return '<a class="inline" href="/produs/' + slugify(p.name) + '">' + esc(p.name) + "</a>"; }).join("") +
-        "</span>";
-    }
+    el.innerHTML = "Produsul „" + esc(slug || "(gol)") + "” nu a fost găsit." +
+      (list.length
+        ? " Alege unul disponibil:<span class=\"pdp__missing-list\">" +
+          list.map(function (p) { return '<a class="inline" href="/produs/' + slugify(p.name) + '">' + esc(p.name) + "</a>"; }).join("") +
+          "</span>"
+        : " <a class=\"inline\" href=\"/produse\">Vezi toate produsele →</a>");
   }
 
   fetch("/api/content", { headers: { Accept: "application/json" } })
