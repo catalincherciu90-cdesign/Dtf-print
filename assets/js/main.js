@@ -40,6 +40,12 @@
     u = String(u == null ? "" : u);
     return /^(https?:|\/|data:)/.test(u) ? u : "/" + u;
   }
+  /* Slug pentru URL-uri de produs (ex. „Genți" -> „genti"). */
+  function slugify(s) {
+    return String(s == null ? "" : s).toLowerCase()
+      .replace(/ă/g, "a").replace(/â/g, "a").replace(/î/g, "i").replace(/ș/g, "s").replace(/ş/g, "s").replace(/ț/g, "t").replace(/ţ/g, "t")
+      .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
   /* Iconiță SVG dintr-un nume sau emoji; revine la text dacă nu există setul. */
   function ico(val, size) {
     if (window.MrIcons) return window.MrIcons.iconOrText(val, { size: size || 22 });
@@ -127,9 +133,14 @@
         ? "<button class=\"btn btn--primary btn--sm add-cart\" data-name=\"" + esc(p.name) +
           "\" data-price=\"" + fin + "\" data-img=\"" + esc(p.img) + "\">Adaugă în coș</button>"
         : "";
-      return "<article class=\"product\">" + badge + "<div class=\"product__img\"><img src=\"" +
-        esc(p.img) + "\" alt=\"" + esc(p.name) + "\" loading=\"lazy\" /></div><h4>" +
-        esc(p.name) + "</h4><p>" + esc(p.desc) + "</p>" + priceHtml + btn + "</article>";
+      var slug = slugify(p.name);
+      return "<article class=\"product\">" + badge +
+        "<a class=\"product__link\" href=\"/produs/" + slug + "\">" +
+        "<div class=\"product__img\"><img src=\"" + esc(p.img) + "\" alt=\"" + esc(p.name) + "\" loading=\"lazy\" /></div>" +
+        "<h4>" + esc(p.name) + "</h4><p>" + esc(p.desc) + "</p></a>" +
+        priceHtml + btn +
+        "<a class=\"product__detail\" href=\"/produs/" + slug + "\">Vezi produsul →</a>" +
+        "</article>";
     });
     bindAddToCart();
 
@@ -386,6 +397,8 @@
 
   function openCart() { if (elCart) { elCart.hidden = false; document.body.style.overflow = "hidden"; } }
   function closeCart() { if (elCart) { elCart.hidden = true; document.body.style.overflow = ""; } }
+  // API minimal pentru alte pagini (ex. pagina de produs) — adaugă în coș + deschide
+  window.MrCart = { add: function (line) { cartAdd(line); }, open: openCart };
   var cartBtn = document.getElementById("cartBtn");
   if (cartBtn) cartBtn.addEventListener("click", openCart);
   var cartCloseBtn = document.getElementById("cartClose");

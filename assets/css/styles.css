@@ -671,3 +671,64 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
 @media (prefers-reduced-motion: reduce) {
   .cookie-pop, .cookie-pop__modal { transition: opacity 0.2s linear; transform: none; }
 }
+
+/* =================================================================
+   Pagină produs (PDP) + tool plasare design
+   ================================================================= */
+.pdp { padding: 30px 0 60px; }
+.pdp__back { display: inline-block; color: var(--muted); font-size: 0.9rem; margin-bottom: 18px; }
+.pdp__back:hover { color: var(--text); }
+.pdp__grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 34px; align-items: start; }
+
+/* Stage (poza + design) */
+.pdp__stage-col { position: sticky; top: 84px; }
+.pdp__stage {
+  position: relative; border-radius: var(--radius); overflow: hidden;
+  background: var(--lg-bg); border: 1px solid var(--lg-border);
+  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: var(--lg-hi); display: grid; place-items: center; min-height: 320px;
+  touch-action: none;
+}
+.pdp__img { width: 100%; height: 100%; max-height: 560px; object-fit: contain; padding: 18px; display: block; }
+.pdp__stage-hint {
+  position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+  font-size: 0.78rem; color: var(--muted); background: rgba(7,7,18,0.6);
+  padding: 5px 12px; border-radius: 999px; pointer-events: none; text-align: center; max-width: 90%;
+}
+.pdp__design {
+  position: absolute; left: 50%; top: 50%; width: 40%;
+  transform: translate(-50%, -50%); cursor: grab; user-select: none; -webkit-user-drag: none;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.4)); touch-action: none;
+}
+.pdp__design:active { cursor: grabbing; }
+
+.pdp__tools { margin-top: 16px; display: grid; gap: 12px; }
+.pdp__controls { display: grid; gap: 12px; padding: 14px 16px; border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+.pdp__range { display: grid; gap: 7px; font-size: 0.82rem; color: #cfcfe6; }
+.pdp__hint { font-size: 0.8rem; color: var(--muted); }
+
+/* Info */
+.pdp__title { font-size: clamp(1.7rem, 4vw, 2.6rem); font-weight: 800; margin: 8px 0 10px; }
+.pdp__price { font-family: "Poppins"; font-weight: 700; font-size: 1.6rem; margin-bottom: 16px;
+  background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.pdp__price-old { -webkit-text-fill-color: var(--muted); color: var(--muted); text-decoration: line-through;
+  font-size: 1rem; font-weight: 600; margin-right: 6px; }
+.pdp__price-badge { -webkit-text-fill-color: #fff; color: #fff; background: var(--grad-orange);
+  font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; margin-left: 6px; vertical-align: middle; }
+.pdp__desc { color: var(--muted); line-height: 1.7; margin-bottom: 20px; }
+.pdp__specs { display: grid; gap: 10px; margin-bottom: 22px; }
+.pdp__spec { display: grid; grid-template-columns: 160px 1fr; gap: 12px; padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.07); }
+.pdp__spec dt { color: var(--muted); font-size: 0.85rem; }
+.pdp__spec dd { color: var(--text); font-size: 0.92rem; }
+.pdp__note { text-align: center; font-size: 0.85rem; color: var(--muted); margin-top: 14px; }
+.pdp__note a { color: var(--blue); }
+.pdp__missing { text-align: center; color: var(--muted); padding: 60px 0; }
+.pdp__missing a { color: var(--blue); }
+
+@media (max-width: 860px) {
+  .pdp__grid { grid-template-columns: 1fr; gap: 22px; }
+  .pdp__stage-col { position: static; }
+  .pdp__spec { grid-template-columns: 130px 1fr; }
+}

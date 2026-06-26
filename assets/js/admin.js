@@ -31,6 +31,7 @@
     steps: "Pași (cum funcționează)",
     products: "Secțiunea Produse", items: "Produse", img: "Cale imagine (ex. assets/img/x.jpg)", name: "Nume",
     price: "Preț (RON)", reducere: "Reducere produs (%)",
+    marimi: "Mărimi disponibile", dimensiuni: "Dimensiuni / material", descriereLunga: "Descriere lungă (pagina produsului)",
     trust: "Garanții (jos)",
     footer: "Footer", tagline: "Descriere footer", phone: "Telefon", email: "Email",
     schedule: "Program", copyright: "Text copyright",
@@ -540,6 +541,9 @@
       c.products.items.forEach(function (it) {
         if (it.price == null) it.price = 0;
         if (it.reducere == null) it.reducere = 0;
+        if (it.marimi == null) it.marimi = "";
+        if (it.dimensiuni == null) it.dimensiuni = "";
+        if (it.descriereLunga == null) it.descriereLunga = "";
       });
     }
     // praguri preț DTF + lățime fixă (pentru conținut salvat anterior)

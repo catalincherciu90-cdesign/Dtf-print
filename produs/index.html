@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Produse Blank — MrDTF | Textile premium pentru personalizare</title>
-  <meta name="description" content="Gama de produse blank MrDTF: tricouri, hanorace, genți și șepci premium, perfecte pentru personalizare prin print DTF." />
+  <title>Produs — MrDTF</title>
+  <meta name="description" content="Detalii produs blank MrDTF: dimensiuni, mărimi și previzualizare cu designul tău aplicat." />
   <meta name="theme-color" content="#0a0a1a" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -14,7 +14,6 @@
   <link rel="stylesheet" href="/assets/css/styles.css" />
 </head>
 <body>
-  <!-- ===== Background decor ===== -->
   <div class="bg-decor" aria-hidden="true">
     <span class="orb orb--1"></span>
     <span class="orb orb--2"></span>
@@ -26,9 +25,8 @@
     <div class="container header__inner">
       <a class="logo" href="/" aria-label="MrDTF — acasă">
         <span class="logo__mark"><span class="logo__mr">Mr</span>DTF</span>
-        <span class="logo__sub" data-edit="brandTagline">PRINT DTF PREMIUM</span>
+        <span class="logo__sub">PRINT DTF PREMIUM</span>
       </a>
-
       <nav class="nav" id="nav">
         <a href="/">Acasă</a>
         <a href="/#comanda">Comandă DTF</a>
@@ -36,7 +34,6 @@
         <a href="/#despre">Despre noi</a>
         <a href="/#contact">Contact</a>
       </nav>
-
       <div class="header__actions">
         <a class="icon-btn" href="/cont" aria-label="Contul meu">
           <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4 0-8 2-8 6v1h16v-1c0-4-4-6-8-6Z"/></svg>
@@ -52,60 +49,51 @@
     </div>
   </header>
 
-  <main>
-    <!-- ===== Banner ===== -->
-    <section class="page-hero">
-      <div class="page-hero__media" aria-hidden="true">
-        <img id="produseBanner" src="/assets/img/hero-prints.jpg" alt="" />
-        <div class="page-hero__veil" id="produseVeil"></div>
-      </div>
-      <div class="container page-hero__content">
-        <span class="eyebrow" data-edit="products.eyebrow">Textile și accesorii</span>
-        <h1 class="page-hero__title grad-text" data-edit="products.title">Produse Blank</h1>
-        <p class="page-hero__sub" data-edit="products.desc">
-          Tricouri, hanorace, genți și șepci premium, gata de personalizat prin print DTF.
-        </p>
-        <div class="page-hero__cta">
-          <a href="/#contact" class="btn btn--primary"><span data-edit="products.cta">Întreabă-ne despre produse</span>
-            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M5 12h12l-5-5 1.4-1.4L21 13l-7.6 7.4L12 19l5-5H5Z"/></svg>
-          </a>
-        </div>
-      </div>
-    </section>
+  <main class="pdp">
+    <div class="container">
+      <a class="pdp__back" href="/produse">← Toate produsele</a>
 
-    <!-- ===== Produse Blank ===== -->
-    <section class="products" id="produse">
-      <div class="container">
-        <div class="panel products__panel">
-          <div class="product-grid" id="productGrid">
-              <article class="product">
-                <div class="product__img"><img src="/assets/img/prod-tricou.jpg" alt="Tricouri blank" loading="lazy" /></div>
-                <h4>Tricouri</h4>
-                <p>De la XS la 5XL</p>
-                <a href="/produs/tricouri" class="product__arrow" aria-label="Tricouri">→</a>
-              </article>
-              <article class="product">
-                <div class="product__img"><img src="/assets/img/prod-hanorac.jpg" alt="Hanorace blank" loading="lazy" /></div>
-                <h4>Hanorace</h4>
-                <p>Model unisex</p>
-                <a href="/produs/hanorace" class="product__arrow" aria-label="Hanorace">→</a>
-              </article>
-              <article class="product">
-                <div class="product__img"><img src="/assets/img/prod-geanta.jpg" alt="Genți blank din bumbac" loading="lazy" /></div>
-                <h4>Genți</h4>
-                <p>Bumbac premium</p>
-                <a href="/produs/genti" class="product__arrow" aria-label="Genți">→</a>
-              </article>
-              <article class="product">
-                <div class="product__img"><img src="/assets/img/prod-sapca.jpg" alt="Șepci blank" loading="lazy" /></div>
-                <h4>Șepci</h4>
-                <p>Diverse modele</p>
-                <a href="/produs/sepci" class="product__arrow" aria-label="Șepci">→</a>
-              </article>
+      <div class="pdp__grid" id="pdpGrid" hidden>
+        <!-- Stage: poza produsului + plasare design -->
+        <div class="pdp__stage-col">
+          <div class="pdp__stage" id="pdpStage">
+            <img class="pdp__img" id="pdpImg" alt="" />
+            <span class="pdp__stage-hint" id="pdpStageHint">Încarcă designul ca să-l previzualizezi aici</span>
+          </div>
+          <div class="pdp__tools">
+            <input type="file" id="pdpDesignInput" accept="image/*" hidden />
+            <button class="btn btn--primary btn--sm" id="pdpUpload" type="button">⬆ Încarcă designul tău</button>
+            <div class="pdp__controls" id="pdpControls" hidden>
+              <label class="pdp__range">Mărime design
+                <input type="range" id="pdpSize" min="10" max="100" step="1" value="40" />
+              </label>
+              <label class="pdp__range">Rotire
+                <input type="range" id="pdpRot" min="-180" max="180" step="1" value="0" />
+              </label>
+              <button class="btn btn--ghost btn--sm" id="pdpRemove" type="button">Șterge designul</button>
+            </div>
+            <p class="pdp__hint">Trage designul peste produs ca să-l poziționezi. Este o previzualizare orientativă.</p>
           </div>
         </div>
+
+        <!-- Info produs -->
+        <div class="pdp__info">
+          <span class="eyebrow" id="pdpEyebrow">Produs blank</span>
+          <h1 class="pdp__title grad-text" id="pdpName">…</h1>
+          <div class="pdp__price" id="pdpPrice"></div>
+          <p class="pdp__desc" id="pdpDesc"></p>
+          <dl class="pdp__specs">
+            <div class="pdp__spec"><dt>Mărimi disponibile</dt><dd id="pdpSizes">—</dd></div>
+            <div class="pdp__spec"><dt>Dimensiuni / material</dt><dd id="pdpDims">—</dd></div>
+          </dl>
+          <button class="btn btn--cta btn--block" id="pdpAddCart" type="button">Adaugă în coș</button>
+          <p class="order-msg" id="pdpMsg" role="status"></p>
+          <p class="pdp__note">Vrei printul DTF la metru? <a class="inline" href="/#comanda">Mergi la calculator →</a></p>
+        </div>
       </div>
-    </section>
+
+      <p class="pdp__missing" id="pdpMissing" hidden>Produsul nu a fost găsit. <a class="inline" href="/produse">Vezi toate produsele →</a></p>
+    </div>
   </main>
 
   <!-- ===== Footer ===== -->
@@ -118,7 +106,6 @@
         </a>
         <p data-edit="footer.tagline">Specialiști în print DTF premium la metru liniar și produse blank pentru personalizare.</p>
       </div>
-
       <div class="footer__col">
         <h5>Link-uri utile</h5>
         <a href="/">Acasă</a>
@@ -127,7 +114,6 @@
         <a href="/#despre">Despre noi</a>
         <a href="/#contact">Contact</a>
       </div>
-
       <div class="footer__col">
         <h5>Informații</h5>
         <a href="/intrebari-frecvente">Întrebări frecvente</a>
@@ -136,14 +122,12 @@
         <a href="/livrare">Politica de livrare</a>
         <a href="/retur">Politica de retur</a>
       </div>
-
       <div class="footer__col footer__contact">
         <h5>Contact</h5>
         <a id="footerPhone" href="tel:+40123456789"><span class="mr-ico" data-icon="phone" data-icon-size="17"></span><span class="footer__contact-txt">+40 123 456 789</span></a>
         <a id="footerEmail" href="mailto:contact@dtfprint.ro"><span class="mr-ico" data-icon="mail" data-icon-size="17"></span><span class="footer__contact-txt">contact@dtfprint.ro</span></a>
         <span id="footerSchedule"><span class="mr-ico" data-icon="clock" data-icon-size="17"></span><span class="footer__contact-txt">L–V: 09:00 – 17:00</span></span>
       </div>
-
       <div class="footer__col">
         <h5>Urmărește-ne</h5>
         <div class="socials">
@@ -167,13 +151,10 @@
         <h3>Coșul tău</h3>
         <button class="cart__close" id="cartClose" aria-label="Închide">✕</button>
       </div>
-
       <div class="cart__items" id="cartItems"></div>
-
       <div class="cart__foot" id="cartFoot">
         <div class="cart__summary" id="cartSummary"></div>
         <div class="cart__total"><span>Total</span><strong id="cartTotal">0.00 RON</strong></div>
-
         <div class="cart__checkout" id="cartCheckout">
           <div class="cart__files" id="cartFiles" hidden>
             <label for="cartFileInput">Atașează fișierele de design</label>
@@ -203,6 +184,7 @@
 
   <script src="/assets/js/icons.js"></script>
   <script src="/assets/js/main.js"></script>
+  <script src="/assets/js/produs.js"></script>
   <script src="/assets/js/consent.js" defer></script>
 </body>
 </html>

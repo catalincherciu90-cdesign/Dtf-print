@@ -75,10 +75,18 @@ const DEFAULT_CONTENT = {
     desc: "Descoperă gama noastră de produse blank premium, perfecte pentru personalizare.",
     cta: "Vezi toate produsele",
     items: [
-      { img: "assets/img/prod-tricou.jpg", name: "Tricouri", desc: "De la XS la 5XL", price: 35, reducere: 0 },
-      { img: "assets/img/prod-hanorac.jpg", name: "Hanorace", desc: "Model unisex", price: 90, reducere: 0 },
-      { img: "assets/img/prod-geanta.jpg", name: "Genți", desc: "Bumbac premium", price: 25, reducere: 0 },
-      { img: "assets/img/prod-sapca.jpg", name: "Șepci", desc: "Diverse modele", price: 30, reducere: 0 },
+      { img: "assets/img/prod-tricou.jpg", name: "Tricouri", desc: "De la XS la 5XL", price: 35, reducere: 0,
+        marimi: "XS, S, M, L, XL, 2XL, 3XL, 4XL, 5XL", dimensiuni: "Bumbac 180 g/mp · lățime print recomandată max. 30 cm",
+        descriereLunga: "Tricou unisex din bumbac premium, ideal pentru personalizare prin print DTF. Tușeu moale, rezistent la spălări repetate." },
+      { img: "assets/img/prod-hanorac.jpg", name: "Hanorace", desc: "Model unisex", price: 90, reducere: 0,
+        marimi: "S, M, L, XL, 2XL, 3XL", dimensiuni: "Bumbac/poliester 280 g/mp · zonă print piept/spate",
+        descriereLunga: "Hanorac unisex cu glugă, material gros și călduros, perfect pentru imprimări DTF de dimensiuni mari." },
+      { img: "assets/img/prod-geanta.jpg", name: "Genți", desc: "Bumbac premium", price: 25, reducere: 0,
+        marimi: "Universală (38 × 42 cm)", dimensiuni: "Bumbac 140 g/mp · zonă print ~25 × 30 cm",
+        descriereLunga: "Geantă tip tote din bumbac, rezistentă și reutilizabilă, suprafață ideală pentru un design pe o față." },
+      { img: "assets/img/prod-sapca.jpg", name: "Șepci", desc: "Diverse modele", price: 30, reducere: 0,
+        marimi: "Reglabilă (universală)", dimensiuni: "Front print ~10 × 5 cm",
+        descriereLunga: "Șapcă reglabilă, potrivită pentru logo-uri și texte mici aplicate frontal." },
     ],
   },
   trust: [
@@ -807,6 +815,18 @@ async function serveHome(request, env) {
     .transform(res);
 }
 
+// Pagini de produs „pretty URL" (/produs/<slug>) — servesc același template,
+// iar JS-ul din pagină alege produsul după slug-ul din path.
+async function serveProductPage(request, env) {
+  const u = new URL(request.url);
+  u.pathname = "/produs/index.html";
+  const res = await env.ASSETS.fetch(new Request(u.toString(), request));
+  const headers = new Headers(res.headers);
+  headers.set("Content-Type", "text/html; charset=utf-8");
+  headers.set("Cache-Control", "no-cache");
+  return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -888,6 +908,7 @@ export default {
       }
 
       if (path === "/" || path === "/index.html") return serveHome(request, env);
+      if (path === "/produs" || path.startsWith("/produs/")) return serveProductPage(request, env);
       return serveAsset(request, env);
     } catch (e) {
       if (!path.startsWith("/api/")) return env.ASSETS.fetch(request);
