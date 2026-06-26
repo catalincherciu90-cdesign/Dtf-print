@@ -118,8 +118,9 @@
         "</p></div></div>";
     });
 
-    // Produse
-    fill("productGrid", c.products && c.products.items, function (p) {
+    // Produse — sar peste produsele fără nume (evită carduri/linkuri goale -> /produs/)
+    var prodItems = ((c.products && c.products.items) || []).filter(function (p) { return p && String(p.name || "").trim(); });
+    fill("productGrid", prodItems, function (p) {
       var price = Number(p.price) || 0;
       var red = Math.max(0, Math.min(100, Number(p.reducere) || 0));
       var fin = red > 0 ? Number((price * (1 - red / 100)).toFixed(2)) : price;
