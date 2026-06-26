@@ -25,6 +25,11 @@ const STATUSES = ["Nouă", "În lucru", "Trimisă", "Finalizată", "Anulată"];
 
 // ---- Conținut implicit (folosit dacă KV e gol) ----
 const DEFAULT_CONTENT = {
+  maintenance: {
+    enabled: true,
+    title: "Revenim în curând",
+    mesaj: "Lucrăm la câteva îmbunătățiri pentru tine. Site-ul revine online în scurt timp. Mulțumim pentru răbdare!",
+  },
   brandTagline: "PRINT DTF PREMIUM",
   hero: {
     line1: "PRINT", hi: "DTF", line2: "LA METRU LINIAR",
@@ -827,12 +832,81 @@ async function serveProductPage(request, env) {
   return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
 }
 
+// ---- Mod mentenanță (site în construcție) ----
+function escHtml(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+// Rutele care rămân accesibile în mentenanță: admin, API, fișiere statice.
+function isMaintenanceExempt(path) {
+  return path === "/admin" || path.startsWith("/admin/")
+    || path.startsWith("/api/")
+    || path.startsWith("/assets/")
+    || /\.[a-z0-9]+$/i.test(path);
+}
+async function maintenanceState(env) {
+  let m = { enabled: false, title: "Revenim în curând", mesaj: "Site-ul revine în curând." };
+  try { const c = await getContent(env); if (c && c.maintenance) m = { ...m, ...c.maintenance }; } catch { /* ignore */ }
+  const ev = String(env.MAINTENANCE || "").toLowerCase();
+  if (ev === "on" || ev === "1" || ev === "true") m.enabled = true;
+  else if (ev === "off" || ev === "0" || ev === "false") m.enabled = false;
+  return m;
+}
+function maintenancePage(m) {
+  const title = escHtml(m.title || "Revenim în curând");
+  const mesaj = escHtml(m.mesaj || "Site-ul revine în curând.");
+  const html = `<!DOCTYPE html><html lang="ro"><head><meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" /><title>${title} — MrDTF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500&display=swap" media="print" onload="this.media='all'" />
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100vh;display:grid;place-items:center;padding:24px;font-family:"Inter",system-ui,sans-serif;color:#ececf7;text-align:center;
+background:radial-gradient(1200px 700px at 80% -10%,#1a1340 0,transparent 60%),radial-gradient(900px 600px at -10% 30%,#112a4a 0,transparent 55%),#070712}
+.card{max-width:560px;padding:48px 34px;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.05));
+border:1px solid rgba(255,255,255,.22);-webkit-backdrop-filter:blur(30px) saturate(190%);backdrop-filter:blur(30px) saturate(190%);
+box-shadow:0 40px 90px -30px rgba(0,0,0,.7)}
+.logo{font-family:"Poppins";font-weight:800;font-size:2rem;letter-spacing:.5px;margin-bottom:6px;
+background:linear-gradient(100deg,#22d3ee,#5b8cff 45%,#d946ef);-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo b{-webkit-text-fill-color:#22d3ee;color:#22d3ee}
+.sub{font-size:.6rem;letter-spacing:3px;color:#9a9ab8;font-weight:600;margin-bottom:30px}
+.ico{font-size:3rem;margin-bottom:14px}
+h1{font-family:"Poppins";font-size:clamp(1.6rem,5vw,2.4rem);margin-bottom:14px;
+background:linear-gradient(100deg,#22d3ee,#5b8cff 45%,#d946ef);-webkit-background-clip:text;background-clip:text;color:transparent}
+p{color:#c7c7dd;line-height:1.7;font-size:1.02rem}
+.dots{margin-top:26px;display:flex;gap:8px;justify-content:center}
+.dots span{width:9px;height:9px;border-radius:50%;background:#5b8cff;opacity:.5;animation:b 1.2s infinite}
+.dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
+@keyframes b{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-6px)}}
+.contact{margin-top:26px;font-size:.9rem;color:#9a9ab8}.contact a{color:#22d3ee}
+</style></head>
+<body><div class="card">
+<div class="logo"><b>Mr</b>DTF</div><div class="sub">PRINT DTF PREMIUM</div>
+<div class="ico">🛠️</div>
+<h1>${title}</h1>
+<p>${mesaj}</p>
+<div class="dots"><span></span><span></span><span></span></div>
+<div class="contact">Contact: <a href="mailto:contact@dtfprint.ro">contact@dtfprint.ro</a></div>
+</div></body></html>`;
+  return new Response(html, {
+    status: 503,
+    headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "Retry-After": "3600" },
+  });
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const path = url.pathname;
 
     try {
+      // Mod mentenanță — blochează paginile publice; admin, API și asset-urile rămân accesibile.
+      if (request.method === "GET" && !isMaintenanceExempt(path)) {
+        const m = await maintenanceState(env);
+        if (m.enabled) return maintenancePage(m);
+      }
+
       if (path.startsWith("/api/")) {
         if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
         const segs = path.replace(/^\/api\//, "").replace(/\/+$/, "").split("/");
