@@ -689,7 +689,7 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
   box-shadow: var(--lg-hi); display: grid; place-items: center; min-height: 320px;
   touch-action: none;
 }
-.pdp__img { width: 100%; height: 100%; max-height: 560px; object-fit: contain; padding: 18px; display: block; }
+.pdp__img { width: 100%; height: auto; max-height: 560px; object-fit: contain; padding: 18px; display: block; }
 .pdp__stage-hint {
   position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
   font-size: 0.78rem; color: var(--muted); background: rgba(7,7,18,0.6);
