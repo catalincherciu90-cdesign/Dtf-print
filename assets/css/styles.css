@@ -274,6 +274,23 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
 .btn--sm { padding: 9px 16px; font-size: 0.85rem; }
 .add-cart { width: 100%; }
 
+/* ---------- Banner pagină (hero secundar) ---------- */
+.page-hero { position: relative; overflow: hidden; isolation: isolate; padding: 72px 0 52px; text-align: center; }
+.page-hero__media { position: absolute; inset: 0; z-index: -1; }
+.page-hero__media img { width: 100%; height: 100%; object-fit: cover; opacity: 0.85; }
+.page-hero__veil { position: absolute; inset: 0;
+  background: radial-gradient(75% 90% at 50% 40%, rgba(7,7,18,0.55), rgba(7,7,18,0.92) 92%),
+              linear-gradient(180deg, rgba(7,7,18,0.45), rgba(7,7,18,0.9)); }
+.page-hero__content { position: relative; }
+.page-hero__title { font-size: clamp(2.1rem, 5vw, 3.4rem); font-weight: 800; letter-spacing: 1px;
+  text-transform: uppercase; margin: 10px 0 12px; text-shadow: 0 6px 30px rgba(0,0,0,0.6); }
+.page-hero__sub { color: #cdd3e6; font-size: clamp(0.95rem, 2vw, 1.1rem); max-width: 640px; margin: 0 auto; }
+.page-hero__cta { display: flex; justify-content: center; margin-top: 24px; }
+
+@media (max-width: 540px) {
+  .page-hero { padding: 48px 0 38px; }
+}
+
 /* ---------- Coș (drawer) ---------- */
 .cart { position: fixed; inset: 0; z-index: 200; }
 .cart[hidden] { display: none; }
