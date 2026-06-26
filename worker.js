@@ -46,7 +46,7 @@ const DEFAULT_CONTENT = {
     desc: "Încarci designul, alegi dimensiunea și primești printul DTF la metru liniar, gata de aplicat.",
     checklist: [
       "Preț afișat la metru liniar",
-      "Lățime maximă print: 60 cm",
+      "Lățime print: 90 cm",
       "Print de înaltă rezoluție",
       "Folie premium, cerneală certificată",
       "Ideal pentru textile din bumbac, poliester și mix",
@@ -59,7 +59,7 @@ const DEFAULT_CONTENT = {
       { dela: 50, pretMl: 19 },
       { dela: 100, pretMl: 17 },
     ],
-    maxWidth: 60,
+    printWidth: 90,
     uploadText: "Încarcă design",
     calcNote: "Upload PDF, PNG, TIFF (300dpi recomandat)",
   },

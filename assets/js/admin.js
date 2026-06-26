@@ -27,7 +27,7 @@
     checklist: "Listă avantaje (o linie fiecare)",
     calcTitle: "Titlu calculator", pricePerMeter: "Preț pe metru liniar — de bază (RON)",
     priceTiers: "Reduceri la cantitate (preț/ml pe praguri)", dela: "De la (metri liniari)", pretMl: "Preț (RON / ml)",
-    maxWidth: "Lățime maximă (cm)", uploadText: "Text buton upload", calcNote: "Notă sub buton",
+    printWidth: "Lățime print (cm) — fixă", uploadText: "Text buton upload", calcNote: "Notă sub buton",
     steps: "Pași (cum funcționează)",
     products: "Secțiunea Produse", items: "Produse", img: "Cale imagine (ex. assets/img/x.jpg)", name: "Nume",
     price: "Preț (RON)", reducere: "Reducere produs (%)",
@@ -502,12 +502,16 @@
         if (it.reducere == null) it.reducere = 0;
       });
     }
-    // praguri preț DTF (pentru conținut salvat înainte de această funcție)
+    // praguri preț DTF + lățime fixă (pentru conținut salvat anterior)
     if (c.order && !Array.isArray(c.order.priceTiers)) {
       c.order.priceTiers = [
         { dela: 5, pretMl: 23 }, { dela: 20, pretMl: 21 },
         { dela: 50, pretMl: 19 }, { dela: 100, pretMl: 17 },
       ];
+    }
+    if (c.order) {
+      if (c.order.printWidth == null) c.order.printWidth = 90;
+      delete c.order.maxWidth; // câmp vechi (sliderul de lățime a fost eliminat)
     }
     var b = c.banners || {};
     c.banners = {

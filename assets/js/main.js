@@ -9,7 +9,7 @@
   /* Valori implicite pentru calculator (suprascrise de conținutul din CMS). */
   var PRICE_PER_METER = 25;
   var PRICE_TIERS = []; // praguri cantitate: [{ dela, pretMl }] sortate crescător
-  var MAX_WIDTH = 60;
+  var PRINT_WIDTH = 90; // lățime print fixă (cm)
 
   /* Prețul pe metru aplicabil pentru o lungime dată, în funcție de praguri.
      Sub primul prag se folosește PRICE_PER_METER (preț de bază). */
@@ -99,14 +99,9 @@
           .filter(function (t) { return t.dela > 0 && t.pretMl > 0; })
           .sort(function (a, b) { return a.dela - b.dela; });
       }
-      if (c.order.maxWidth != null) {
-        MAX_WIDTH = Number(c.order.maxWidth);
-        var w = document.getElementById("width");
-        if (w) {
-          w.max = MAX_WIDTH;
-          if (Number(w.value) > MAX_WIDTH) w.value = MAX_WIDTH;
-        }
-      }
+      if (c.order.printWidth != null) PRINT_WIDTH = Number(c.order.printWidth);
+      var wf = document.getElementById("widthFixed");
+      if (wf) wf.textContent = PRINT_WIDTH + " cm";
       recalc();
     }
 
@@ -276,20 +271,16 @@
     el.href = scheme + (scheme === "tel:" ? val.replace(/\s/g, "") : val);
   }
 
-  /* ---------- Calculator ---------- */
-  var width = document.getElementById("width");
+  /* ---------- Calculator (lățime fixă, doar lungimea se alege) ---------- */
   var length = document.getElementById("length");
-  var widthOut = document.getElementById("widthOut");
   var lengthOut = document.getElementById("lengthOut");
   var priceEl = document.getElementById("price");
   var unitEl = document.getElementById("calcUnit");
 
   function recalc() {
-    if (!width || !length) return;
-    var w = parseInt(width.value, 10);
+    if (!length) return;
     var l = parseInt(length.value, 10);
     var pm = pricePerM(l);
-    widthOut.textContent = w + " cm";
     lengthOut.textContent = l + " m";
     priceEl.textContent = (l * pm).toFixed(2) + " RON";
     if (unitEl) {
@@ -299,8 +290,7 @@
     }
   }
 
-  if (width && length) {
-    width.addEventListener("input", recalc);
+  if (length) {
     length.addEventListener("input", recalc);
     recalc();
   }
@@ -354,7 +344,7 @@
     } else {
       if (elCheckout) elCheckout.style.display = "";
       elItems.innerHTML = cart.map(function (it, i) {
-        var sub = it.type === "dtf" ? ("Print " + it.width + "×" + it.length + " m") : "";
+        var sub = it.type === "dtf" ? ("Print lățime " + it.width + " cm × " + it.length + " m") : "";
         var img = it.img ? "<img src=\"" + esc(it.img) + "\" alt=\"\" />" : "<span class=\"cart-item__ico\">" + ico("receipt", 22) + "</span>";
         return "<div class=\"cart-item\">" +
           "<div class=\"cart-item__img\">" + img + "</div>" +
@@ -410,9 +400,8 @@
   var dtfAddCart = document.getElementById("dtfAddCart");
   if (dtfAddCart) {
     dtfAddCart.addEventListener("click", function () {
-      var w = width ? parseInt(width.value, 10) : 0;
       var l = length ? parseInt(length.value, 10) : 0;
-      cartAdd({ type: "dtf", name: "Print DTF la metru", width: w, length: l, price: Number((l * pricePerM(l)).toFixed(2)), qty: 1 });
+      cartAdd({ type: "dtf", name: "Print DTF la metru", width: PRINT_WIDTH, length: l, price: Number((l * pricePerM(l)).toFixed(2)), qty: 1 });
       openCart();
     });
   }
