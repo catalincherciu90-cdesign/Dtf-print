@@ -51,8 +51,16 @@
     $("pdpDims").textContent = p.dimensiuni || "—";
 
     var img = $("pdpImg");
-    img.src = imgUrl; img.alt = p.name || "";
-    img.setAttribute("fetchpriority", "high");
+    var hint = $("pdpStageHint");
+    if (imgUrl) {
+      img.alt = p.name || "";
+      img.setAttribute("fetchpriority", "high");
+      img.onerror = function () { img.style.display = "none"; if (hint) { hint.style.display = ""; hint.textContent = "Imaginea produsului nu a putut fi încărcată"; } };
+      img.src = imgUrl;
+    } else {
+      img.style.display = "none";
+      if (hint) hint.textContent = "Acest produs nu are încă o imagine. Adaug-o din Admin → Produse.";
+    }
 
     if (price) {
       $("pdpPrice").innerHTML = red > 0

@@ -129,14 +129,15 @@
             : "<div class=\"product-price\">" + price.toFixed(2) + " RON</div>")
         : "";
       var badge = red > 0 ? "<span class=\"product-badge\">-" + red + "%</span>" : "";
+      var imgUrl = absUrl(p.img);
       var btn = price
         ? "<button class=\"btn btn--primary btn--sm add-cart\" data-name=\"" + esc(p.name) +
-          "\" data-price=\"" + fin + "\" data-img=\"" + esc(p.img) + "\">Adaugă în coș</button>"
+          "\" data-price=\"" + fin + "\" data-img=\"" + esc(imgUrl) + "\">Adaugă în coș</button>"
         : "";
       var slug = slugify(p.name);
       return "<article class=\"product\">" + badge +
         "<a class=\"product__link\" href=\"/produs/" + slug + "\">" +
-        "<div class=\"product__img\"><img src=\"" + esc(p.img) + "\" alt=\"" + esc(p.name) + "\" loading=\"lazy\" /></div>" +
+        "<div class=\"product__img\"><img src=\"" + esc(imgUrl) + "\" alt=\"" + esc(p.name) + "\" loading=\"lazy\" /></div>" +
         "<h4>" + esc(p.name) + "</h4><p>" + esc(p.desc) + "</p></a>" +
         priceHtml + btn +
         "<a class=\"product__detail\" href=\"/produs/" + slug + "\">Vezi produsul →</a>" +
@@ -363,7 +364,7 @@
       if (elCheckout) elCheckout.style.display = "";
       elItems.innerHTML = cart.map(function (it, i) {
         var sub = it.type === "dtf" ? ("Print lățime " + it.width + " cm × " + it.length + " m") : "";
-        var img = it.img ? "<img src=\"" + esc(it.img) + "\" alt=\"\" />" : "<span class=\"cart-item__ico\">" + ico("receipt", 22) + "</span>";
+        var img = it.img ? "<img src=\"" + esc(absUrl(it.img)) + "\" alt=\"\" />" : "<span class=\"cart-item__ico\">" + ico("receipt", 22) + "</span>";
         return "<div class=\"cart-item\">" +
           "<div class=\"cart-item__img\">" + img + "</div>" +
           "<div class=\"cart-item__info\"><strong>" + esc(it.name) + "</strong>" +
