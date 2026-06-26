@@ -301,3 +301,9 @@
   background: rgba(10, 10, 26, 0.7); border: 1px solid rgba(255, 255, 255, 0.12); color: var(--text); cursor: pointer;
 }
 .admin select:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.18); }
+
+/* Design atașat la articolul de comandă */
+.order-design { display: flex; align-items: center; gap: 10px; margin: 6px 0 2px; }
+.order-design img { width: 54px; height: 54px; object-fit: contain; border-radius: 8px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); padding: 3px; }
+.order-design a[download] { color: var(--blue, #22d3ee); }

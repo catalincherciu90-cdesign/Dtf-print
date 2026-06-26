@@ -750,10 +750,22 @@
       var itemsHtml = "";
       if (Array.isArray(o.items) && o.items.length) {
         itemsHtml = "<ul class=\"order-items\">" + o.items.map(function (it) {
-          var dim = it.type === "dtf" ? " <span class=\"order-meta\">(" + esc(it.width) + "×" + esc(it.length) + " m)</span>" : "";
+          var meta = [];
+          if (it.type === "dtf") meta.push(esc(it.width) + "×" + esc(it.length) + " m");
+          if (it.marime) meta.push("mărime " + esc(it.marime));
+          if (it.cod) meta.push("cod " + esc(it.cod));
+          var metaHtml = meta.length ? " <span class=\"order-meta\">(" + meta.join(", ") + ")</span>" : "";
           var line = (Number(it.price) * Number(it.qty)).toFixed(2);
-          return "<li>" + esc(it.qty) + "× " + esc(it.name) + dim +
-            " <span class=\"order-meta\">— " + line + " RON</span></li>";
+          var designHtml = "";
+          if (it.design && it.design.url) {
+            var d = it.design;
+            var pos = "poz. " + Math.round(d.x) + "%, " + Math.round(d.y) + "% · dim. " + Math.round(d.size) + "% · rot. " + Math.round(d.rot) + "°";
+            designHtml = "<div class=\"order-design\">" +
+              "<a href=\"" + esc(d.url) + "\" target=\"_blank\" rel=\"noopener\"><img src=\"" + esc(d.url) + "\" alt=\"design\" /></a>" +
+              "<span class=\"order-meta\"><a href=\"" + esc(d.url) + "\" target=\"_blank\" rel=\"noopener\" download>⬇ design</a> · " + esc(pos) + "</span></div>";
+          }
+          return "<li>" + esc(it.qty) + "× " + esc(it.name) + metaHtml +
+            " <span class=\"order-meta\">— " + line + " RON</span>" + designHtml + "</li>";
         }).join("") + "</ul>";
       } else if (o.width != null) {
         itemsHtml = "<ul class=\"order-items\"><li>Print DTF " + esc(o.width) + "×" + esc(o.length) + " m</li></ul>";
