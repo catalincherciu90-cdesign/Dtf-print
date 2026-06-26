@@ -36,6 +36,8 @@
     banners: "Bannere", heroBg: "Fundal Hero (imagine completă)",
     heroLeft: "Banner stânga (printuri)", heroRight: "Banner dreapta (imprimantă)",
     veilOpacity: "Opacitate val (0–100, întunecime peste imagini)",
+    produseBg: "Banner pagina Produse Blank (imagine fundal)",
+    produseVeilOpacity: "Opacitate val Produse Blank (0–100)",
     discount: "Reducere coș", enabled: "Activă", tipPrag: "Tip prag",
     prag: "Prag (RON sau bucăți)", procent: "Procent reducere (%)",
     tiktok: "TikTok", profileUrl: "Link profil TikTok", videos: "Linkuri video (unul pe linie)",
@@ -256,7 +258,7 @@
     } else if (keyOf(path) === "tipPrag") {
       parent.appendChild(selectField(label("tipPrag"), value, path,
         [["valoare", "După valoarea coșului (RON)"], ["cantitate", "După cantitatea de produse"]]));
-    } else if (keyOf(path) === "img" || /^banners\.hero/.test(path)) {
+    } else if (keyOf(path) === "img" || (/^banners\./.test(path) && /(Bg|Left|Right)$/.test(keyOf(path)))) {
       parent.appendChild(mediaField(value, path, label(keyOf(path))));
     } else if (keyOf(path) === "ico") {
       parent.appendChild(iconField(value, path));
@@ -489,6 +491,8 @@
     c.banners = {
       heroBg: b.heroBg || "", heroLeft: b.heroLeft || "", heroRight: b.heroRight || "",
       veilOpacity: b.veilOpacity != null ? b.veilOpacity : 100,
+      produseBg: b.produseBg || "assets/img/hero-prints.jpg",
+      produseVeilOpacity: b.produseVeilOpacity != null ? b.produseVeilOpacity : 100,
     };
     var d = c.discount || {};
     c.discount = {
