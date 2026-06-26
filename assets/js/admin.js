@@ -310,6 +310,38 @@
     return wrap;
   }
 
+  /* Optimizează imaginea în browser înainte de upload: redimensionează la
+     max 1920px pe latura mare și recodează în WebP (~0.82). Reduce mult
+     dimensiunea (de regulă de 5–10×). Cade pe fișierul original dacă ceva
+     eșuează sau dacă nu reduce dimensiunea (și sare peste GIF/SVG). */
+  function optimizeImage(file) {
+    return new Promise(function (resolve) {
+      var keep = function () { resolve({ blob: file, name: file.name || "imagine" }); };
+      if (!/^image\//.test(file.type || "") || /gif|svg/.test(file.type || "")) return keep();
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        try {
+          var MAXD = 1920;
+          var scale = Math.min(1, MAXD / Math.max(img.naturalWidth, img.naturalHeight));
+          var cw = Math.max(1, Math.round(img.naturalWidth * scale));
+          var ch = Math.max(1, Math.round(img.naturalHeight * scale));
+          var canvas = document.createElement("canvas");
+          canvas.width = cw; canvas.height = ch;
+          canvas.getContext("2d").drawImage(img, 0, 0, cw, ch);
+          URL.revokeObjectURL(url);
+          canvas.toBlob(function (blob) {
+            if (blob && blob.size > 0 && blob.size < file.size) {
+              resolve({ blob: blob, name: (file.name || "imagine").replace(/\.[^.]+$/, "") + ".webp" });
+            } else keep();
+          }, "image/webp", 0.82);
+        } catch (e) { URL.revokeObjectURL(url); keep(); }
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); keep(); };
+      img.src = url;
+    });
+  }
+
   /* câmp imagine: previzualizare + buton de încărcare + cale text */
   function mediaField(value, path, labelText) {
     var wrap = document.createElement("div");
@@ -340,9 +372,16 @@
     file.addEventListener("change", function () {
       if (!file.files || !file.files.length) return;
       var f = file.files[0];
-      if (f.size > 5 * 1024 * 1024) { alert("Imagine prea mare (max 5 MB)."); return; }
-      btn.disabled = true; btn.textContent = "Se încarcă…";
-      var fd = new FormData(); fd.append("file", f);
+      if (f.size > 15 * 1024 * 1024) { alert("Imagine prea mare (max 15 MB)."); return; }
+      btn.disabled = true; btn.textContent = "Se optimizează…";
+      optimizeImage(f).then(function (opt) {
+      if (opt.blob.size > 5 * 1024 * 1024) {
+        btn.disabled = false; btn.textContent = "⬆ Încarcă imagine";
+        alert("Imaginea rămâne prea mare după optimizare (max 5 MB). Încearcă una mai mică.");
+        return;
+      }
+      btn.textContent = "Se încarcă…";
+      var fd = new FormData(); fd.append("file", opt.blob, opt.name);
       fetch("/api/media", { method: "POST", headers: { Authorization: "Bearer " + token }, body: fd })
         .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
         .then(function (res) {
@@ -352,6 +391,7 @@
           prev.src = res.d.url; prev.style.display = "";
         })
         .catch(function () { btn.disabled = false; btn.textContent = "⬆ Încarcă imagine"; alert("Eroare de rețea."); });
+      });
     });
 
     var row = document.createElement("div");
