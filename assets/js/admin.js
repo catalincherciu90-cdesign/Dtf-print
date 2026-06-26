@@ -30,6 +30,7 @@
     printWidth: "Lățime print (cm) — fixă", uploadText: "Text buton upload", calcNote: "Notă sub buton",
     steps: "Pași (cum funcționează)",
     products: "Secțiunea Produse", items: "Produse", img: "Cale imagine (ex. assets/img/x.jpg)", name: "Nume",
+    cod: "Cod intern (folosit în link — evită să-l schimbi după publicare)",
     price: "Preț (RON)", reducere: "Reducere produs (%)",
     marimi: "Mărimi disponibile", dimensiuni: "Dimensiuni / material", descriereLunga: "Descriere lungă (pagina produsului)",
     trust: "Garanții (jos)",
@@ -534,16 +535,29 @@
     return fetch(path, { method: method, headers: headers, body: body ? JSON.stringify(body) : undefined });
   }
 
+  function slugify(s) {
+    return String(s == null ? "" : s).toLowerCase()
+      .replace(/ă/g, "a").replace(/â/g, "a").replace(/î/g, "i").replace(/ș/g, "s").replace(/ş/g, "s").replace(/ț/g, "t").replace(/ţ/g, "t")
+      .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+
   // asigură că produsele au câmp de preț (pentru conținut salvat înainte)
   function normalizeContent(c) {
     if (!c) return;
     if (c.products && Array.isArray(c.products.items)) {
-      c.products.items.forEach(function (it) {
+      var usedCods = {};
+      c.products.items.forEach(function (it, i) {
         if (it.price == null) it.price = 0;
         if (it.reducere == null) it.reducere = 0;
         if (it.marimi == null) it.marimi = "";
         if (it.dimensiuni == null) it.dimensiuni = "";
         if (it.descriereLunga == null) it.descriereLunga = "";
+        // cod intern stabil — auto-completat din nume dacă lipsește, unic
+        var cod = slugify(it.cod) || slugify(it.name) || ("p" + (i + 1));
+        var base = cod, n = 2;
+        while (usedCods[cod]) { cod = base + "-" + n; n++; }
+        usedCods[cod] = true;
+        it.cod = cod;
       });
     }
     // praguri preț DTF + lățime fixă (pentru conținut salvat anterior)
