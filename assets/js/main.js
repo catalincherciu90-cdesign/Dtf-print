@@ -345,8 +345,19 @@
   var elCount = document.getElementById("cartCount");
   var elFiles = document.getElementById("cartFiles");
   var elCheckout = document.getElementById("cartCheckout");
+  var elCheckoutBtn = document.getElementById("cartCheckoutBtn");
+  var elBack = document.getElementById("cartBack");
   var elSummary = document.getElementById("cartSummary");
   var discountCfg = null;
+  var checkoutStep = 1; // 1 = vezi coșul, 2 = livrare + finalizare
+
+  // Pas 1: doar produsele + buton „Finalizează". Pas 2: livrare/adresă/trimite.
+  function setCheckoutStep(s) {
+    checkoutStep = s;
+    var hasItems = cart.length > 0;
+    if (elCheckoutBtn) elCheckoutBtn.style.display = (s === 1 && hasItems) ? "" : "none";
+    if (elCheckout) elCheckout.hidden = !(s === 2 && hasItems);
+  }
 
   function computeDiscount(subtotal, qty) {
     if (!discountCfg || !discountCfg.enabled) return { amount: 0, percent: 0 };
@@ -365,9 +376,9 @@
     if (!elItems) return;
     if (!cart.length) {
       elItems.innerHTML = "<p class=\"cart__empty\">Coșul tău este gol.</p>";
-      if (elCheckout) elCheckout.style.display = "none";
+      setCheckoutStep(1);
     } else {
-      if (elCheckout) elCheckout.style.display = "";
+      setCheckoutStep(checkoutStep);
       elItems.innerHTML = cart.map(function (it, i) {
         var sub = "";
         if (it.type === "dtf") {
@@ -410,8 +421,10 @@
     });
   }
 
-  function openCart() { if (elCart) { elCart.hidden = false; document.body.style.overflow = "hidden"; } }
+  function openCart() { if (elCart) { elCart.hidden = false; document.body.style.overflow = "hidden"; setCheckoutStep(1); } }
   function closeCart() { if (elCart) { elCart.hidden = true; document.body.style.overflow = ""; } }
+  if (elCheckoutBtn) elCheckoutBtn.addEventListener("click", function () { if (cart.length) { setCheckoutStep(2); if (elCheckout) elCheckout.scrollIntoView({ behavior: "smooth", block: "nearest" }); } });
+  if (elBack) elBack.addEventListener("click", function () { setCheckoutStep(1); });
   // API minimal pentru alte pagini (ex. pagina de produs) — adaugă în coș + deschide
   window.MrCart = { add: function (line) { cartAdd(line); }, open: openCart };
   var cartBtn = document.getElementById("cartBtn");
