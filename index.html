@@ -332,7 +332,9 @@
         <div class="cart__summary" id="cartSummary"></div>
         <div class="cart__total"><span>Total</span><strong id="cartTotal">0.00 RON</strong></div>
 
-        <div class="cart__checkout" id="cartCheckout">
+        <button class="btn btn--cta btn--block" id="cartCheckoutBtn">Finalizează comanda →</button>
+        <div class="cart__checkout" id="cartCheckout" hidden>
+          <button type="button" class="cart__back" id="cartBack">← Înapoi la coș</button>
           <div class="cart__files" id="cartFiles" hidden>
             <label for="cartFileInput">Atașează fișierele de design</label>
             <input type="file" id="cartFileInput" multiple accept=".pdf,.png,.tiff,.tif,image/*" />
