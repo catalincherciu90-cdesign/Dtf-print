@@ -335,6 +335,7 @@ input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none;
 .cart__total { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .cart__total strong { font-family: "Poppins"; font-size: 1.4rem; }
 .cart__files { margin-bottom: 12px; display: grid; gap: 6px; }
+.cart__files[hidden] { display: none; }
 .cart__files label { font-size: 0.82rem; color: var(--muted); }
 .cart__files input { font: inherit; font-size: 0.85rem; color: var(--text); }
 .cart__checkout textarea { width: 100%; padding: 11px 14px; border-radius: 10px; font: inherit; font-size: 0.92rem;

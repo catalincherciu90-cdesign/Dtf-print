@@ -410,7 +410,8 @@
         : "";
     }
     if (elTotal) elTotal.textContent = (subtotal - disc.amount).toFixed(2) + " RON";
-    if (elFiles) elFiles.hidden = !cart.some(function (it) { return it.type === "dtf"; });
+    // Arătăm „Atașează fișierele" doar dacă e nevoie: print DTF sau produs fără design atașat.
+    if (elFiles) elFiles.hidden = !cart.some(function (it) { return it.type === "dtf" || (it.type === "product" && !it.design); });
   }
 
   if (elItems) {
