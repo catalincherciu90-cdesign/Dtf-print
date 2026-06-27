@@ -839,13 +839,17 @@ async function serveHome(request, env) {
 // Pagini de produs „pretty URL" (/produs/<slug>) — servesc același template,
 // iar JS-ul din pagină alege produsul după slug-ul din path.
 async function serveProductPage(request, env) {
+  // Cerem directorul canonic „/produs/" (servit direct cu 200). NU „/produs/index.html",
+  // pe care Cloudflare îl redirecționează la „/produs/" → ar crea o buclă de redirect.
   const u = new URL(request.url);
-  u.pathname = "/produs/index.html";
-  const res = await env.ASSETS.fetch(new Request(u.toString(), request));
+  u.pathname = "/produs/";
+  u.search = "";
+  const res = await env.ASSETS.fetch(new Request(u.toString(), { method: "GET" }));
   const headers = new Headers(res.headers);
   headers.set("Content-Type", "text/html; charset=utf-8");
   headers.set("Cache-Control", "no-cache");
-  return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
+  // forțăm 200 ca să nu propagăm vreun eventual redirect (ar bucla)
+  return new Response(res.body, { status: 200, statusText: "OK", headers });
 }
 
 // ---- Mod mentenanță (site în construcție) ----
