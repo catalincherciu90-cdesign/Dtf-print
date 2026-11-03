@@ -496,6 +496,12 @@ nav .btn-dark{justify-self:end}
   <label>Mesaj<textarea id="ctm" rows="4"></textarea></label>
   <p id="ctsent" hidden></p>
   <a class="go" id="ctgo" href="#">Trimite mesajul</a>
+  <div class="done-ov" id="ctDone" hidden>
+   <svg class="done-check" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="50"/><path d="M37 62 L53 79 L84 44"/></svg>
+   <h3>Mesaj trimis!</h3>
+   <p>Mulțumim! Îți răspundem în cel mai scurt timp.</p>
+   <button type="button" class="go" id="ctDoneClose">Închide</button>
+  </div>
  </div>
 </div>
 
@@ -663,12 +669,13 @@ cp.onclick=()=>{let ok=false;try{navigator.clipboard.writeText(cpNum).then(()=>{
   var C={n:document.getElementById('ctn'),e:document.getElementById('cte'),p:document.getElementById('ctp'),s:document.getElementById('cts'),m:document.getElementById('ctm')};
   var cgo=document.getElementById('ctgo');
   function csent(t,ok){var el=document.getElementById('ctsent');if(!el)return;el.textContent=t;el.hidden=false;el.style.cssText='margin:8px 0 0;font-size:14px;font-weight:600;color:'+(ok===false?'#c0392b':'#1b8a5a');}
-  function cReset(){var el=document.getElementById('ctsent');if(el)el.hidden=true;cgo.textContent='Trimite mesajul';delete cgo.dataset.done;}
+  function cReset(){var el=document.getElementById('ctsent');if(el)el.hidden=true;var cdv=document.getElementById('ctDone');if(cdv)cdv.hidden=true;cgo.textContent='Trimite mesajul';delete cgo.dataset.done;}
   ovc.inert=true;
   function openC(){cReset();ovc.inert=false;ovc.classList.add('open');ovc.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';setTimeout(function(){C.n.focus();},250);}
   function closeC(){ovc.classList.remove('open');ovc.setAttribute('aria-hidden','true');ovc.inert=true;document.body.style.overflow='';}
   document.querySelectorAll('[data-contact]').forEach(function(b){b.addEventListener('click',function(e){e.preventDefault();openC();});});
   document.getElementById('ctx').onclick=closeC;
+  (function(){var cdc=document.getElementById('ctDoneClose');if(cdc)cdc.onclick=closeC;})();
   ovc.addEventListener('click',function(e){if(e.target===ovc)closeC();});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&ovc.classList.contains('open'))closeC();});
   var cbusy=false;
@@ -684,7 +691,7 @@ cp.onclick=()=>{let ok=false;try{navigator.clipboard.writeText(cpNum).then(()=>{
     fetch('/api/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
       .then(function(r){return r.json().catch(function(){return{};}).then(function(d){return{ok:r.ok,d:d};});})
       .then(function(res){cbusy=false;
-        if(res.ok){csent('✓ Mesaj trimis! Îți răspundem în curând.',true);cgo.textContent='Închide';cgo.dataset.done='1';}
+        if(res.ok){var cdv=document.getElementById('ctDone');if(cdv)cdv.hidden=false;cgo.textContent='Închide';cgo.dataset.done='1';}
         else{cgo.textContent=old;csent((res.d&&res.d.error)||'Eroare la trimitere.',false);}
       })
       .catch(function(){cbusy=false;cgo.textContent=old;csent('Eroare de rețea.',false);});
