@@ -1322,7 +1322,7 @@
       "<div class=\"offer-form\"><div class=\"offer-lines\" id=\"offerLines\"></div>" +
       "<div class=\"offer-addrow\"><button class=\"btn btn--ghost btn--sm\" id=\"offerAddDtf\" type=\"button\">＋ Print DTF (preț după praguri)</button>" +
       "<button class=\"btn btn--ghost btn--sm\" id=\"offerAddLine\" type=\"button\">＋ Linie liberă</button></div>" + tiersHint +
-      "<div class=\"offer-opts\"><label><input type=\"checkbox\" id=\"offerVat\" checked /> TVA 19%</label>" +
+      "<div class=\"offer-opts\"><label><input type=\"checkbox\" id=\"offerVat\" checked /> TVA 21%</label>" +
       "<label>Valabilitate (zile) <input type=\"number\" id=\"offerValidity\" value=\"14\" min=\"0\" max=\"365\" /></label></div>" +
       "<label class=\"crm-notes\"><span>Mențiuni (opțional)</span><textarea id=\"offerNotes\" rows=\"2\" placeholder=\"Termene, condiții, observații…\"></textarea></label>" +
       "<div class=\"crm-notes__actions\"><button class=\"btn btn--primary btn--sm\" id=\"offerCreate\" type=\"button\">Creează oferta</button><span class=\"form-msg\" id=\"offerMsg\"></span></div></div>";
