@@ -660,10 +660,10 @@
 
   function showEditor() {
     loginView.hidden = true; editorView.hidden = false; topActions.hidden = false;
+    loadDashboard();
     api("GET", "/api/content").then(function (r) { return r.json(); }).then(function (data) {
       content = data; normalizeContent(content);
       templates = {}; captureTemplates(content, "");
-      buildSite();
       handleTiktokReturn();
     });
     if (typeof refreshMessagesBadge === "function") refreshMessagesBadge();
@@ -743,7 +743,8 @@
       document.querySelectorAll(".tab-panel").forEach(function (panel) {
         panel.hidden = panel.id !== "tab-" + which;
       });
-      if (which === "orders") loadOrders();
+      if (which === "dashboard") loadDashboard();
+      else if (which === "orders") loadOrders();
       else if (which === "messages") loadMessages();
       else if (which === "site") buildSite();
       else if (which === "order") buildOrder();
@@ -758,6 +759,127 @@
   });
   if ($("ordersRefresh")) $("ordersRefresh").addEventListener("click", loadOrders);
   if ($("messagesRefresh")) $("messagesRefresh").addEventListener("click", loadMessages);
+  if ($("dashRefresh")) $("dashRefresh").addEventListener("click", loadDashboard);
+
+  /* ---------- Dashboard (Acasă) ---------- */
+  function okJson(r) { return r.status === 401 ? 401 : r.json(); }
+  function orderTotalOf(o) { return Number(o.total != null ? o.total : (o.price != null ? o.price : 0)) || 0; }
+
+  function loadDashboard() {
+    var msg = $("dashMsg"); if (msg) { msg.textContent = "Se încarcă…"; msg.className = "form-msg"; }
+    Promise.all([
+      api("GET", "/api/admin/stats", null, true).then(okJson),
+      api("GET", "/api/orders", null, true).then(okJson),
+      api("GET", "/api/messages", null, true).then(okJson),
+      api("GET", "/api/admin/offers", null, true).then(okJson),
+    ]).then(function (res) {
+      if (res.indexOf(401) >= 0) { showLogin("Sesiune expirată. Autentifică-te din nou."); return; }
+      var stats = res[0] || {};
+      var orders = (res[1] && res[1].orders) || [];
+      var messages = (res[2] && res[2].messages) || [];
+      var offers = (res[3] && res[3].offers) || [];
+      var unread = (res[2] && res[2].unread) || 0;
+      if (res[1] && res[1].statuses) statuses = res[1].statuses;
+      renderDashboard(stats, orders, messages, offers, unread);
+      var ob = $("ordersBadge"); if (ob) { ob.textContent = orders.length; ob.hidden = orders.length === 0; }
+      updateMessagesBadge(unread);
+      if (msg) msg.textContent = "";
+    }).catch(function () { if (msg) { msg.textContent = "Eroare la încărcare."; msg.className = "form-msg is-error"; } });
+  }
+
+  function kpi(icon, value, labelText, sub, accent) {
+    return "<div class=\"kpi" + (accent ? " kpi--accent" : "") + "\">" +
+      "<span class=\"kpi__ic\">" + icName(icon, 20) + "</span>" +
+      "<div class=\"kpi__body\"><span class=\"kpi__value\">" + esc(value) + "</span>" +
+      "<span class=\"kpi__label\">" + esc(labelText) + "</span>" +
+      (sub ? "<span class=\"kpi__sub\">" + esc(sub) + "</span>" : "") +
+      "</div></div>";
+  }
+
+  function renderDashboard(stats, orders, messages, offers, unread) {
+    var NEW = statuses[0] || "Nouă";
+    var newOrders = orders.filter(function (o) { return o.status === NEW; }).length;
+    var now = new Date();
+    var ym = now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2);
+    var monthRevenue = orders.reduce(function (s, o) {
+      if (o.status === "Anulată") return s;
+      if ((o.createdAt || "").slice(0, 7) !== ym) return s;
+      return s + orderTotalOf(o);
+    }, 0);
+    var activeOffers = offers.filter(function (o) { return o.validUntil && new Date(o.validUntil).getTime() >= Date.now(); }).length;
+    var soon = offers.filter(function (o) {
+      if (!o.validUntil) return false;
+      var ms = new Date(o.validUntil).getTime() - Date.now();
+      return ms >= 0 && ms <= 7 * 86400000;
+    }).sort(function (a, b) { return new Date(a.validUntil) - new Date(b.validUntil); });
+
+    /* KPI-uri */
+    $("dashKpis").innerHTML =
+      kpi("box", newOrders, "Comenzi noi", orders.length + " în total", newOrders > 0) +
+      kpi("mail", unread, "Mesaje noi", messages.length + " în total", unread > 0) +
+      kpi("wallet", money(monthRevenue), "Venit luna aceasta", "Total: " + money(stats.revenue || 0), false) +
+      kpi("users", stats.totalCustomers || 0, "Clienți", (stats.totalOrders || 0) + " comenzi", false) +
+      kpi("receipt", activeOffers, "Oferte active", soon.length + " expiră curând", soon.length > 0) +
+      kpi("chart", stats.units || 0, "Produse vândute", "", false);
+
+    /* Comenzi recente (max 6) */
+    var recent = orders.slice(0, 6);
+    var ordersHtml = recent.length ? recent.map(function (o) {
+      return "<button type=\"button\" class=\"dash-row\" data-goto=\"orders\">" +
+        "<span class=\"dash-row__main\"><strong>" + esc(o.name || o.email || "Client") + "</strong>" +
+        "<em>" + fmtDate(o.createdAt) + "</em></span>" +
+        "<span class=\"dash-row__meta\"><span class=\"crm-chip\" data-status=\"" + esc(o.status) + "\">" + esc(o.status) + "</span>" +
+        "<strong>" + money(orderTotalOf(o)) + "</strong></span></button>";
+    }).join("") : "<p class=\"dash-empty\">Nicio comandă încă.</p>";
+    $("dashOrders").innerHTML = "<div class=\"dash-panel__head\"><h2><span class=\"adm-ic\">" + icName("box", 18) + "</span> Comenzi recente</h2>" +
+      "<button type=\"button\" class=\"btn btn--ghost btn--sm\" data-goto=\"orders\">Vezi toate →</button></div>" +
+      "<div class=\"dash-rows\">" + ordersHtml + "</div>";
+
+    /* Mesaje — necitite întâi (max 6) */
+    var msgsSorted = messages.slice().sort(function (a, b) { return (a.read === b.read) ? 0 : (a.read ? 1 : -1); }).slice(0, 6);
+    var msgsHtml = msgsSorted.length ? msgsSorted.map(function (m) {
+      var snippet = (m.message || "").replace(/\s+/g, " ").trim().slice(0, 70);
+      return "<button type=\"button\" class=\"dash-row\" data-goto=\"messages\">" +
+        "<span class=\"dash-row__main\"><strong>" + esc(m.name || m.email || "—") + (!m.read ? " <span class=\"msg-new\">NOU</span>" : "") + "</strong>" +
+        "<em>" + esc(snippet) + (snippet.length >= 70 ? "…" : "") + "</em></span>" +
+        "<span class=\"dash-row__meta\"><em class=\"order-meta\">" + fmtDate(m.createdAt) + "</em></span></button>";
+    }).join("") : "<p class=\"dash-empty\">Niciun mesaj încă.</p>";
+    $("dashMessages").innerHTML = "<div class=\"dash-panel__head\"><h2><span class=\"adm-ic\">" + icName("message", 18) + "</span> Mesaje noi</h2>" +
+      "<button type=\"button\" class=\"btn btn--ghost btn--sm\" data-goto=\"messages\">Vezi toate →</button></div>" +
+      "<div class=\"dash-rows\">" + msgsHtml + "</div>";
+
+    /* Rapoarte: comenzi după status + oferte care expiră */
+    var byStatus = stats.byStatus || {};
+    var maxv = 1;
+    statuses.forEach(function (s) { maxv = Math.max(maxv, byStatus[s] || 0); });
+    var barsHtml = statuses.map(function (s) {
+      var v = byStatus[s] || 0;
+      var pct = Math.round(v / maxv * 100);
+      return "<div class=\"dash-bar\"><span class=\"dash-bar__lbl\">" + esc(s) + "</span>" +
+        "<span class=\"dash-bar__track\"><span class=\"dash-bar__fill\" data-status=\"" + esc(s) + "\" style=\"width:" + pct + "%\"></span></span>" +
+        "<span class=\"dash-bar__val\">" + v + "</span></div>";
+    }).join("");
+    var soonHtml = soon.length ? soon.map(function (o) {
+      var dl = Math.ceil((new Date(o.validUntil).getTime() - Date.now()) / 86400000);
+      return "<div class=\"dash-expire\"><div class=\"dash-expire__main\"><strong>" + esc(o.number || "Ofertă") + "</strong>" +
+        "<em class=\"order-meta\"> · " + esc((o.client && (o.client.name || o.client.email)) || "—") + "</em></div>" +
+        "<div class=\"dash-expire__meta\"><span class=\"dash-days" + (dl <= 2 ? " is-urgent" : "") + "\">" + (dl <= 0 ? "azi" : dl + " zile") + "</span>" +
+        "<a class=\"btn btn--ghost btn--sm\" href=\"/oferta/" + esc(o.id) + "\" target=\"_blank\" rel=\"noopener\">Deschide ↗</a></div></div>";
+    }).join("") : "<p class=\"dash-empty\">Nicio ofertă care expiră în 7 zile.</p>";
+    $("dashReports").innerHTML =
+      "<section class=\"dash-panel\"><div class=\"dash-panel__head\"><h2><span class=\"adm-ic\">" + icName("chart", 18) + "</span> Comenzi după status</h2></div>" +
+        "<div class=\"dash-bars\">" + (barsHtml || "<p class=\"dash-empty\">—</p>") + "</div></section>" +
+      "<section class=\"dash-panel\"><div class=\"dash-panel__head\"><h2><span class=\"adm-ic\">" + icName("receipt", 18) + "</span> Oferte care expiră</h2></div>" +
+        "<div class=\"dash-expires\">" + soonHtml + "</div></section>";
+
+    /* navigare rapidă către taburi */
+    document.querySelectorAll("#tab-dashboard [data-goto]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var t = document.querySelector(".tab[data-tab=\"" + b.dataset.goto + "\"]");
+        if (t) t.click();
+      });
+    });
+  }
 
   /* ---------- Comenzi ---------- */
   function esc(s) {

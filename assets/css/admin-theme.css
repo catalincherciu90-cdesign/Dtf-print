@@ -119,3 +119,96 @@ body.admin {
 .offer-addrow { display: flex; gap: 8px; flex-wrap: wrap; }
 .offer-head { display: grid; grid-template-columns: 1fr 90px 120px auto; gap: 8px; padding: 0 2px 2px; font-size: .72rem; letter-spacing: .03em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
 @media (max-width: 560px) { .offer-head { display: none; } }
+
+/* ===========================================================
+   Taburi — control segmentat (aspect business)
+   =========================================================== */
+.tabs {
+  gap: 4px; margin: 22px 0 22px; padding: 5px; flex-wrap: wrap;
+  border-bottom: 0; border: 1px solid rgba(15, 15, 16, .08);
+  background: rgba(255, 255, 255, .62); border-radius: 14px;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, .06);
+  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+}
+.tab { border-radius: 10px; padding: 9px 15px; font-weight: 600; color: var(--muted); transition: background .15s, color .15s; }
+.tab::after { display: none !important; }
+.tab:hover { color: var(--text); background: rgba(0, 0, 0, .045); }
+.tab.is-active { background: #0b0b0c; color: #fff; box-shadow: 0 6px 16px rgba(0, 0, 0, .22); }
+.tab.is-active .mr-icon { color: #fff; }
+.tab-badge { background: var(--y); color: #111; }
+@media (max-width: 560px) { .tabs { flex-wrap: nowrap; overflow-x: auto; } }
+
+/* Bara de sus — logo în culorile brandului (galben + negru), nu cyanul vechi */
+.admin .logo__mark { color: var(--text); }
+.admin .logo__mr { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.admin .logo__sub { letter-spacing: .14em; color: var(--muted); }
+
+/* ===========================================================
+   Dashboard (Acasă)
+   =========================================================== */
+.dash { display: grid; gap: 22px; }
+.dash-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.dash-head h1 { font-size: 1.7rem; letter-spacing: -.02em; }
+.dash-head .muted { font-size: .92rem; color: var(--muted); }
+
+.dash-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
+.kpi {
+  display: flex; align-items: center; gap: 14px; padding: 18px; border-radius: 16px;
+  background: var(--lg-bg); border: 1px solid var(--lg-border);
+  box-shadow: var(--lg-hi), 0 10px 30px rgba(0, 0, 0, .05);
+}
+.kpi__ic { width: 46px; height: 46px; flex: none; display: grid; place-items: center; border-radius: 13px; background: rgba(0, 0, 0, .05); color: var(--text); }
+.kpi__ic .mr-icon { display: block; }
+.kpi--accent { outline: 2px solid rgba(255, 200, 0, .55); outline-offset: -2px; }
+.kpi--accent .kpi__ic { background: var(--grad); color: #111; }
+.kpi__body { display: flex; flex-direction: column; min-width: 0; }
+.kpi__value { font-family: "Poppins", inherit; font-size: 1.5rem; font-weight: 700; line-height: 1.1; letter-spacing: -.02em; }
+.kpi__label { font-size: .86rem; font-weight: 600; color: var(--text); }
+.kpi__sub { font-size: .76rem; color: var(--muted); margin-top: 2px; }
+
+.dash-grid, .dash-reports { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.dash-panel {
+  padding: 18px 20px; border-radius: 16px; background: var(--lg-bg);
+  border: 1px solid var(--lg-border); box-shadow: var(--lg-hi), 0 10px 30px rgba(0, 0, 0, .05);
+}
+.dash-panel__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.dash-panel__head h2 { font-size: 1.05rem; display: flex; align-items: center; gap: 8px; }
+.dash-rows { display: grid; gap: 6px; }
+.dash-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;
+  text-align: left; font: inherit; cursor: pointer; padding: 11px 13px; border-radius: 11px;
+  background: rgba(255, 255, 255, .5); border: 1px solid rgba(15, 15, 16, .08); color: var(--text);
+  transition: border-color .15s, background .15s;
+}
+.dash-row:hover { border-color: rgba(255, 184, 0, .7); background: #fff; }
+.dash-row__main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.dash-row__main strong { font-size: .94rem; }
+.dash-row__main em { font-style: normal; color: var(--muted); font-size: .8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 340px; }
+.dash-row__meta { display: flex; align-items: center; gap: 10px; flex: none; }
+.dash-row__meta strong { font-family: "Poppins", inherit; font-size: .92rem; }
+.dash-empty { color: var(--muted); font-size: .88rem; padding: 10px 2px; }
+
+.dash-bars { display: grid; gap: 10px; }
+.dash-bar { display: grid; grid-template-columns: 96px 1fr 34px; align-items: center; gap: 10px; font-size: .84rem; }
+.dash-bar__lbl { color: var(--muted); }
+.dash-bar__track { height: 9px; border-radius: 999px; background: rgba(0, 0, 0, .06); overflow: hidden; }
+.dash-bar__fill { display: block; height: 100%; border-radius: 999px; background: var(--grad); min-width: 3px; }
+.dash-bar__fill[data-status="Nouă"] { background: linear-gradient(90deg, #4fc3ff, #2aa4e0); }
+.dash-bar__fill[data-status="În lucru"] { background: linear-gradient(90deg, #ffcf4a, #f5a623); }
+.dash-bar__fill[data-status="Trimisă"] { background: linear-gradient(90deg, #b79cff, #8b6bf0); }
+.dash-bar__fill[data-status="Finalizată"] { background: linear-gradient(90deg, #57d9a3, #28b981); }
+.dash-bar__fill[data-status="Anulată"] { background: linear-gradient(90deg, #ff8a8a, #f55); }
+.dash-bar__val { text-align: right; font-weight: 700; font-family: "Poppins", inherit; }
+
+.dash-expires { display: grid; gap: 8px; }
+.dash-expire { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 13px; border-radius: 11px; background: rgba(255, 255, 255, .5); border: 1px solid rgba(15, 15, 16, .08); }
+.dash-expire__main { min-width: 0; }
+.dash-expire__meta { display: flex; align-items: center; gap: 10px; flex: none; }
+.dash-days { font-size: .76rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: rgba(0, 0, 0, .06); color: var(--text); }
+.dash-days.is-urgent { background: rgba(255, 80, 80, .16); color: #c0392b; }
+
+@media (max-width: 860px) { .dash-grid, .dash-reports { grid-template-columns: 1fr; } }
+@media (max-width: 560px) {
+  .dash-row__main em { max-width: 180px; }
+  .dash-bar { grid-template-columns: 80px 1fr 30px; }
+}
