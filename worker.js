@@ -35,9 +35,10 @@ const DEFAULT_CONTENT = {
   brandTagline: "PRINT DTF PREMIUM",
   // ---- Conținut temă nouă (Mr.DTF) ----
   site: {
+    logo: "/assets/img/logo-mrdtf.png",
     phone: "+40786022893",
     phoneDisplay: "0786 022 893",
-    email: "comenzi@mrdtf.ro",
+    email: "comenzi@unilevelnetwork.ro",
     topNote: "PRINT DTF NON-STOP 24/24",
     heroTitle: "calitate",
     schedule: "Luni – Vineri: NON STOP\n(programul de print se termină vineri la ora 16:00)",
@@ -136,7 +137,7 @@ const DEFAULT_CONTENT = {
   footer: {
     tagline: "Specialiști în print DTF premium la metru liniar și produse blank pentru personalizare.",
     phone: "+40 123 456 789",
-    email: "contact@dtfprint.ro",
+    email: "comenzi@unilevelnetwork.ro",
     schedule: "L–V: 09:00 – 17:00",
     copyright: "© 2024 MrDTF — Print DTF Premium. Toate drepturile rezervate.",
   },
@@ -1035,7 +1036,7 @@ p{color:#c7c7dd;line-height:1.7;font-size:1.02rem}
 <h1>${title}</h1>
 <p>${mesaj}</p>
 <div class="dots"><span></span><span></span><span></span></div>
-<div class="contact">Contact: <a href="mailto:contact@dtfprint.ro">contact@dtfprint.ro</a></div>
+<div class="contact">Contact: <a href="mailto:comenzi@unilevelnetwork.ro">comenzi@unilevelnetwork.ro</a></div>
 </div></body></html>`;
   return new Response(html, {
     status: 503,
