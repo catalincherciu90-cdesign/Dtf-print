@@ -187,6 +187,7 @@ body.admin {
 .dash-row__meta { display: flex; align-items: center; gap: 10px; flex: none; }
 .dash-row__meta strong { font-family: "Poppins", inherit; font-size: .92rem; }
 .dash-empty { color: var(--muted); font-size: .88rem; padding: 10px 2px; }
+.dash-updated { color: var(--muted) !important; font-weight: 500; font-size: .82rem; }
 
 .dash-bars { display: grid; gap: 10px; }
 .dash-bar { display: grid; grid-template-columns: 96px 1fr 34px; align-items: center; gap: 10px; font-size: .84rem; }
