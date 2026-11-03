@@ -105,3 +105,21 @@ body.admin {
 
 /* Accent brand (text gradient) rămâne galben pe fundal alb */
 .grad-text { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* ---- Căsuță email (inbox) ---- */
+.inbox-list { display: grid; gap: 8px; margin-bottom: 16px; }
+.inbox-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; width: 100%; text-align: left; cursor: pointer;
+  padding: 12px 16px; border-radius: 14px; background: rgba(255,255,255,.6); border: 1px solid rgba(15,15,16,.1); color: var(--text); font: inherit; }
+.inbox-row:hover { border-color: var(--y); }
+.inbox-row.unread { background: #fff; border-left: 3px solid var(--y); }
+.inbox-row.unread strong::before { content: "● "; color: var(--y); }
+.inbox-row__main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.inbox-row__main strong { font-size: .95rem; }
+.inbox-row__main em { font-style: normal; color: var(--muted); font-size: .85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 55vw; }
+.inbox-row__date { color: var(--muted); font-size: .78rem; white-space: nowrap; flex: none; }
+.inbox-detail { padding: 20px; border-radius: 18px; background: var(--panel); border: 1px solid var(--panel-border); box-shadow: var(--shadow); }
+.inbox-detail__head { display: flex; justify-content: space-between; gap: 14px; margin-bottom: 6px; flex-wrap: wrap; }
+.inbox-subj { margin: 4px 0 12px; }
+.inbox-body { white-space: normal; line-height: 1.6; font-size: .95rem; border-top: 1px solid rgba(0,0,0,.08); padding-top: 14px; max-height: 50vh; overflow: auto; word-break: break-word; }
+.inbox-reply { margin-top: 18px; border-top: 1px solid rgba(0,0,0,.08); padding-top: 14px; display: grid; gap: 10px; }
+.inbox-reply h4 { margin: 0; }

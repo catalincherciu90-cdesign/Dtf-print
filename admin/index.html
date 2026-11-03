@@ -43,6 +43,7 @@
       <button class="tab" type="button" data-tab="social"><span class="mr-ico tab__ico" data-icon="link" data-icon-size="16"></span> Social</button>
       <button class="tab" type="button" data-tab="orders"><span class="mr-ico tab__ico" data-icon="box" data-icon-size="16"></span> Comenzi <span class="tab-badge" id="ordersBadge" hidden>0</span></button>
       <button class="tab" type="button" data-tab="messages"><span class="mr-ico tab__ico" data-icon="message" data-icon-size="16"></span> Mesaje <span class="tab-badge" id="messagesBadge" hidden>0</span></button>
+      <button class="tab" type="button" data-tab="inbox"><span class="mr-ico tab__ico" data-icon="mail" data-icon-size="16"></span> Căsuță</button>
       <button class="tab" type="button" data-tab="crm"><span class="mr-ico tab__ico" data-icon="chart" data-icon-size="16"></span> CRM</button>
     </div>
 
@@ -114,6 +115,21 @@
       </div>
       <p class="form-msg" id="messagesMsg" role="status"></p>
       <div id="messagesList"></div>
+    </div>
+
+    <div class="tab-panel" id="tab-inbox" hidden>
+      <div class="editor-head">
+        <div>
+          <h1>Căsuță email</h1>
+          <p class="muted">Mesajele primite pe adresa de comenzi (IMAP). Le poți citi și răspunde direct de aici.</p>
+        </div>
+        <div class="editor-actions">
+          <button class="btn btn--ghost" id="inboxRefresh" type="button">↻ Reîmprospătează</button>
+        </div>
+      </div>
+      <p class="form-msg" id="inboxMsg" role="status"></p>
+      <div class="inbox-list" id="inboxList"></div>
+      <div class="inbox-detail" id="inboxDetail" hidden></div>
     </div>
 
     <div class="tab-panel" id="tab-crm" hidden>
