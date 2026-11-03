@@ -11,6 +11,8 @@
 //   JWT_SECRET     – cheie pentru semnarea token-ului
 // ===========================================================
 
+import { connect } from "cloudflare:sockets";
+
 const KV_KEY = "home";
 const ORDER_PREFIX = "order:";
 const FILE_PREFIX = "orderfile:";
@@ -327,6 +329,18 @@ async function handleAdmin(request, env, segs) {
   if (!(await requireAuth(request, env))) return err("Neautorizat.", 401);
   if (!env.CONTENT) return err("KV neconfigurat.", 503);
   const sub = segs[1];
+
+  // POST /api/admin/test-email — trimite un email de test cu setările curente.
+  if (sub === "test-email" && request.method === "POST") {
+    const method = (env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASS) ? "smtp" : (env.RESEND_API_KEY ? "resend" : "none");
+    if (method === "none") return json({ ok: false, method, error: "Email neconfigurat (lipsesc secretele SMTP_* sau RESEND_API_KEY)." });
+    const ok = await sendMail(env, {
+      subject: "✅ Test email — MrDTF",
+      html: "<div style=\"font-family:Arial,sans-serif;font-size:15px\"><h2>Test reușit 🎉</h2><p>Dacă ai primit acest mesaj, trimiterea de emailuri din site funcționează corect.</p><p style=\"color:#888;font-size:13px\">Metodă: " + method + "</p></div>",
+      text: "Test reusit. Trimiterea de emailuri functioneaza. Metoda: " + method,
+    });
+    return json({ ok, method, error: ok ? undefined : "Trimiterea a eșuat. Verifică setările (host/port/user/parolă) sau logurile Worker." });
+  }
 
   // GET /api/admin/stats — dashboard
   if (sub === "stats" && request.method === "GET") {
@@ -678,12 +692,110 @@ async function listMessages(env) {
 //   NOTIFY_EMAIL   – adresa unde vrei să primești notificările
 //   NOTIFY_FROM    – (opțional) expeditor verificat, ex. "MrDTF <contact@domeniul-tau.ro>"
 // Dacă lipsesc RESEND_API_KEY sau NOTIFY_EMAIL, funcția nu face nimic.
+// Encode UTF-8 → base64 (pentru subiect MIME și AUTH LOGIN).
+function b64utf8(s) {
+  const bytes = new TextEncoder().encode(String(s == null ? "" : s));
+  let bin = "";
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return btoa(bin);
+}
+function emailAddr(s) {
+  const m = String(s || "").match(/<([^>]+)>/);
+  return (m ? m[1] : String(s || "")).trim();
+}
+
+// Client SMTP minimal peste TLS implicit (port 465), folosind cloudflare:sockets.
+// Trimite prin serverul propriu (ex. mail.unilevelnetwork.ro). Best-effort.
+async function smtpSend(env, { to, from, subject, html, text, replyTo }) {
+  const host = env.SMTP_HOST;
+  const port = Number(env.SMTP_PORT) || 465;
+  const user = env.SMTP_USER;
+  const pass = env.SMTP_PASS;
+  if (!host || !user || !pass) return false;
+
+  const socket = connect({ hostname: host, port }, { secureTransport: "on", allowHalfOpen: false });
+  const writer = socket.writable.getWriter();
+  const reader = socket.readable.getReader();
+  const enc = new TextEncoder();
+  const dec = new TextDecoder();
+  let buf = "";
+
+  const withTimeout = (p, ms, label) => Promise.race([
+    p, new Promise((_, rej) => setTimeout(() => rej(new Error("timeout " + label)), ms)),
+  ]);
+  async function readReply(expect) {
+    while (true) {
+      const lines = buf.split("\r\n");
+      for (let i = 0; i < lines.length - 1; i++) {
+        if (/^\d{3} /.test(lines[i])) {
+          const code = lines[i].slice(0, 3);
+          buf = lines.slice(i + 1).join("\r\n");
+          if (expect && code[0] !== expect) throw new Error("SMTP: " + lines[i]);
+          return code;
+        }
+      }
+      const { value, done } = await withTimeout(reader.read(), 10000, "read");
+      if (value) buf += dec.decode(value);
+      if (done) throw new Error("SMTP: conexiune închisă");
+    }
+  }
+  async function cmd(line, expect) {
+    await withTimeout(writer.write(enc.encode(line + "\r\n")), 10000, "write");
+    return readReply(expect);
+  }
+  try {
+    await readReply("2");                 // 220 salut
+    await cmd("EHLO mrdtf.ro", "2");
+    await cmd("AUTH LOGIN", "3");
+    await cmd(b64utf8(user), "3");
+    await cmd(b64utf8(pass), "2");         // 235 autentificat
+    await cmd("MAIL FROM:<" + emailAddr(from) + ">", "2");
+    await cmd("RCPT TO:<" + emailAddr(to) + ">", "2");
+    await cmd("DATA", "3");                // 354
+    const headers =
+      "From: " + from + "\r\n" +
+      "To: " + to + "\r\n" +
+      (replyTo ? "Reply-To: " + replyTo + "\r\n" : "") +
+      "Subject: =?UTF-8?B?" + b64utf8(subject) + "?=\r\n" +
+      "Date: " + new Date().toUTCString() + "\r\n" +
+      "MIME-Version: 1.0\r\n" +
+      "Content-Type: text/html; charset=UTF-8\r\n\r\n";
+    // dot-stuffing + CRLF
+    const body = String(html || text || "").replace(/\r?\n/g, "\r\n").replace(/\r\n\./g, "\r\n..");
+    await withTimeout(writer.write(enc.encode(headers + body + "\r\n.\r\n")), 10000, "data");
+    await readReply("2");                  // 250 acceptat
+    try { await cmd("QUIT"); } catch { /* ignore */ }
+    return true;
+  } finally {
+    try { await writer.close(); } catch { /* ignore */ }
+    try { reader.releaseLock(); } catch { /* ignore */ }
+    try { await socket.close(); } catch { /* ignore */ }
+  }
+}
+
+// Alege metoda de trimitere: SMTP propriu dacă e configurat, altfel Resend.
+async function sendMail(env, msg) {
+  const to = env.NOTIFY_EMAIL || env.SMTP_USER;
+  if (!to) return false;
+  const from = env.NOTIFY_FROM || env.SMTP_FROM || env.SMTP_USER || "MrDTF <onboarding@resend.dev>";
+  try {
+    if (env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASS) {
+      return await smtpSend(env, { to, from, subject: msg.subject, html: msg.html, text: msg.text, replyTo: msg.replyTo });
+    }
+    if (env.RESEND_API_KEY) {
+      const r = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { Authorization: "Bearer " + env.RESEND_API_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({ from, to: [to], reply_to: msg.replyTo, subject: msg.subject, html: msg.html, text: msg.text }),
+      });
+      return r.ok;
+    }
+  } catch { /* best-effort — nu blocăm răspunsul */ }
+  return false;
+}
+
 async function notifyNewMessage(env, msg) {
   try {
-    const to = env.NOTIFY_EMAIL;
-    const apiKey = env.RESEND_API_KEY;
-    if (!to || !apiKey) return; // neconfigurat — nu trimite nimic
-    const from = env.NOTIFY_FROM || "MrDTF <onboarding@resend.dev>";
     const esc = (s) => String(s == null ? "" : s)
       .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     const subject = "📨 Mesaj nou de contact — " + (msg.name || msg.email);
@@ -702,22 +814,14 @@ async function notifyNewMessage(env, msg) {
       "<p style=\"margin-top:16px;color:#888;font-size:13px\">Vezi toate mesajele în panoul admin → Mesaje.</p></div>";
     const text = "Mesaj nou de contact\n\nNume: " + (msg.name || "") + "\nEmail: " + (msg.email || "") +
       "\nTelefon: " + (msg.phone || "—") + "\nSubiect: " + (msg.subject || "—") + "\n\n" + (msg.message || "");
-    await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: "Bearer " + apiKey, "Content-Type": "application/json" },
-      body: JSON.stringify({ from, to: [to], reply_to: msg.email, subject, html, text }),
-    });
-  } catch { /* best-effort — nu blocăm răspunsul către client */ }
+    return await sendMail(env, { subject, html, text, replyTo: msg.email });
+  } catch { return false; }
 }
 
-// Notificare email pentru o comandă nouă (același mecanism Resend ca la mesaje).
+// Notificare email pentru o comandă nouă (SMTP propriu sau Resend, via sendMail).
 // Întoarce true dacă emailul a fost trimis, false dacă e neconfigurat sau a eșuat.
 async function notifyNewOrder(env, order) {
   try {
-    const to = env.NOTIFY_EMAIL;
-    const apiKey = env.RESEND_API_KEY;
-    if (!to || !apiKey) return false; // neconfigurat — nu trimite nimic
-    const from = env.NOTIFY_FROM || "MrDTF <onboarding@resend.dev>";
     const esc = (s) => String(s == null ? "" : s)
       .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     const bt = order.billingType === "pj" ? "persoană juridică" : "persoană fizică";
@@ -747,12 +851,7 @@ async function notifyNewOrder(env, order) {
       "\nLățime: " + (order.width || "") + " cm\nMetri: " + (order.meters || "") + " ml\nPreț estimat: " + pret +
       "\nFacturare (" + bt + "):\n" + (order.billing || "") + "\n\nLink grafică: " + (order.graphicsLink || "—") +
       "\nDetalii: " + (order.note || "—");
-    const r = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: "Bearer " + apiKey, "Content-Type": "application/json" },
-      body: JSON.stringify({ from, to: [to], subject, html, text }),
-    });
-    return r.ok;
+    return await sendMail(env, { subject, html, text });
   } catch { return false; }
 }
 
@@ -975,8 +1074,9 @@ export default {
             kv: !!env.CONTENT,
             files: !!env.CONTENT,
             auth: !!(env.JWT_SECRET && env.ADMIN_PASSWORD),
-            // Notificări email (Resend) — doar dacă sunt setate ambele secrete.
-            email: !!(env.RESEND_API_KEY && env.NOTIFY_EMAIL),
+            // Notificări email active (SMTP propriu sau Resend).
+            email: !!((env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASS) || (env.RESEND_API_KEY && env.NOTIFY_EMAIL)),
+            emailMethod: (env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASS) ? "smtp" : (env.RESEND_API_KEY ? "resend" : "none"),
           });
         }
 
