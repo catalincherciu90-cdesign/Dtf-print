@@ -178,6 +178,25 @@
     sec("Prețuri pe metru (trepte)", function (p) { if (s.dtfTiers) buildInto(p, s.dtfTiers, "site.dtfTiers"); });
     sec("Galerie „Ce facem noi” (4 imagini)", function (p) { if (s.gallery) buildInto(p, s.gallery, "site.gallery"); });
     sec("Mod mentenanță (site în construcție)", function (p) { if (content.maintenance) buildInto(p, content.maintenance, "maintenance"); });
+    sec("Notificări email", function (p) {
+      var info = document.createElement("p");
+      info.className = "crm-kv"; info.style.margin = "0 0 10px";
+      info.textContent = "Trimite un email de test ca să verifici că notificările de comandă ajung la tine.";
+      var btn = document.createElement("button");
+      btn.type = "button"; btn.className = "btn btn--ghost"; btn.textContent = "✉ Trimite email de test";
+      var msg = document.createElement("p"); msg.className = "form-msg"; msg.style.marginTop = "8px";
+      btn.addEventListener("click", function () {
+        msg.textContent = "Se trimite…"; msg.className = "form-msg";
+        api("POST", "/api/admin/test-email", {}, true)
+          .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+          .then(function (res) {
+            if (res.ok && res.d.ok) { msg.textContent = "✓ Trimis! Verifică inboxul (metodă: " + res.d.method + ")."; msg.className = "form-msg is-ok"; }
+            else { msg.textContent = (res.d && res.d.error) || "Eroare la trimitere."; msg.className = "form-msg is-error"; }
+          })
+          .catch(function () { msg.textContent = "Eroare de rețea."; msg.className = "form-msg is-error"; });
+      });
+      p.appendChild(info); p.appendChild(btn); p.appendChild(msg);
+    });
   }
 
   function buildTiktok() {
