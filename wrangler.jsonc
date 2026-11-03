@@ -17,6 +17,14 @@
   "kv_namespaces": [
     { "binding": "CONTENT", "id": "69ad61bb836248e9a70778bb92b25e98" }
   ],
+  // Variabile ne-secrete (persistă la fiecare deploy — nu se mai șterg ca cele
+  // din dashboard). Parola rămâne DOAR ca Secret în dashboard: SMTP_PASS.
+  "vars": {
+    "SMTP_HOST": "mail.unilevelnetwork.ro",
+    "SMTP_PORT": "465",
+    "SMTP_USER": "comenzi@unilevelnetwork.ro",
+    "NOTIFY_EMAIL": "comenzi@unilevelnetwork.ro"
+  },
   "triggers": {
     "crons": ["0 6 * * *"]
   }

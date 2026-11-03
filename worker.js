@@ -564,10 +564,13 @@ async function handleOrders(request, env, segs) {
       note: String(f.note || "").slice(0, 2000),
     };
     await env.CONTENT.put(ORDER_PREFIX + oid, JSON.stringify(order));
-    // Notificare email automată (server-side). Best-effort: dacă nu e configurat
-    // Resend, comanda rămâne salvată în admin, iar frontend-ul deschide mailul ca rezervă.
-    const emailed = await notifyNewOrder(env, order);
-    return json({ ok: true, id: oid, emailed: emailed });
+    // Două emailuri: notificare către noi (business) + confirmare către client.
+    // Best-effort: dacă emailul nu e configurat, comanda rămâne salvată în admin.
+    const [emailed, customerEmailed] = await Promise.all([
+      notifyNewOrder(env, order),
+      sendOrderConfirmation(env, order),
+    ]);
+    return json({ ok: true, id: oid, emailed: emailed, customerEmailed: customerEmailed });
   }
 
   // de aici încolo — doar admin
@@ -776,8 +779,9 @@ async function smtpSend(env, { to, from, subject, html, text, replyTo }) {
 }
 
 // Alege metoda de trimitere: SMTP propriu dacă e configurat, altfel Resend.
+// Destinatar: msg.to dacă e dat, altfel adresa proprie (NOTIFY_EMAIL / SMTP_USER).
 async function sendMail(env, msg) {
-  const to = env.NOTIFY_EMAIL || env.SMTP_USER;
+  const to = msg.to || env.NOTIFY_EMAIL || env.SMTP_USER;
   if (!to) return false;
   const from = env.NOTIFY_FROM || env.SMTP_FROM || env.SMTP_USER || "MrDTF <onboarding@resend.dev>";
   try {
@@ -855,6 +859,35 @@ async function notifyNewOrder(env, order) {
       "\nFacturare (" + bt + "):\n" + (order.billing || "") + "\n\nLink grafică: " + (order.graphicsLink || "—") +
       "\nDetalii: " + (order.note || "—");
     return await sendMail(env, { subject, html, text, replyTo: order.email || undefined });
+  } catch { return false; }
+}
+
+// Email de confirmare către CLIENT (cumpărător). Întoarce true dacă a fost trimis.
+async function sendOrderConfirmation(env, order) {
+  try {
+    if (!order.email) return false;
+    const biz = env.NOTIFY_EMAIL || env.SMTP_USER || "comenzi@unilevelnetwork.ro";
+    const esc = (s) => String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const pret = order.total ? (order.total + " lei" + (order.pretMl ? " (" + order.pretMl + " lei/ml)" : "")) : "—";
+    const rows = [
+      ["Lățime", (order.width || "—") + " cm"],
+      ["Metri liniari", (order.meters || "—") + " ml"],
+      ["Preț estimat", pret],
+    ].map((r) => "<tr><td style=\"padding:4px 12px 4px 0;color:#666\">" + esc(r[0]) +
+      "</td><td style=\"padding:4px 0\"><strong>" + esc(r[1]) + "</strong></td></tr>").join("");
+    const subject = "Am primit comanda ta — Mr.DTF";
+    const html = "<div style=\"font-family:Arial,sans-serif;font-size:15px;color:#222\">" +
+      "<h2 style=\"margin:0 0 12px\">Mulțumim" + (order.name ? ", " + esc(order.name) : "") + "! 🎉</h2>" +
+      "<p>Am primit comanda ta de transfer DTF. Te contactăm în cel mai scurt timp pentru confirmare și factură. " +
+      "Comanda intră în producție după achitarea facturii.</p>" +
+      "<table style=\"border-collapse:collapse;margin:12px 0 14px\">" + rows + "</table>" +
+      "<p style=\"color:#888;font-size:13px\">Prețul este orientativ și nu include TVA. Pentru orice întrebare, răspunde la acest e-mail sau scrie-ne la " + esc(biz) + ".</p>" +
+      "<p style=\"margin-top:16px\">Echipa Mr.DTF</p></div>";
+    const text = "Multumim" + (order.name ? ", " + order.name : "") + "!\n\nAm primit comanda ta de transfer DTF. Te contactam in cel mai scurt timp pentru confirmare si factura.\n\n" +
+      "Latime: " + (order.width || "—") + " cm\nMetri: " + (order.meters || "—") + " ml\nPret estimat: " + pret +
+      "\n\nPentru intrebari, raspunde la acest e-mail sau scrie-ne la " + biz + ".\n\nEchipa Mr.DTF";
+    return await sendMail(env, { to: order.email, subject, html, text, replyTo: biz });
   } catch { return false; }
 }
 
