@@ -1194,7 +1194,8 @@
         if (!offers.length) { box.innerHTML = "<p class=\"order-meta\">Nicio ofertă încă.</p>"; return; }
         box.innerHTML = offers.map(function (o) {
           var cemail = (o.client && o.client.email) || "";
-          return "<div class=\"crm-order\"><div><strong>" + esc(o.number) + "</strong> <span class=\"order-meta\">" + fmtDate(o.createdAt) + "</span></div>" +
+          var vu = o.validUntil ? new Date(o.validUntil).toLocaleDateString("ro-RO") : "";
+          return "<div class=\"crm-order\"><div><strong>" + esc(o.number) + "</strong> <span class=\"order-meta\">" + fmtDate(o.createdAt) + (vu ? " · valabilă până la " + esc(vu) : "") + "</span></div>" +
             "<div class=\"crm-order__total\"><strong>" + money(o.total) + "</strong></div>" +
             "<div style=\"display:flex;gap:8px;flex-wrap:wrap\"><a class=\"btn btn--ghost btn--sm\" href=\"/oferta/" + esc(o.id) + "\" target=\"_blank\" rel=\"noopener\">Deschide ↗</a>" +
             (cemail ? "<button class=\"btn btn--primary btn--sm offer-send\" data-id=\"" + esc(o.id) + "\" data-email=\"" + esc(cemail) + "\">" + icName("mail", 14) + " Trimite pe email</button>" : "") +
@@ -1254,6 +1255,7 @@
     var box = $("offerBuilder"); if (!box) return;
     if (!box.hidden) { box.hidden = true; box.innerHTML = ""; return; }
     box.hidden = false;
+    var defValid = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10);
     var tiers = (content && content.site && content.site.dtfTiers) || [];
     var tiersHint = tiers.length ? "<p class=\"crm-kv\" style=\"margin:4px 0 0\">Praguri preț DTF (din site): " + tiers.map(function (t) { return esc(t.pret) + " lei/ml (" + esc(t.range) + ")"; }).join(" · ") + "</p>" : "";
     box.innerHTML =
@@ -1264,7 +1266,7 @@
       "<button class=\"btn btn--ghost btn--sm\" id=\"offerAddLine\" type=\"button\">＋ Linie liberă</button></div>" + tiersHint +
       "<div class=\"offer-opts\"><label><input type=\"checkbox\" id=\"offerVat\" checked /> TVA 21%</label>" +
       "<label>Discount (%) <input type=\"number\" id=\"offerDiscount\" value=\"0\" min=\"0\" max=\"100\" step=\"0.5\" /></label>" +
-      "<label>Valabilitate (zile) <input type=\"number\" id=\"offerValidity\" value=\"14\" min=\"0\" max=\"365\" /></label></div>" +
+      "<label>Valabilă până la <input type=\"date\" id=\"offerValidUntil\" value=\"" + defValid + "\" /></label></div>" +
       "<label class=\"crm-notes\"><span>Mențiuni (opțional)</span><textarea id=\"offerNotes\" rows=\"2\" placeholder=\"Termene, condiții, observații…\"></textarea></label>" +
       "<div class=\"crm-notes__actions\"><button class=\"btn btn--primary btn--sm\" id=\"offerCreate\" type=\"button\">Creează oferta</button><span class=\"form-msg\" id=\"offerMsg\"></span></div></div>";
     var lines = $("offerLines");
@@ -1283,7 +1285,7 @@
       om.textContent = "Se creează…"; om.className = "form-msg";
       var payload = {
         client: { name: c.name, email: c.email, phone: c.phone, company: c.company, type: c.type },
-        items: items, vat: $("offerVat").checked, discount: Number($("offerDiscount").value) || 0, validity: Number($("offerValidity").value) || 14, notes: $("offerNotes").value,
+        items: items, vat: $("offerVat").checked, discount: Number($("offerDiscount").value) || 0, validUntil: $("offerValidUntil").value, notes: $("offerNotes").value,
       };
       api("POST", "/api/admin/offers", payload, true).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
         .then(function (res) {

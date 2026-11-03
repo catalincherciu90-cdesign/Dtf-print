@@ -465,7 +465,14 @@ async function handleAdmin(request, env, segs) {
       items, vatRate, net, discountPercent, discount, vat, total,
       validity: Math.max(0, Math.min(365, Number(b.validity) || 14)),
       notes: String(b.notes || "").slice(0, 2000),
+      reminded: false,
     };
+    // Data de expirare: explicită (date picker) sau calculată din valabilitate.
+    if (b.validUntil && /^\d{4}-\d{2}-\d{2}/.test(String(b.validUntil))) {
+      offer.validUntil = new Date(String(b.validUntil).slice(0, 10) + "T23:59:59").toISOString();
+    } else {
+      offer.validUntil = new Date(Date.now() + offer.validity * 86400000).toISOString();
+    }
     await env.CONTENT.put(OFFER_PREFIX + oid, JSON.stringify(offer));
     return json({ ok: true, id: oid, number: offer.number, url: "/oferta/" + oid });
   }
@@ -481,7 +488,7 @@ async function handleAdmin(request, env, segs) {
       for (const k of res.keys) {
         const o = await env.CONTENT.get(k.name, "json");
         if (o && (!email || (o.client && o.client.email === email))) {
-          out.push({ id: o.id, number: o.number, createdAt: o.createdAt, total: o.total, client: o.client });
+          out.push({ id: o.id, number: o.number, createdAt: o.createdAt, total: o.total, client: o.client, validUntil: o.validUntil });
         }
       }
       cursor = res.list_complete ? null : res.cursor;
@@ -508,6 +515,7 @@ async function handleAdmin(request, env, segs) {
     const link = origin + "/oferta/" + o.id;
     const esc = escHtml;
     const money = (n) => (Number(n) || 0).toFixed(2) + " lei";
+    const validStr = o.validUntil ? new Date(o.validUntil).toLocaleDateString("ro-RO") : (o.validity + " zile");
     const rows = (o.items || []).map((it) => "<tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">" + esc(it.desc) +
       "</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">" + esc(it.qty) +
       "</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">" + money(it.price) +
@@ -521,10 +529,10 @@ async function handleAdmin(request, env, segs) {
       "<table style=\"border-collapse:collapse;margin:10px 0\"><thead><tr><th style=\"padding:6px 10px;text-align:left;color:#888\">Descriere</th><th style=\"padding:6px 10px;text-align:right;color:#888\">Cant.</th><th style=\"padding:6px 10px;text-align:right;color:#888\">Preț</th><th style=\"padding:6px 10px;text-align:right;color:#888\">Valoare</th></tr></thead><tbody>" + rows + "</tbody></table>" +
       "<p>Subtotal: " + money(o.net) + (o.discountPercent ? " · Discount (" + esc(o.discountPercent) + "%): − " + money(o.discount) : "") + (o.vatRate ? " · TVA (" + esc(o.vatRate) + "%): " + money(o.vat) : "") + "<br><strong style=\"font-size:17px\">Total: " + money(o.total) + "</strong></p>" +
       (o.notes ? "<p style=\"background:#fff8e1;padding:12px;border-radius:8px;white-space:pre-wrap\">" + esc(o.notes) + "</p>" : "") +
-      "<p style=\"color:#888;font-size:13px\">Oferta este valabilă " + esc(o.validity) + " zile. Pentru confirmare, răspundeți la acest e-mail sau sunați la " + esc(site.phoneDisplay || site.phone || "") + ".</p>" +
+      "<p style=\"color:#888;font-size:13px\">Ofertă valabilă până la " + esc(validStr) + ". Pentru confirmare, răspundeți la acest e-mail sau sunați la " + esc(site.phoneDisplay || site.phone || "") + ".</p>" +
       "<p>Cu stimă,<br>Echipa Mr.DTF</p></div>";
     const text = "Ofertă " + o.number + "\n\nVedeți oferta: " + link + "\nTotal: " + money(o.total) +
-      "\n\nOfertă valabilă " + o.validity + " zile. Răspundeți la acest e-mail pentru confirmare.\n\nEchipa Mr.DTF";
+      "\n\nOfertă valabilă până la " + validStr + ". Răspundeți la acest e-mail pentru confirmare.\n\nEchipa Mr.DTF";
     const ok = await sendMail(env, { to, subject, html, text, replyTo: site.email || env.NOTIFY_EMAIL });
     return json({ ok: ok, to: to, error: ok ? undefined : "Trimiterea a eșuat (verifică setările email)." });
   }
@@ -1140,7 +1148,7 @@ async function serveOfferPage(request, env, id) {
   const money = (n) => (Number(n) || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " lei";
   const d = new Date(o.createdAt);
   const dateStr = isNaN(d) ? "" : d.toLocaleDateString("ro-RO");
-  const valid = new Date((isNaN(d) ? Date.now() : d.getTime()) + (o.validity || 14) * 86400000).toLocaleDateString("ro-RO");
+  const valid = (o.validUntil ? new Date(o.validUntil) : new Date((isNaN(d) ? Date.now() : d.getTime()) + (o.validity || 14) * 86400000)).toLocaleDateString("ro-RO");
   const rows = (o.items || []).map((it, i) => (
     "<tr><td>" + (i + 1) + "</td><td>" + esc(it.desc) + "</td><td class=\"r\">" + esc(it.qty) +
     "</td><td class=\"r\">" + money(it.price) + "</td><td class=\"r\">" + money(it.qty * it.price) + "</td></tr>"
@@ -1265,6 +1273,50 @@ p{color:#c7c7dd;line-height:1.7;font-size:1.02rem}
     status: 503,
     headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "Retry-After": "3600" },
   });
+}
+
+// ---- Follow-up oferte: reminder email cu ~3-4 zile înainte de expirare ----
+async function sendOfferReminder(env, o, daysLeft, site) {
+  const esc = escHtml;
+  const money = (n) => (Number(n) || 0).toFixed(2) + " lei";
+  const link = "https://mrdtf.ro/oferta/" + o.id;
+  const cl = o.client || {};
+  const validStr = new Date(o.validUntil).toLocaleDateString("ro-RO");
+  const when = daysLeft <= 0 ? "astăzi" : ("în " + daysLeft + " " + (daysLeft === 1 ? "zi" : "zile"));
+  const companyLine = cl.company ? " (" + esc(String(cl.company).split("\n")[0]) + ")" : "";
+  const subject = "⏰ Follow-up: oferta " + o.number + " expiră " + when;
+  const html = "<div style=\"font-family:Arial,sans-serif;font-size:15px;color:#222\">" +
+    "<h2 style=\"margin:0 0 10px\">Follow-up ofertă</h2>" +
+    "<p>Oferta <strong>" + esc(o.number) + "</strong> expiră <strong>" + esc(when) + "</strong> (valabilă până la " + esc(validStr) + ").</p>" +
+    "<p>Client: <strong>" + esc(cl.name || "—") + "</strong>" + companyLine + "<br>" + (cl.email ? esc(cl.email) : "") + (cl.phone ? " · " + esc(cl.phone) : "") + "</p>" +
+    "<p>Total ofertă: <strong>" + money(o.total) + "</strong></p>" +
+    "<p><a href=\"" + link + "\" style=\"background:#111;color:#fff;padding:10px 20px;border-radius:10px;text-decoration:none;display:inline-block;font-weight:700\">Vezi oferta ↗</a></p>" +
+    "<p style=\"color:#888;font-size:13px\">Contactează clientul pentru follow-up înainte să expire oferta.</p></div>";
+  const text = "Follow-up: oferta " + o.number + " expiră " + when + " (până la " + validStr + ").\n" +
+    "Client: " + (cl.name || "—") + " " + (cl.email || "") + " " + (cl.phone || "") + "\nTotal: " + money(o.total) + "\nOfertă: " + link;
+  return sendMail(env, { subject, html, text });
+}
+async function remindExpiringOffers(env) {
+  if (!env.CONTENT) return;
+  const now = Date.now();
+  let site = {};
+  try { const c = await getContent(env); site = c.site || {}; } catch { /* fallback */ }
+  let cursor;
+  do {
+    const res = await env.CONTENT.list({ prefix: OFFER_PREFIX, cursor });
+    for (const k of res.keys) {
+      const o = await env.CONTENT.get(k.name, "json");
+      if (!o || o.reminded || !o.validUntil) continue;
+      const ms = new Date(o.validUntil).getTime();
+      if (isNaN(ms)) continue;
+      const daysLeft = Math.ceil((ms - now) / 86400000);
+      if (daysLeft <= 4 && daysLeft >= 0) {
+        const ok = await sendOfferReminder(env, o, daysLeft, site);
+        if (ok) { o.reminded = true; await env.CONTENT.put(k.name, JSON.stringify(o)); }
+      }
+    }
+    cursor = res.list_complete ? null : res.cursor;
+  } while (cursor);
 }
 
 export default {
@@ -1417,5 +1469,6 @@ export default {
   // Cron — reîmprospătează videoclipurile TikTok (dacă e conectat)
   async scheduled(event, env, ctx) {
     ctx.waitUntil(tiktokSyncVideos(env).catch(() => {}));
+    ctx.waitUntil(remindExpiringOffers(env).catch(() => {}));
   },
 };
