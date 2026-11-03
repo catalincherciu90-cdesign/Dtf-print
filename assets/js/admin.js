@@ -638,6 +638,7 @@
       buildSite();
       handleTiktokReturn();
     });
+    if (typeof refreshMessagesBadge === "function") refreshMessagesBadge();
   }
   function showLogin(msg) {
     editorView.hidden = true; topActions.hidden = true; loginView.hidden = false;

@@ -548,7 +548,10 @@ async function handleOrders(request, env, segs) {
       note: String(f.note || "").slice(0, 2000),
     };
     await env.CONTENT.put(ORDER_PREFIX + oid, JSON.stringify(order));
-    return json({ ok: true, id: oid });
+    // Notificare email automată (server-side). Best-effort: dacă nu e configurat
+    // Resend, comanda rămâne salvată în admin, iar frontend-ul deschide mailul ca rezervă.
+    const emailed = await notifyNewOrder(env, order);
+    return json({ ok: true, id: oid, emailed: emailed });
   }
 
   // de aici încolo — doar admin
@@ -705,6 +708,52 @@ async function notifyNewMessage(env, msg) {
       body: JSON.stringify({ from, to: [to], reply_to: msg.email, subject, html, text }),
     });
   } catch { /* best-effort — nu blocăm răspunsul către client */ }
+}
+
+// Notificare email pentru o comandă nouă (același mecanism Resend ca la mesaje).
+// Întoarce true dacă emailul a fost trimis, false dacă e neconfigurat sau a eșuat.
+async function notifyNewOrder(env, order) {
+  try {
+    const to = env.NOTIFY_EMAIL;
+    const apiKey = env.RESEND_API_KEY;
+    if (!to || !apiKey) return false; // neconfigurat — nu trimite nimic
+    const from = env.NOTIFY_FROM || "MrDTF <onboarding@resend.dev>";
+    const esc = (s) => String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const bt = order.billingType === "pj" ? "persoană juridică" : "persoană fizică";
+    const pret = order.total ? (order.total + " lei" + (order.pretMl ? " (" + order.pretMl + " lei/ml)" : "")) : "—";
+    const rows = [
+      ["Nume", order.name || "—"],
+      ["Telefon", order.phone || "—"],
+      ["Lățime", (order.width || "—") + " cm"],
+      ["Metri liniari", (order.meters || "—") + " ml"],
+      ["Preț estimat", pret],
+      ["Facturare", bt],
+    ].map((r) => "<tr><td style=\"padding:4px 12px 4px 0;color:#666\">" + esc(r[0]) +
+      "</td><td style=\"padding:4px 0\"><strong>" + esc(r[1]) + "</strong></td></tr>").join("");
+    const link = order.graphicsLink
+      ? "<p style=\"margin:12px 0\">Link grafică: <a href=\"" + esc(order.graphicsLink) + "\">" + esc(order.graphicsLink) + "</a></p>" : "";
+    const billing = order.billing
+      ? "<div style=\"padding:12px;background:#f5f5f7;border-radius:8px;white-space:pre-wrap;margin-bottom:10px\"><strong>Date facturare:</strong>\n" + esc(order.billing) + "</div>" : "";
+    const note = order.note
+      ? "<div style=\"padding:12px;background:#fff8e1;border-radius:8px;white-space:pre-wrap\"><strong>Detalii:</strong>\n" + esc(order.note) + "</div>" : "";
+    const subject = "🧾 Comandă nouă DTF — " + (order.name || order.phone || order.id);
+    const html = "<div style=\"font-family:Arial,sans-serif;font-size:15px;color:#222\">" +
+      "<h2 style=\"margin:0 0 12px\">Comandă nouă de pe site</h2>" +
+      "<table style=\"border-collapse:collapse;margin-bottom:14px\">" + rows + "</table>" +
+      link + billing + note +
+      "<p style=\"margin-top:16px;color:#888;font-size:13px\">Vezi toate comenzile în panoul admin → Comenzi.</p></div>";
+    const text = "Comandă nouă DTF\n\nNume: " + (order.name || "") + "\nTelefon: " + (order.phone || "") +
+      "\nLățime: " + (order.width || "") + " cm\nMetri: " + (order.meters || "") + " ml\nPreț estimat: " + pret +
+      "\nFacturare (" + bt + "):\n" + (order.billing || "") + "\n\nLink grafică: " + (order.graphicsLink || "—") +
+      "\nDetalii: " + (order.note || "—");
+    const r = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + apiKey, "Content-Type": "application/json" },
+      body: JSON.stringify({ from, to: [to], subject, html, text }),
+    });
+    return r.ok;
+  } catch { return false; }
 }
 
 async function handleMessages(request, env, segs, ctx) {
