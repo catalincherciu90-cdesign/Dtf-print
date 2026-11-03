@@ -526,7 +526,7 @@ async function handleAdmin(request, env, segs) {
       "<p>Bună ziua" + (o.client.name ? ", " + esc(o.client.name) : "") + ",</p>" +
       "<p>Vă transmitem oferta solicitată. O puteți vedea și printa aici:</p>" +
       "<p><a href=\"" + link + "\" style=\"background:#111;color:#fff;padding:12px 22px;border-radius:10px;text-decoration:none;display:inline-block;font-weight:700\">Vezi oferta ↗</a></p>" +
-      "<table style=\"border-collapse:collapse;margin:10px 0\"><thead><tr><th style=\"padding:6px 10px;text-align:left;color:#888\">Descriere</th><th style=\"padding:6px 10px;text-align:right;color:#888\">Cant.</th><th style=\"padding:6px 10px;text-align:right;color:#888\">Preț</th><th style=\"padding:6px 10px;text-align:right;color:#888\">Valoare</th></tr></thead><tbody>" + rows + "</tbody></table>" +
+      "<table style=\"border-collapse:collapse;margin:10px 0\"><thead><tr><th style=\"padding:6px 10px;text-align:left;color:#888\">Descriere</th><th style=\"padding:6px 10px;text-align:right;color:#888\">Metri l.</th><th style=\"padding:6px 10px;text-align:right;color:#888\">Preț/m.l.</th><th style=\"padding:6px 10px;text-align:right;color:#888\">Valoare</th></tr></thead><tbody>" + rows + "</tbody></table>" +
       "<p>Subtotal: " + money(o.net) + (o.discountPercent ? " · Discount (" + esc(o.discountPercent) + "%): − " + money(o.discount) : "") + (o.vatRate ? " · TVA (" + esc(o.vatRate) + "%): " + money(o.vat) : "") + "<br><strong style=\"font-size:17px\">Total: " + money(o.total) + "</strong></p>" +
       (o.notes ? "<p style=\"background:#fff8e1;padding:12px;border-radius:8px;white-space:pre-wrap\">" + esc(o.notes) + "</p>" : "") +
       "<p style=\"color:#888;font-size:13px\">Ofertă valabilă până la " + esc(validStr) + ". Pentru confirmare, răspundeți la acest e-mail sau sunați la " + esc(site.phoneDisplay || site.phone || "") + ".</p>" +
@@ -1197,7 +1197,7 @@ thead th:first-child,tbody td:first-child{width:34px;color:var(--mute)}
     <div class="box"><h4>De la</h4><p><strong>${esc(co.name || "Mr.DTF")}</strong>${co.cui ? "<br>CUI: " + esc(co.cui) : ""}${co.reg ? "<br>Reg. Com.: " + esc(co.reg) : ""}${co.address ? "<br>" + esc(co.address) : ""}${site.phone ? "<br>" + esc(site.phoneDisplay || site.phone) : ""}${site.email ? "<br>" + esc(site.email) : ""}</p></div>
     <div class="box"><h4>Pentru</h4><p>${clientLines || "—"}</p></div>
   </div>
-  <table><thead><tr><th>#</th><th>Descriere</th><th class="r">Cant.</th><th class="r">Preț unitar</th><th class="r">Valoare</th></tr></thead><tbody>${rows}</tbody></table>
+  <table><thead><tr><th>#</th><th>Descriere</th><th class="r">Metri liniari</th><th class="r">Preț/m.l.</th><th class="r">Valoare</th></tr></thead><tbody>${rows}</tbody></table>
   <div class="tot">
     <div class="row"><span>Subtotal</span><span>${money(o.net)}</span></div>
     ${o.discountPercent ? '<div class="row" style="color:#c0392b"><span>Discount (' + esc(o.discountPercent) + '%)</span><span>− ' + money(o.discount) + "</span></div>" : ""}
