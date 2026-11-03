@@ -745,7 +745,6 @@
       });
       if (which === "orders") loadOrders();
       else if (which === "messages") loadMessages();
-      else if (which === "inbox") loadInbox();
       else if (which === "site") buildSite();
       else if (which === "order") buildOrder();
       else if (which === "products") buildProducts();
@@ -759,67 +758,6 @@
   });
   if ($("ordersRefresh")) $("ordersRefresh").addEventListener("click", loadOrders);
   if ($("messagesRefresh")) $("messagesRefresh").addEventListener("click", loadMessages);
-
-  /* ---------- Căsuță email (IMAP) ---------- */
-  var inboxLoaded = false;
-  if ($("inboxRefresh")) $("inboxRefresh").addEventListener("click", function () { inboxLoaded = false; loadInbox(); });
-  function setInboxMsg(t, e) { var m = $("inboxMsg"); if (m) { m.textContent = t || ""; m.className = "form-msg" + (e ? " is-error" : ""); } }
-  function loadInbox() {
-    if (inboxLoaded) return; inboxLoaded = true;
-    if ($("inboxDetail")) $("inboxDetail").hidden = true;
-    setInboxMsg("Se încarcă… (poate dura câteva secunde)", false);
-    $("inboxList").innerHTML = "";
-    api("GET", "/api/admin/inbox", null, true).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
-      .then(function (res) {
-        if (res.ok === false && res.d && res.d.error && /401|Neautorizat/.test(res.d.error)) { showLogin("Sesiune expirată."); return; }
-        if (!res.ok) { setInboxMsg((res.d && res.d.error) || "Eroare la încărcare.", true); inboxLoaded = false; return; }
-        var msgs = (res.d && res.d.messages) || [];
-        setInboxMsg(msgs.length ? "" : "Nu sunt mesaje în căsuță.", false);
-        $("inboxList").innerHTML = msgs.map(function (m) {
-          return "<button class=\"inbox-row" + (m.seen ? "" : " unread") + "\" data-uid=\"" + esc(m.uid) + "\">" +
-            "<span class=\"inbox-row__main\"><strong>" + esc(m.from) + "</strong><em>" + esc(m.subject) + "</em></span>" +
-            "<span class=\"inbox-row__date\">" + esc(m.date) + "</span></button>";
-        }).join("");
-        $("inboxList").querySelectorAll(".inbox-row").forEach(function (b) {
-          b.addEventListener("click", function () { openMail(b.dataset.uid, b); });
-        });
-      }).catch(function () { setInboxMsg("Eroare de rețea.", true); inboxLoaded = false; });
-  }
-  function openMail(uid, rowEl) {
-    var d = $("inboxDetail"); d.hidden = false; d.innerHTML = "<p class=\"muted\">Se încarcă mesajul…</p>";
-    d.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    api("GET", "/api/admin/inbox/" + encodeURIComponent(uid), null, true).then(function (r) { return r.json().then(function (x) { return { ok: r.ok, d: x }; }); })
-      .then(function (res) {
-        if (!res.ok) { d.innerHTML = "<p class=\"form-msg is-error\">" + esc((res.d && res.d.error) || "Eroare.") + "</p>"; return; }
-        if (rowEl) rowEl.classList.remove("unread");
-        var m = res.d;
-        var replyTo = (String(m.from || "").match(/<([^>]+)>/) || [null, m.from])[1] || "";
-        var subj = /^re:/i.test(m.subject || "") ? m.subject : ("Re: " + (m.subject || ""));
-        d.innerHTML =
-          "<div class=\"inbox-detail__head\"><div><div class=\"crm-kv\">De la</div><strong>" + esc(m.from) + "</strong></div>" +
-          "<div class=\"crm-kv\">" + esc(m.date) + "</div></div>" +
-          "<h3 class=\"inbox-subj\">" + esc(m.subject || "(fără subiect)") + "</h3>" +
-          "<div class=\"inbox-body\">" + esc(m.text || "").replace(/\n/g, "<br>") + "</div>" +
-          "<div class=\"inbox-reply\"><h4>Răspunde</h4>" +
-          "<input id=\"replyTo\" value=\"" + esc(replyTo) + "\" placeholder=\"Destinatar\" />" +
-          "<input id=\"replySubj\" value=\"" + esc(subj) + "\" placeholder=\"Subiect\" />" +
-          "<textarea id=\"replyBody\" rows=\"5\" placeholder=\"Scrie răspunsul…\"></textarea>" +
-          "<button class=\"btn btn--primary\" id=\"replyBtn\" type=\"button\">Trimite răspunsul</button>" +
-          "<p class=\"form-msg\" id=\"replyMsg\"></p></div>";
-        $("replyBtn").addEventListener("click", function () {
-          var body = $("replyBody").value.trim();
-          if (!body) { $("replyMsg").textContent = "Scrie un răspuns."; $("replyMsg").className = "form-msg is-error"; return; }
-          $("replyBtn").disabled = true; $("replyMsg").textContent = "Se trimite…"; $("replyMsg").className = "form-msg";
-          api("POST", "/api/admin/inbox-reply", { to: $("replyTo").value, subject: $("replySubj").value, body: body }, true)
-            .then(function (r) { return r.json().then(function (x) { return { ok: r.ok, d: x }; }); })
-            .then(function (res2) {
-              $("replyBtn").disabled = false;
-              if (res2.ok && res2.d.ok) { $("replyMsg").textContent = "✓ Răspuns trimis!"; $("replyMsg").className = "form-msg is-ok"; $("replyBody").value = ""; }
-              else { $("replyMsg").textContent = (res2.d && res2.d.error) || "Eroare la trimitere."; $("replyMsg").className = "form-msg is-error"; }
-            }).catch(function () { $("replyBtn").disabled = false; $("replyMsg").textContent = "Eroare de rețea."; $("replyMsg").className = "form-msg is-error"; });
-        });
-      }).catch(function () { d.innerHTML = "<p class=\"form-msg is-error\">Eroare de rețea.</p>"; });
-  }
 
   /* ---------- Comenzi ---------- */
   function esc(s) {
