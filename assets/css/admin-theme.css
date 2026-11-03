@@ -189,6 +189,16 @@ body.admin {
 .dash-empty { color: var(--muted); font-size: .88rem; padding: 10px 2px; }
 .dash-updated { color: var(--muted) !important; font-weight: 500; font-size: .82rem; }
 
+/* ---- CRM: adaugă / șterge client ---- */
+.crm-detail__head-actions { display: flex; gap: 8px; flex: none; flex-wrap: wrap; align-items: flex-start; }
+.crm-del-client { background: rgba(255, 80, 80, .1) !important; border: 1px solid rgba(210, 60, 60, .35) !important; color: #c0392b !important; }
+.crm-del-client:hover { background: rgba(255, 80, 80, .2) !important; }
+.crm-del-client .mr-icon { display: block; }
+.crm-addform__inner { margin: 6px 0 16px; padding: 16px; border-radius: 14px; background: rgba(255, 255, 255, .6); border: 1px solid rgba(15, 15, 16, .1); }
+.crm-add-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.crm-add-grid label { display: grid; gap: 4px; font-size: .82rem; color: var(--muted); }
+@media (max-width: 560px) { .crm-add-grid { grid-template-columns: 1fr; } }
+
 .dash-bars { display: grid; gap: 10px; }
 .dash-bar { display: grid; grid-template-columns: 96px 1fr 34px; align-items: center; gap: 10px; font-size: .84rem; }
 .dash-bar__lbl { color: var(--muted); }

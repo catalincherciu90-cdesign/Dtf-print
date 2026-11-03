@@ -1178,7 +1178,43 @@
   if ($("crmRefresh")) $("crmRefresh").addEventListener("click", loadCRM);
   if ($("crmSearch")) $("crmSearch").addEventListener("input", applyCustomerFilter);
   if ($("crmExport")) $("crmExport").addEventListener("click", exportCSV);
+  if ($("crmAddBtn")) $("crmAddBtn").addEventListener("click", buildAddClientForm);
   function money(n) { return (Number(n) || 0).toFixed(2) + " RON"; }
+
+  /* Formular „Adaugă client" (manual) → POST /api/admin/customers (upsert) */
+  function buildAddClientForm() {
+    var box = $("crmAddForm"); if (!box) return;
+    if (!box.hidden) { box.hidden = true; box.innerHTML = ""; return; } // toggle
+    box.hidden = false;
+    box.innerHTML =
+      "<div class=\"crm-addform__inner\">" +
+        "<div class=\"crm-add-grid\">" +
+          "<label>Nume<input type=\"text\" id=\"acName\" placeholder=\"Nume client / firmă\" /></label>" +
+          "<label>Email<input type=\"email\" id=\"acEmail\" placeholder=\"obligatoriu\" /></label>" +
+          "<label>Telefon<input type=\"tel\" id=\"acPhone\" /></label>" +
+          "<label>Tip<select id=\"acType\"><option value=\"pf\">Persoană fizică</option><option value=\"pj\">Persoană juridică</option></select></label>" +
+        "</div>" +
+        "<label class=\"crm-notes\"><span>Date firmă (pentru persoană juridică)</span><textarea id=\"acCompany\" rows=\"2\" placeholder=\"Denumire, CUI, Reg. Com., adresă…\"></textarea></label>" +
+        "<div class=\"crm-notes__actions\">" +
+          "<button class=\"btn btn--primary btn--sm\" id=\"acSave\" type=\"button\">" + icName("save", 15) + " Salvează client</button>" +
+          "<button class=\"btn btn--ghost btn--sm\" id=\"acCancel\" type=\"button\">Anulează</button>" +
+          "<span class=\"form-msg\" id=\"acMsg\"></span>" +
+        "</div>" +
+      "</div>";
+    $("acCancel").addEventListener("click", function () { box.hidden = true; box.innerHTML = ""; });
+    $("acSave").addEventListener("click", function () {
+      var email = ($("acEmail").value || "").trim();
+      var m = $("acMsg");
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { m.textContent = "Introdu o adresă de email validă."; m.className = "form-msg is-error"; $("acEmail").focus(); return; }
+      var data = { name: $("acName").value.trim(), email: email, phone: $("acPhone").value.trim(), type: $("acType").value, company: $("acCompany").value.trim() };
+      m.textContent = "Se salvează…"; m.className = "form-msg";
+      api("POST", "/api/admin/customers", data, true).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+        .then(function (res) {
+          if (res.ok && res.d.ok) { box.hidden = true; box.innerHTML = ""; loadCRM(); }
+          else { m.textContent = (res.d && res.d.error) || "Eroare la salvare."; m.className = "form-msg is-error"; }
+        }).catch(function () { m.textContent = "Eroare de rețea."; m.className = "form-msg is-error"; });
+    });
+  }
 
   function loadCRM() {
     setMsg("crmMsg", "Se încarcă…", false);
@@ -1312,7 +1348,8 @@
       "<div class=\"crm-detail__head\"><div><h2>" + esc(c.name || "Client") + (c.type === "pj" ? " <span class=\"crm-chip\">Firmă</span>" : "") + "</h2>" +
         "<p class=\"order-meta\">" + esc(c.email || "") + (c.phone ? " · " + esc(c.phone) : "") + "</p>" +
         (c.company ? "<p class=\"crm-kv\" style=\"white-space:pre-wrap;margin-top:4px\">" + esc(c.company) + "</p>" : "") + "</div>" +
-        "<button class=\"btn btn--ghost btn--sm\" id=\"crmBack\" type=\"button\">← Înapoi</button></div>" +
+        "<div class=\"crm-detail__head-actions\"><button class=\"btn btn--ghost btn--sm\" id=\"crmBack\" type=\"button\">← Înapoi</button>" +
+        "<button class=\"btn btn--sm crm-del-client\" id=\"crmDelClient\" type=\"button\">" + icName("trash", 15) + " Șterge client</button></div></div>" +
       "<div class=\"crm-tagedit\"><span class=\"crm-lbl\">Etichete</span>" +
         "<div class=\"crm-tagedit__chips\" id=\"crmTagChips\"></div>" +
         "<div class=\"crm-tagedit__add\"><input type=\"text\" id=\"crmTagInput\" placeholder=\"Adaugă etichetă\" />" +
@@ -1329,6 +1366,17 @@
     el.scrollIntoView({ behavior: "smooth", block: "start" });
     renderTagChips();
     $("crmBack").addEventListener("click", closeCustomer);
+    if ($("crmDelClient")) $("crmDelClient").addEventListener("click", function () {
+      var n = (d.orders || []).length;
+      var msg = "Ștergi clientul „" + (c.name || c.email) + "” din CRM?\n\nSe șterg profilul, etichetele și notele.";
+      if (n) msg += "\n\nCele " + n + " comenzi NU se șterg (rămân în istoric — le poți șterge din tabul Comenzi).";
+      if (!confirm(msg)) return;
+      api("DELETE", "/api/admin/customers/" + encodeURIComponent(c.email), null, true).then(function (r) {
+        if (r.status === 401) { showLogin("Sesiune expirată."); return; }
+        if (r.ok) { closeCustomer(); loadCRM(); setMsg("crmMsg", "✓ Client șters din CRM.", false); }
+        else setMsg("crmMsg", "Eroare la ștergere.", true);
+      }).catch(function () { setMsg("crmMsg", "Eroare de rețea.", true); });
+    });
     $("crmTagAdd").addEventListener("click", function () { addTag($("crmTagInput").value); $("crmTagInput").value = ""; });
     $("crmTagInput").addEventListener("keydown", function (e) {
       if (e.key === "Enter") { e.preventDefault(); addTag($("crmTagInput").value); $("crmTagInput").value = ""; }
