@@ -1165,27 +1165,36 @@ async function handleMessages(request, env, segs, ctx) {
 // imediat după deploy, fără să rămână versiuni vechi în cache-ul browserului.
 // Etichetele PWA injectate în <head>-ul fiecărei pagini HTML: manifest, iconiță
 // iOS, meta pentru mod standalone și înregistrarea service worker-ului.
+// Paginile publice: NU sunt aplicație instalabilă (clientul final nu vede nimic).
+// Păstrăm doar verificarea Google, culoarea temei și service worker-ul (cache/offline).
 const PWA_HEAD =
   '<meta name="google-site-verification" content="Ye4bqP6VR6sjmu8fQKjWC2qtZyarTWNgbpnRdhbgfYI">' +
-  '<link rel="manifest" href="/manifest.json">' +
   '<meta name="theme-color" content="#ffc800">' +
+  '<script>if("serviceWorker" in navigator){addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})});}</script>';
+// Admin: aplicație instalabilă SEPARATĂ, doar pentru proprietar — pornește direct în /admin.
+const PWA_HEAD_ADMIN =
+  '<link rel="manifest" href="/manifest-admin.json">' +
+  '<meta name="theme-color" content="#0b0b0c">' +
   '<meta name="apple-mobile-web-app-capable" content="yes">' +
   '<meta name="mobile-web-app-capable" content="yes">' +
-  '<meta name="apple-mobile-web-app-status-bar-style" content="default">' +
-  '<meta name="apple-mobile-web-app-title" content="MrDTF">' +
+  '<meta name="apple-mobile-web-app-status-bar-style" content="black">' +
+  '<meta name="apple-mobile-web-app-title" content="MrDTF Admin">' +
   '<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">' +
-  '<script>if("serviceWorker" in navigator){addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})});}</script>' +
-  '<script src="/assets/js/pwa-install.js" defer></script>';
-class PwaHead { element(el) { el.append(PWA_HEAD, { html: true }); } }
+  '<script>if("serviceWorker" in navigator){addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})});}</script>';
+class PwaHead {
+  constructor(admin) { this.admin = admin; }
+  element(el) { el.append(this.admin ? PWA_HEAD_ADMIN : PWA_HEAD, { html: true }); }
+}
 
 async function serveAsset(request, env) {
   const res = await env.ASSETS.fetch(request);
   const ct = res.headers.get("Content-Type") || "";
   if (/text\/html/.test(ct)) {
+    const isAdmin = new URL(request.url).pathname.indexOf("/admin") === 0;
     const headers = new Headers(res.headers);
     headers.set("Cache-Control", "no-cache");
     const out = new Response(res.body, { status: res.status, statusText: res.statusText, headers });
-    return new HTMLRewriter().on("head", new PwaHead()).transform(out);
+    return new HTMLRewriter().on("head", new PwaHead(isAdmin)).transform(out);
   }
   if (/text\/css|javascript/.test(ct)) {
     const headers = new Headers(res.headers);
