@@ -470,6 +470,14 @@ async function handleAdmin(request, env, segs) {
         tags: (rec && Array.isArray(rec.tags)) ? rec.tags : [],
       });
     }
+    // DELETE /api/admin/customers/:email — șterge profilul clientului + notele/etichetele CRM.
+    // Comenzile NU se șterg (rămân în istoric); un client cu comenzi va apărea în continuare
+    // ca și contact derivat din comenzi.
+    if (request.method === "DELETE") {
+      await env.CONTENT.delete(USER_PREFIX + email);
+      await env.CONTENT.delete("crmnote:" + email);
+      return json({ ok: true });
+    }
   }
 
   // POST /api/admin/customers — importă/actualizează client în CRM
