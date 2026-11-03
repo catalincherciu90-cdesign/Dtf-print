@@ -1140,10 +1140,29 @@ async function handleMessages(request, env, segs, ctx) {
 
 // Servește asset-urile statice cu revalidare, ca schimbările (HTML/CSS/JS) să apară
 // imediat după deploy, fără să rămână versiuni vechi în cache-ul browserului.
+// Etichetele PWA injectate în <head>-ul fiecărei pagini HTML: manifest, iconiță
+// iOS, meta pentru mod standalone și înregistrarea service worker-ului.
+const PWA_HEAD =
+  '<link rel="manifest" href="/manifest.json">' +
+  '<meta name="theme-color" content="#ffc800">' +
+  '<meta name="apple-mobile-web-app-capable" content="yes">' +
+  '<meta name="mobile-web-app-capable" content="yes">' +
+  '<meta name="apple-mobile-web-app-status-bar-style" content="default">' +
+  '<meta name="apple-mobile-web-app-title" content="MrDTF">' +
+  '<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">' +
+  '<script>if("serviceWorker" in navigator){addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})});}</script>';
+class PwaHead { element(el) { el.append(PWA_HEAD, { html: true }); } }
+
 async function serveAsset(request, env) {
   const res = await env.ASSETS.fetch(request);
   const ct = res.headers.get("Content-Type") || "";
-  if (/text\/html|text\/css|javascript/.test(ct)) {
+  if (/text\/html/.test(ct)) {
+    const headers = new Headers(res.headers);
+    headers.set("Cache-Control", "no-cache");
+    const out = new Response(res.body, { status: res.status, statusText: res.statusText, headers });
+    return new HTMLRewriter().on("head", new PwaHead()).transform(out);
+  }
+  if (/text\/css|javascript/.test(ct)) {
     const headers = new Headers(res.headers);
     headers.set("Cache-Control", "no-cache");
     return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
