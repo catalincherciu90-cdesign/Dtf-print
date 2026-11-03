@@ -1,18 +1,18 @@
 /* ===========================================================
-   MrDTF — Popup de consimțământ cookie-uri (GDPR)
-   Afișează un modal centrat la prima vizită și reține opțiunea
-   utilizatorului în localStorage. Site-ul folosește doar stocare
-   esențială; popup-ul informează și permite acordul pentru
-   eventuale cookie-uri non-esențiale (analiză/marketing).
-   Popup-ul poate fi închis (X / clic pe fundal) — în acest caz
-   se păstrează doar cookie-urile esențiale.
+   MrDTF — Banner de consimțământ cookie-uri (GDPR)
+   Stil „glass" potrivit temei noi (light). Se afișează o singură
+   dată, jos pe ecran, și reține opțiunea în localStorage.
+   Site-ul folosește doar stocare esențială; banner-ul informează
+   și permite acordul pentru eventuale cookie-uri de analiză.
+   Scriptul este autonom: își injectează propriul CSS, deci nu
+   depinde de stilurile paginii și nu afectează designul.
    =========================================================== */
 (function () {
   "use strict";
 
   var KEY = "mrdtf_cookie_consent"; // "all" | "essential"
 
-  // Dacă utilizatorul a ales deja, nu mai afișăm popup-ul.
+  // Dacă utilizatorul a ales deja, nu mai afișăm banner-ul.
   try {
     if (localStorage.getItem(KEY)) return;
   } catch (e) {
@@ -31,29 +31,60 @@
     } catch (e) {}
   }
 
+  function injectCss() {
+    if (document.getElementById("mrdtf-cc-style")) return;
+    var css =
+      ".mrdtf-cc{position:fixed;left:16px;right:16px;bottom:16px;z-index:2000;" +
+      "max-width:760px;margin:0 auto;padding:18px 20px;border-radius:22px;" +
+      "background:rgba(255,255,255,.72);backdrop-filter:blur(18px) saturate(1.1);" +
+      "-webkit-backdrop-filter:blur(18px) saturate(1.1);" +
+      "border:1px solid rgba(255,255,255,.85);box-shadow:0 12px 40px rgba(0,0,0,.14);" +
+      "color:#0f0f10;font-family:-apple-system,'SF Pro Display','Segoe UI',Roboto,Helvetica,Arial,sans-serif;" +
+      "transform:translateY(140%);opacity:0;transition:transform .4s cubic-bezier(.22,1,.36,1),opacity .4s;" +
+      "padding-bottom:calc(18px + env(safe-area-inset-bottom,0px))}" +
+      ".mrdtf-cc.is-visible{transform:none;opacity:1}" +
+      ".mrdtf-cc__row{display:flex;align-items:center;gap:16px;flex-wrap:wrap}" +
+      ".mrdtf-cc__txt{flex:1 1 320px;min-width:0;font-size:14px;line-height:1.5;color:#3a3a40;margin:0}" +
+      ".mrdtf-cc__txt b{color:#0f0f10}" +
+      ".mrdtf-cc__txt a{color:#0f0f10;text-decoration:underline;text-underline-offset:2px}" +
+      ".mrdtf-cc__actions{display:flex;gap:10px;flex:0 0 auto;flex-wrap:wrap}" +
+      ".mrdtf-cc__btn{font:inherit;font-weight:600;font-size:14px;cursor:pointer;" +
+      "padding:11px 18px;border-radius:999px;border:1px solid transparent;transition:transform .15s,filter .15s}" +
+      ".mrdtf-cc__btn:focus-visible{outline:2px solid #0f0f10;outline-offset:2px}" +
+      ".mrdtf-cc__btn:hover{transform:translateY(-1px)}" +
+      ".mrdtf-cc__btn--ghost{background:rgba(255,255,255,.6);border-color:rgba(15,15,16,.18);color:#0f0f10}" +
+      ".mrdtf-cc__btn--cta{background:#111;color:#fff}" +
+      ".mrdtf-cc__btn--cta:hover{filter:brightness(1.12)}" +
+      "@media(max-width:560px){.mrdtf-cc__actions{width:100%}.mrdtf-cc__btn{flex:1 1 auto;text-align:center}}";
+    var st = document.createElement("style");
+    st.id = "mrdtf-cc-style";
+    st.textContent = css;
+    document.head.appendChild(st);
+  }
+
   function build() {
     var wrap = document.createElement("div");
-    wrap.className = "cookie-pop";
+    wrap.className = "mrdtf-cc";
+    wrap.setAttribute("role", "dialog");
+    wrap.setAttribute("aria-live", "polite");
+    wrap.setAttribute("aria-label", "Consimțământ cookie-uri");
     wrap.innerHTML =
-      '<div class="cookie-pop__overlay" data-close="1"></div>' +
-      '<div class="cookie-pop__modal" role="dialog" aria-modal="false" aria-labelledby="cookiePopTitle">' +
-        '<button type="button" class="cookie-pop__x" data-close="1" aria-label="Închide">✕</button>' +
-        '<div class="cookie-pop__icon" aria-hidden="true">🍪</div>' +
-        '<h3 class="cookie-pop__title" id="cookiePopTitle">Folosim cookie-uri</h3>' +
-        '<p class="cookie-pop__text">Folosim stocare esențială pentru funcționarea site-ului ' +
-          "(coș de cumpărături, autentificare). Cu acordul tău putem folosi și cookie-uri pentru " +
-          "analiză și îmbunătățirea experienței. Detalii în " +
-          '<a href="/confidentialitate">Politica de confidențialitate</a>.</p>' +
-        '<div class="cookie-pop__actions">' +
-          '<button type="button" class="btn btn--ghost cookie-pop__btn" data-consent="essential">Doar esențiale</button>' +
-          '<button type="button" class="btn btn--cta cookie-pop__btn" data-consent="all">Accept toate</button>' +
+      '<div class="mrdtf-cc__row">' +
+        '<p class="mrdtf-cc__txt"><b>Folosim cookie-uri.</b> Folosim stocare esențială pentru ' +
+          "funcționarea site-ului. Cu acordul tău putem folosi și cookie-uri pentru analiză și " +
+          "îmbunătățirea experienței. Detalii în " +
+          '<a href="/politica-de-confidentialitate">Politica de confidențialitate</a>.</p>' +
+        '<div class="mrdtf-cc__actions">' +
+          '<button type="button" class="mrdtf-cc__btn mrdtf-cc__btn--ghost" data-consent="essential">Doar esențiale</button>' +
+          '<button type="button" class="mrdtf-cc__btn mrdtf-cc__btn--cta" data-consent="all">Accept toate</button>' +
         "</div>" +
       "</div>";
     return wrap;
   }
 
   function init() {
-    if (document.querySelector(".cookie-pop")) return;
+    if (document.querySelector(".mrdtf-cc")) return;
+    injectCss();
     var pop = build();
     document.body.appendChild(pop);
     requestAnimationFrame(function () { pop.classList.add("is-visible"); });
@@ -61,17 +92,12 @@
     function dismiss(choice) {
       save(choice);
       pop.classList.remove("is-visible");
-      setTimeout(function () { pop.remove(); document.removeEventListener("keydown", onKey); }, 300);
+      setTimeout(function () { pop.remove(); }, 400);
     }
 
-    function onKey(e) { if (e.key === "Escape") dismiss("essential"); }
-    document.addEventListener("keydown", onKey);
-
     pop.addEventListener("click", function (e) {
-      var consentBtn = e.target.closest("[data-consent]");
-      if (consentBtn) return dismiss(consentBtn.getAttribute("data-consent"));
-      // Închidere prin X sau clic pe fundal => doar cookie-uri esențiale.
-      if (e.target.closest("[data-close]")) return dismiss("essential");
+      var btn = e.target.closest("[data-consent]");
+      if (btn) dismiss(btn.getAttribute("data-consent"));
     });
   }
 
