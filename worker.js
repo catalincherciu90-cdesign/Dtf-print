@@ -1143,6 +1143,7 @@ async function handleMessages(request, env, segs, ctx) {
 // Etichetele PWA injectate în <head>-ul fiecărei pagini HTML: manifest, iconiță
 // iOS, meta pentru mod standalone și înregistrarea service worker-ului.
 const PWA_HEAD =
+  '<meta name="google-site-verification" content="Ye4bqP6VR6sjmu8fQKjWC2qtZyarTWNgbpnRdhbgfYI">' +
   '<link rel="manifest" href="/manifest.json">' +
   '<meta name="theme-color" content="#ffc800">' +
   '<meta name="apple-mobile-web-app-capable" content="yes">' +
@@ -1316,7 +1317,9 @@ function maintenancePage(m) {
   const mesaj = escHtml(m.mesaj || "Site-ul revine în curând.");
   const html = `<!DOCTYPE html><html lang="ro"><head><meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="robots" content="noindex" /><title>${title} — MrDTF</title>
+<meta name="robots" content="noindex" />
+<meta name="google-site-verification" content="Ye4bqP6VR6sjmu8fQKjWC2qtZyarTWNgbpnRdhbgfYI" />
+<title>${title} — MrDTF</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500&display=swap" media="print" onload="this.media='all'" />
 <style>
