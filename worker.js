@@ -36,6 +36,7 @@ const DEFAULT_CONTENT = {
   // ---- Conținut temă nouă (Mr.DTF) ----
   site: {
     logo: "/assets/img/logo-mrdtf.png",
+    webmailUrl: "https://mail.unilevelnetwork.ro:2096",
     phone: "+40786022893",
     phoneDisplay: "0786 022 893",
     email: "comenzi@unilevelnetwork.ro",
@@ -740,15 +741,16 @@ async function smtpSend(env, { to, from, subject, html, text, replyTo }) {
   if (!host || !user || !pass) return false;
 
   const socket = connect({ hostname: host, port }, { secureTransport: "on", allowHalfOpen: false });
+  const withTimeout = (p, ms, label) => Promise.race([
+    p, new Promise((_, rej) => setTimeout(() => rej(new Error("timeout " + label)), ms)),
+  ]);
+  try { await withTimeout(socket.opened, 10000, "conectare"); }
+  catch (e) { try { await socket.close(); } catch { /**/ } throw new Error("conectare SMTP eșuată la " + host + ":" + port + " (" + (e && e.message) + ")"); }
   const writer = socket.writable.getWriter();
   const reader = socket.readable.getReader();
   const enc = new TextEncoder();
   const dec = new TextDecoder();
   let buf = "";
-
-  const withTimeout = (p, ms, label) => Promise.race([
-    p, new Promise((_, rej) => setTimeout(() => rej(new Error("timeout " + label)), ms)),
-  ]);
   async function readReply(expect) {
     while (true) {
       const lines = buf.split("\r\n");
@@ -848,11 +850,13 @@ async function imapClient(env) {
   const host = env.SMTP_HOST, port = Number(env.IMAP_PORT) || 993, user = env.SMTP_USER, pass = env.SMTP_PASS;
   if (!host || !user || !pass) throw new Error("Email neconfigurat (SMTP_HOST/USER/PASS).");
   const socket = connect({ hostname: host, port }, { secureTransport: "on", allowHalfOpen: false });
+  const race = (p, ms, l) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error("timeout " + l)), ms))]);
+  try { await race(socket.opened, 10000, "conectare"); }
+  catch (e) { try { await socket.close(); } catch { /**/ } throw new Error("conectare eșuată la " + host + ":" + port + " (" + (e && e.message) + ")"); }
   const writer = socket.writable.getWriter();
   const reader = socket.readable.getReader();
   const enc = new TextEncoder();
   let buf = "";
-  const race = (p, ms, l) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error("timeout " + l)), ms))]);
   async function fill() { const { value, done } = await race(reader.read(), 15000, "imap-read"); if (value) buf += u8ToBin(value); if (done) throw new Error("IMAP: conexiune închisă"); }
   async function line() { let i; while ((i = buf.indexOf("\r\n")) === -1) await fill(); const l = buf.slice(0, i); buf = buf.slice(i + 2); return l; }
   async function take(n) { while (buf.length < n) await fill(); const s = buf.slice(0, n); buf = buf.slice(n); return s; }
