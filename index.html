@@ -608,7 +608,7 @@ REELS.forEach((r,i)=>{
   b.innerHTML='<span class="pl"><svg class="i" viewBox="0 0 24 24" style="fill:#fff;stroke:none"><path d="M8 5v14l11-7z"/></svg></span><span class="cap2"></span>';
   b.querySelector('.cap2').textContent=r.t||('Reel '+(i+1));
   let loaded=false;
-  const play=(mute)=>{if(loaded||!id)return;loaded=true;const f=document.createElement('iframe');f.src='https://www.tiktok.com/player/v1/'+id+'?autoplay=1&loop=1&description=1&music_info=1&rel=0'+(mute?'&muted=1':'');f.allow='autoplay; fullscreen; encrypted-media';f.allowFullscreen=true;f.title=r.t||'Reel TikTok';s.replaceChildren(f)};
+  const play=(mute)=>{if(loaded||!id)return;loaded=true;const f=document.createElement('iframe');f.src='https://www.tiktok.com/player/v1/'+id+'?autoplay=1&loop=1&controls=0&progress_bar=0&play_button=0&volume_control=0&fullscreen_button=0&timestamp=0&music_info=0&description=0&native_context_menu=0&rel=0'+(mute?'&muted=1':'');f.allow='autoplay; fullscreen; encrypted-media';f.allowFullscreen=true;f.title=r.t||'Reel TikTok';s.replaceChildren(f);if(r.u){const ov=document.createElement('a');ov.href=r.u;ov.target='_blank';ov.rel='noopener';ov.setAttribute('aria-label','Deschide pe TikTok');ov.style.cssText='position:absolute;inset:0;z-index:2';s.appendChild(ov);}};
   if(id){
     b.onclick=()=>play(false); /* click = pornire cu sunet (gest utilizator) */
     if('IntersectionObserver' in window){const io2=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){play(true);io2.disconnect();}}),{threshold:.55});io2.observe(c);}
