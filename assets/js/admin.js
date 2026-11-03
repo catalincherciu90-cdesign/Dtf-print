@@ -1283,29 +1283,52 @@
         });
       }).catch(function () { box.innerHTML = "<p class=\"form-msg is-error\">Eroare la încărcarea ofertelor.</p>"; });
   }
-  function offerLineRow() {
+  // Preț lei/ml pe baza pragurilor din site (același calcul ca pe site)
+  function dtfTierPrice(meters, tiers) {
+    if (!meters || !Array.isArray(tiers) || !tiers.length) return 0;
+    for (var i = 0; i < tiers.length; i++) {
+      var nums = String(tiers[i].range || "").match(/\d+/g) || [];
+      var lo = Number(nums[0]) || 0, hi = nums[1] != null ? Number(nums[1]) : Infinity;
+      if (meters >= lo && meters <= hi) return Number(tiers[i].pret) || 0;
+    }
+    return Number(tiers[tiers.length - 1].pret) || 0;
+  }
+  function offerLineRow(cfg) {
+    cfg = cfg || {};
     var row = document.createElement("div");
     row.className = "offer-line";
-    row.innerHTML = "<input class=\"ol-desc\" placeholder=\"Descriere (ex. Transfer DTF, 20 ml)\" />" +
-      "<input class=\"ol-qty\" type=\"number\" min=\"0\" step=\"0.01\" value=\"1\" placeholder=\"Cant.\" />" +
-      "<input class=\"ol-price\" type=\"number\" min=\"0\" step=\"0.01\" value=\"0\" placeholder=\"Preț/buc\" />" +
+    if (cfg.tiered) row.dataset.tiered = "1";
+    row.innerHTML = "<input class=\"ol-desc\" placeholder=\"Descriere\" value=\"" + esc(cfg.desc || "") + "\" />" +
+      "<input class=\"ol-qty\" type=\"number\" min=\"0\" step=\"0.01\" value=\"" + (cfg.qty != null ? cfg.qty : 1) + "\" placeholder=\"" + (cfg.tiered ? "Metri" : "Cant.") + "\" />" +
+      "<input class=\"ol-price\" type=\"number\" min=\"0\" step=\"0.01\" value=\"" + (cfg.price != null ? cfg.price : 0) + "\" placeholder=\"Preț/buc\" />" +
       "<button class=\"btn btn--ghost btn--sm ol-rm\" type=\"button\" title=\"Șterge linia\">✕</button>";
     row.querySelector(".ol-rm").addEventListener("click", function () { row.remove(); });
+    if (cfg.tiered) {
+      var tiers = (content && content.site && content.site.dtfTiers) || [];
+      var qtyEl = row.querySelector(".ol-qty"), priceEl = row.querySelector(".ol-price");
+      var upd = function () { var pr = dtfTierPrice(Number(qtyEl.value) || 0, tiers); if (pr) priceEl.value = pr; };
+      qtyEl.addEventListener("input", upd);
+      upd();
+    }
     return row;
   }
   function buildOfferForm(c) {
     var box = $("offerBuilder"); if (!box) return;
     if (!box.hidden) { box.hidden = true; box.innerHTML = ""; return; }
     box.hidden = false;
+    var tiers = (content && content.site && content.site.dtfTiers) || [];
+    var tiersHint = tiers.length ? "<p class=\"crm-kv\" style=\"margin:4px 0 0\">Praguri preț DTF (din site): " + tiers.map(function (t) { return esc(t.pret) + " lei/ml (" + esc(t.range) + ")"; }).join(" · ") + "</p>" : "";
     box.innerHTML =
       "<div class=\"offer-form\"><div class=\"offer-lines\" id=\"offerLines\"></div>" +
-      "<button class=\"btn btn--ghost btn--sm\" id=\"offerAddLine\" type=\"button\">＋ Adaugă linie</button>" +
+      "<div class=\"offer-addrow\"><button class=\"btn btn--ghost btn--sm\" id=\"offerAddDtf\" type=\"button\">＋ Print DTF (preț după praguri)</button>" +
+      "<button class=\"btn btn--ghost btn--sm\" id=\"offerAddLine\" type=\"button\">＋ Linie liberă</button></div>" + tiersHint +
       "<div class=\"offer-opts\"><label><input type=\"checkbox\" id=\"offerVat\" checked /> TVA 19%</label>" +
       "<label>Valabilitate (zile) <input type=\"number\" id=\"offerValidity\" value=\"14\" min=\"0\" max=\"365\" /></label></div>" +
       "<label class=\"crm-notes\"><span>Mențiuni (opțional)</span><textarea id=\"offerNotes\" rows=\"2\" placeholder=\"Termene, condiții, observații…\"></textarea></label>" +
       "<div class=\"crm-notes__actions\"><button class=\"btn btn--primary btn--sm\" id=\"offerCreate\" type=\"button\">Creează oferta</button><span class=\"form-msg\" id=\"offerMsg\"></span></div></div>";
     var lines = $("offerLines");
-    lines.appendChild(offerLineRow());
+    lines.appendChild(offerLineRow({ tiered: true, desc: "Transfer DTF la metru liniar (lățime 90 cm)", qty: 1 }));
+    $("offerAddDtf").addEventListener("click", function () { lines.appendChild(offerLineRow({ tiered: true, desc: "Transfer DTF la metru liniar (lățime 90 cm)", qty: 1 })); });
     $("offerAddLine").addEventListener("click", function () { lines.appendChild(offerLineRow()); });
     $("offerCreate").addEventListener("click", function () {
       var items = [];
