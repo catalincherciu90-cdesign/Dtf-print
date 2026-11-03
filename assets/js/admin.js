@@ -934,7 +934,9 @@
         delivHtml +
         extraHtml +
         (note ? "<p class=\"order-message\">„" + esc(note) + "”</p>" : "") +
-        "<div class=\"order-card__foot\"><div class=\"order-files\">" + filesHtml + "</div>" +
+        "<div class=\"order-card__foot\"><div class=\"order-files\">" + filesHtml +
+          (o.email ? " <button class=\"btn btn--primary btn--sm crm-import\" data-name=\"" + esc(o.name || "") + "\" data-email=\"" + esc(o.email) + "\" data-phone=\"" + esc(o.phone || "") + "\" data-type=\"" + esc(o.billingType || "pf") + "\" data-company=\"" + esc(o.billing || "") + "\">" + icName("user", 15) + " Importă client</button>" : "") +
+          "</div>" +
           "<button class=\"order-del\" data-id=\"" + esc(o.id) + "\" title=\"Șterge comanda\">" + icName("trash", 17) + "</button>" +
         "</div>" +
       "</div>";
@@ -948,6 +950,9 @@
     });
     list.querySelectorAll(".order-del").forEach(function (b) {
       b.addEventListener("click", function () { deleteOrder(b.dataset.id); });
+    });
+    list.querySelectorAll(".crm-import").forEach(function (b) {
+      b.addEventListener("click", function () { importClient({ name: b.dataset.name, email: b.dataset.email, phone: b.dataset.phone, type: b.dataset.type || "pf", company: b.dataset.company || "" }, b); });
     });
   }
 
@@ -1025,8 +1030,11 @@
         "<div class=\"order-grid\">" + (contact.join(" · ") || "<span class='order-meta'>—</span>") + "</div>" +
         "<p class=\"order-message\">" + esc(m.message).replace(/\n/g, "<br>") + "</p>" +
         "<div class=\"order-card__foot\">" +
+          "<div style=\"display:flex;gap:8px;flex-wrap:wrap\">" +
           "<button class=\"btn btn--ghost btn--sm msg-read\" data-id=\"" + esc(m.id) + "\" data-read=\"" + (unread ? "1" : "0") + "\">" +
             (unread ? icName("check", 15) + " Marchează citit" : "Marchează necitit") + "</button>" +
+          (m.email ? "<button class=\"btn btn--primary btn--sm crm-import\" data-name=\"" + esc(m.name) + "\" data-email=\"" + esc(m.email) + "\" data-phone=\"" + esc(m.phone || "") + "\">" + icName("user", 15) + " Importă client</button>" : "") +
+          "</div>" +
           "<button class=\"order-del msg-del\" data-id=\"" + esc(m.id) + "\" title=\"Șterge mesajul\">" + icName("trash", 17) + "</button>" +
         "</div>" +
       "</div>";
@@ -1038,6 +1046,22 @@
     list.querySelectorAll(".msg-del").forEach(function (b) {
       b.addEventListener("click", function () { deleteMessage(b.dataset.id); });
     });
+    list.querySelectorAll(".crm-import").forEach(function (b) {
+      b.addEventListener("click", function () { importClient({ name: b.dataset.name, email: b.dataset.email, phone: b.dataset.phone, type: b.dataset.type || "pf", company: b.dataset.company || "" }, b); });
+    });
+  }
+
+  // Importă/actualizează un client în CRM (din Mesaje sau Comenzi)
+  function importClient(data, btn) {
+    if (!data.email) { alert("Clientul nu are adresă de email — nu-l pot importa."); return; }
+    var old = btn ? btn.innerHTML : "";
+    if (btn) { btn.disabled = true; btn.textContent = "Se importă…"; }
+    api("POST", "/api/admin/customers", data, true).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        if (btn) btn.disabled = false;
+        if (res.ok && res.d.ok) { if (btn) { btn.innerHTML = "✓ Importat în CRM"; btn.classList.remove("btn--primary"); btn.classList.add("btn--ghost"); } }
+        else { if (btn) btn.innerHTML = old; alert((res.d && res.d.error) || "Eroare la import."); }
+      }).catch(function () { if (btn) { btn.disabled = false; btn.innerHTML = old; } alert("Eroare de rețea."); });
   }
 
   function markMessageRead(id, read) {
@@ -1192,8 +1216,9 @@
     var el = $("crmDetail");
     el.hidden = false;
     el.innerHTML =
-      "<div class=\"crm-detail__head\"><div><h2>" + esc(c.name || "Client") + "</h2>" +
-        "<p class=\"order-meta\">" + esc(c.email) + (c.phone ? " · " + esc(c.phone) : "") + "</p></div>" +
+      "<div class=\"crm-detail__head\"><div><h2>" + esc(c.name || "Client") + (c.type === "pj" ? " <span class=\"crm-chip\">Firmă</span>" : "") + "</h2>" +
+        "<p class=\"order-meta\">" + esc(c.email || "") + (c.phone ? " · " + esc(c.phone) : "") + "</p>" +
+        (c.company ? "<p class=\"crm-kv\" style=\"white-space:pre-wrap;margin-top:4px\">" + esc(c.company) + "</p>" : "") + "</div>" +
         "<button class=\"btn btn--ghost btn--sm\" id=\"crmBack\" type=\"button\">← Înapoi</button></div>" +
       "<div class=\"crm-tagedit\"><span class=\"crm-lbl\">Etichete</span>" +
         "<div class=\"crm-tagedit__chips\" id=\"crmTagChips\"></div>" +
@@ -1204,7 +1229,10 @@
         "<textarea id=\"crmNotes\" rows=\"4\" placeholder=\"Observații despre client, preferințe, follow-up…\">" + esc(d.notes || "") + "</textarea></label>" +
       "<div class=\"crm-notes__actions\"><button class=\"btn btn--primary btn--sm\" id=\"crmSave\" type=\"button\">" + icName("save", 15) + " Salvează</button>" +
         "<span class=\"form-msg\" id=\"crmSaveMsg\"></span></div>" +
-      "<h3 class=\"crm-h\">Comenzi (" + (d.orders || []).length + ")</h3><div class=\"crm-orders\">" + orders + "</div>";
+      "<h3 class=\"crm-h\">Comenzi (" + (d.orders || []).length + ")</h3><div class=\"crm-orders\">" + orders + "</div>" +
+      "<h3 class=\"crm-h\">Oferte</h3><div class=\"crm-offers\" id=\"crmOffers\"><p class=\"order-meta\">Se încarcă…</p></div>" +
+      "<button class=\"btn btn--primary btn--sm\" id=\"crmNewOfferBtn\" type=\"button\">＋ Creează ofertă</button>" +
+      "<div id=\"offerBuilder\" hidden></div>";
     el.scrollIntoView({ behavior: "smooth", block: "start" });
     renderTagChips();
     $("crmBack").addEventListener("click", closeCustomer);
@@ -1214,6 +1242,79 @@
     });
     el.querySelectorAll(".crm-tagsugg").forEach(function (b) { b.addEventListener("click", function () { addTag(b.dataset.t); }); });
     $("crmSave").addEventListener("click", function () { saveCrm(c.email); });
+    if ($("crmNewOfferBtn")) $("crmNewOfferBtn").addEventListener("click", function () { buildOfferForm(c); });
+    loadOffers(c.email);
+  }
+
+  /* ---------- Oferte (CRM) ---------- */
+  function loadOffers(email) {
+    var box = $("crmOffers"); if (!box) return;
+    api("GET", "/api/admin/offers?email=" + encodeURIComponent(email || ""), null, true)
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var offers = (d && d.offers) || [];
+        if (!offers.length) { box.innerHTML = "<p class=\"order-meta\">Nicio ofertă încă.</p>"; return; }
+        box.innerHTML = offers.map(function (o) {
+          return "<div class=\"crm-order\"><div><strong>" + esc(o.number) + "</strong> <span class=\"order-meta\">" + fmtDate(o.createdAt) + "</span></div>" +
+            "<div class=\"crm-order__total\"><strong>" + money(o.total) + "</strong></div>" +
+            "<div style=\"display:flex;gap:8px\"><a class=\"btn btn--ghost btn--sm\" href=\"/oferta/" + esc(o.id) + "\" target=\"_blank\" rel=\"noopener\">Deschide ↗</a>" +
+            "<button class=\"order-del offer-del\" data-id=\"" + esc(o.id) + "\" title=\"Șterge oferta\">" + icName("trash", 15) + "</button></div></div>";
+        }).join("");
+        box.querySelectorAll(".offer-del").forEach(function (b) {
+          b.addEventListener("click", function () {
+            if (!confirm("Ștergi oferta?")) return;
+            api("DELETE", "/api/admin/offers/" + encodeURIComponent(b.dataset.id), null, true).then(function () { loadOffers(email); });
+          });
+        });
+      }).catch(function () { box.innerHTML = "<p class=\"form-msg is-error\">Eroare la încărcarea ofertelor.</p>"; });
+  }
+  function offerLineRow() {
+    var row = document.createElement("div");
+    row.className = "offer-line";
+    row.innerHTML = "<input class=\"ol-desc\" placeholder=\"Descriere (ex. Transfer DTF, 20 ml)\" />" +
+      "<input class=\"ol-qty\" type=\"number\" min=\"0\" step=\"0.01\" value=\"1\" placeholder=\"Cant.\" />" +
+      "<input class=\"ol-price\" type=\"number\" min=\"0\" step=\"0.01\" value=\"0\" placeholder=\"Preț/buc\" />" +
+      "<button class=\"btn btn--ghost btn--sm ol-rm\" type=\"button\" title=\"Șterge linia\">✕</button>";
+    row.querySelector(".ol-rm").addEventListener("click", function () { row.remove(); });
+    return row;
+  }
+  function buildOfferForm(c) {
+    var box = $("offerBuilder"); if (!box) return;
+    if (!box.hidden) { box.hidden = true; box.innerHTML = ""; return; }
+    box.hidden = false;
+    box.innerHTML =
+      "<div class=\"offer-form\"><div class=\"offer-lines\" id=\"offerLines\"></div>" +
+      "<button class=\"btn btn--ghost btn--sm\" id=\"offerAddLine\" type=\"button\">＋ Adaugă linie</button>" +
+      "<div class=\"offer-opts\"><label><input type=\"checkbox\" id=\"offerVat\" checked /> TVA 19%</label>" +
+      "<label>Valabilitate (zile) <input type=\"number\" id=\"offerValidity\" value=\"14\" min=\"0\" max=\"365\" /></label></div>" +
+      "<label class=\"crm-notes\"><span>Mențiuni (opțional)</span><textarea id=\"offerNotes\" rows=\"2\" placeholder=\"Termene, condiții, observații…\"></textarea></label>" +
+      "<div class=\"crm-notes__actions\"><button class=\"btn btn--primary btn--sm\" id=\"offerCreate\" type=\"button\">Creează oferta</button><span class=\"form-msg\" id=\"offerMsg\"></span></div></div>";
+    var lines = $("offerLines");
+    lines.appendChild(offerLineRow());
+    $("offerAddLine").addEventListener("click", function () { lines.appendChild(offerLineRow()); });
+    $("offerCreate").addEventListener("click", function () {
+      var items = [];
+      lines.querySelectorAll(".offer-line").forEach(function (row) {
+        var desc = row.querySelector(".ol-desc").value.trim();
+        if (!desc) return;
+        items.push({ desc: desc, qty: Number(row.querySelector(".ol-qty").value) || 0, price: Number(row.querySelector(".ol-price").value) || 0 });
+      });
+      var om = $("offerMsg");
+      if (!items.length) { om.textContent = "Adaugă cel puțin o linie cu descriere."; om.className = "form-msg is-error"; return; }
+      om.textContent = "Se creează…"; om.className = "form-msg";
+      var payload = {
+        client: { name: c.name, email: c.email, phone: c.phone, company: c.company, type: c.type },
+        items: items, vat: $("offerVat").checked, validity: Number($("offerValidity").value) || 14, notes: $("offerNotes").value,
+      };
+      api("POST", "/api/admin/offers", payload, true).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+        .then(function (res) {
+          if (res.ok && res.d.ok) {
+            om.innerHTML = "✓ Ofertă creată (" + esc(res.d.number) + "). <a href=\"" + esc(res.d.url) + "\" target=\"_blank\" rel=\"noopener\"><strong>Deschide ↗</strong></a>";
+            om.className = "form-msg is-ok";
+            loadOffers(c.email);
+          } else { om.textContent = (res.d && res.d.error) || "Eroare la creare."; om.className = "form-msg is-error"; }
+        }).catch(function () { om.textContent = "Eroare de rețea."; om.className = "form-msg is-error"; });
+    });
   }
 
   function renderTagChips() {

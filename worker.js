@@ -19,6 +19,7 @@ const FILE_PREFIX = "orderfile:";
 const MEDIA_PREFIX = "media:";
 const USER_PREFIX = "user:";
 const MSG_PREFIX = "msg:";
+const OFFER_PREFIX = "offer:";
 const MAX_FILE_MB = 20;
 const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
 const MAX_IMG_MB = 5;
@@ -428,13 +429,89 @@ async function handleAdmin(request, env, segs) {
       const fallback = orders[0] || {};
       return json({
         customer: user
-          ? { email: user.email, name: user.name, phone: user.phone, createdAt: user.createdAt }
-          : { email, name: fallback.name || "", phone: fallback.phone || "", createdAt: null },
+          ? { email: user.email, name: user.name, phone: user.phone, createdAt: user.createdAt, type: user.type || "pf", company: user.company || "" }
+          : { email, name: fallback.name || "", phone: fallback.phone || "", createdAt: null, type: fallback.billingType || "pf", company: fallback.billing || "" },
         orders,
         notes: (rec && rec.notes) || "",
         tags: (rec && Array.isArray(rec.tags)) ? rec.tags : [],
       });
     }
+  }
+
+  // POST /api/admin/customers — importă/actualizează client în CRM
+  if (sub === "customers" && !segs[2] && request.method === "POST") {
+    const b = await request.json().catch(() => ({}));
+    const email = normEmail(b.email);
+    if (!email) return err("Clientul nu are adresă de email — nu-l pot importa în CRM.");
+    const existing = (await env.CONTENT.get(USER_PREFIX + email, "json")) || {};
+    const rec = {
+      ...existing, email,
+      name: String(b.name || existing.name || "").slice(0, 140),
+      phone: String(b.phone || existing.phone || "").slice(0, 40),
+      type: b.type === "pj" ? "pj" : (existing.type || "pf"),
+      company: (b.company != null && b.company !== "") ? String(b.company).slice(0, 1200) : (existing.company || ""),
+      createdAt: existing.createdAt || new Date().toISOString(),
+      imported: true,
+    };
+    await env.CONTENT.put(USER_PREFIX + email, JSON.stringify(rec));
+    return json({ ok: true, email: email });
+  }
+
+  // POST /api/admin/offers — creează o ofertă
+  if (sub === "offers" && !segs[2] && request.method === "POST") {
+    const b = await request.json().catch(() => ({}));
+    const items = (Array.isArray(b.items) ? b.items : []).slice(0, 50).map((it) => ({
+      desc: String(it.desc || "").slice(0, 200),
+      qty: Math.max(0, Number(it.qty) || 0),
+      price: Math.max(0, Number(it.price) || 0),
+    })).filter((it) => it.desc);
+    if (!items.length) return err("Adaugă cel puțin o linie în ofertă.");
+    const vatRate = (b.vat === false) ? 0 : (Number(b.vatRate) >= 0 ? Number(b.vatRate) : 19);
+    const net = Number(items.reduce((s, it) => s + it.qty * it.price, 0).toFixed(2));
+    const vat = Number((net * vatRate / 100).toFixed(2));
+    const total = Number((net + vat).toFixed(2));
+    const oid = genId();
+    const cl = b.client || {};
+    const offer = {
+      id: oid, createdAt: new Date().toISOString(),
+      number: String(b.number || ("OF-" + new Date().getFullYear() + "-" + oid.slice(0, 5).toUpperCase())).slice(0, 40),
+      client: {
+        name: String(cl.name || "").slice(0, 140), email: normEmail(cl.email),
+        phone: String(cl.phone || "").slice(0, 40), company: String(cl.company || "").slice(0, 1200),
+        type: cl.type === "pj" ? "pj" : "pf",
+      },
+      items, vatRate, net, vat, total,
+      validity: Math.max(0, Math.min(365, Number(b.validity) || 14)),
+      notes: String(b.notes || "").slice(0, 2000),
+    };
+    await env.CONTENT.put(OFFER_PREFIX + oid, JSON.stringify(offer));
+    return json({ ok: true, id: oid, number: offer.number, url: "/oferta/" + oid });
+  }
+
+  // GET /api/admin/offers[?email=] — listă oferte (toate sau pe client)
+  if (sub === "offers" && !segs[2] && request.method === "GET") {
+    const u = new URL(request.url);
+    const email = normEmail(u.searchParams.get("email"));
+    const out = [];
+    let cursor;
+    do {
+      const res = await env.CONTENT.list({ prefix: OFFER_PREFIX, cursor });
+      for (const k of res.keys) {
+        const o = await env.CONTENT.get(k.name, "json");
+        if (o && (!email || (o.client && o.client.email === email))) {
+          out.push({ id: o.id, number: o.number, createdAt: o.createdAt, total: o.total, client: o.client });
+        }
+      }
+      cursor = res.list_complete ? null : res.cursor;
+    } while (cursor);
+    out.sort((a, b2) => (b2.createdAt || "").localeCompare(a.createdAt || ""));
+    return json({ offers: out });
+  }
+
+  // DELETE /api/admin/offers/:id
+  if (sub === "offers" && segs[2] && request.method === "DELETE") {
+    await env.CONTENT.delete(OFFER_PREFIX + segs[2]);
+    return json({ ok: true });
   }
 
   return err("Endpoint inexistent.", 404);
@@ -1168,6 +1245,80 @@ async function serveProductPage(request, env) {
   return new Response(res.body, { status: 200, statusText: "OK", headers });
 }
 
+// ---- Pagină publică ofertă (/oferta/:id) în stilul temei ----
+async function serveOfferPage(request, env, id) {
+  if (!env.CONTENT || !id) return new Response("Ofertă inexistentă.", { status: 404 });
+  const o = await env.CONTENT.get(OFFER_PREFIX + id, "json");
+  if (!o) return new Response("Ofertă inexistentă.", { status: 404 });
+  let site = {};
+  try { const c = await getContent(env); site = c.site || {}; } catch { /* fallback */ }
+  const co = site.company || {};
+  const esc = escHtml;
+  const money = (n) => (Number(n) || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " lei";
+  const d = new Date(o.createdAt);
+  const dateStr = isNaN(d) ? "" : d.toLocaleDateString("ro-RO");
+  const valid = new Date((isNaN(d) ? Date.now() : d.getTime()) + (o.validity || 14) * 86400000).toLocaleDateString("ro-RO");
+  const rows = (o.items || []).map((it, i) => (
+    "<tr><td>" + (i + 1) + "</td><td>" + esc(it.desc) + "</td><td class=\"r\">" + esc(it.qty) +
+    "</td><td class=\"r\">" + money(it.price) + "</td><td class=\"r\">" + money(it.qty * it.price) + "</td></tr>"
+  )).join("");
+  const clientLines = [
+    o.client && o.client.company ? esc(o.client.company).replace(/\n/g, "<br>") : "",
+    o.client && o.client.name ? "<strong>" + esc(o.client.name) + "</strong>" : "",
+    o.client && o.client.email ? esc(o.client.email) : "",
+    o.client && o.client.phone ? esc(o.client.phone) : "",
+  ].filter(Boolean).join("<br>");
+  const html = `<!DOCTYPE html><html lang="ro"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ofertă ${esc(o.number)} — Mr.DTF</title>
+<meta name="robots" content="noindex">
+<style>
+:root{--ink:#0f0f10;--mute:#5c5c63;--y:#ffc800;--bg:#f5f5f7}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.55}
+.sheet{max-width:820px;margin:24px auto;background:#fff;border-radius:22px;box-shadow:0 20px 60px rgba(0,0,0,.1);overflow:hidden}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding:28px 32px;background:linear-gradient(180deg,#fff,#fafafa);border-bottom:3px solid var(--y);flex-wrap:wrap}
+.top img{height:54px}
+.badge{text-align:right}.badge h1{margin:0;font-size:26px;letter-spacing:-.02em}.badge .n{color:var(--mute);font-size:14px;margin-top:4px}
+.meta{display:flex;flex-wrap:wrap;gap:22px;padding:20px 32px;border-bottom:1px solid #eee}
+.meta .box{flex:1 1 240px}.meta h4{margin:0 0 6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.meta p{margin:0;font-size:14.5px}
+table{width:100%;border-collapse:collapse;margin:0}
+th,td{padding:12px 14px;text-align:left;font-size:14.5px;border-bottom:1px solid #eee}
+th{background:#faf7ea;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#7a6b2e}
+td.r,th.r{text-align:right;white-space:nowrap}
+thead th:first-child,tbody td:first-child{width:34px;color:var(--mute)}
+.tot{margin-left:auto;width:min(340px,100%);padding:16px 32px}
+.tot .row{display:flex;justify-content:space-between;padding:6px 0;font-size:15px}
+.tot .row.grand{border-top:2px solid var(--y);margin-top:8px;padding-top:12px;font-size:20px;font-weight:800}
+.notes{padding:0 32px 10px;color:var(--mute);font-size:14px;white-space:pre-wrap}
+.foot{padding:20px 32px 30px;color:var(--mute);font-size:13px;border-top:1px solid #eee}
+.bar{max-width:820px;margin:0 auto 24px;display:flex;gap:10px;justify-content:flex-end;padding:0 8px}
+.btn{cursor:pointer;border:none;border-radius:12px;padding:12px 22px;font:inherit;font-weight:700;font-size:15px;background:#111;color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+@media print{.bar{display:none}body{background:#fff}.sheet{box-shadow:none;margin:0;max-width:100%;border-radius:0}}
+</style></head><body>
+<div class="bar"><button class="btn" onclick="window.print()">⎙ Printează / Salvează PDF</button></div>
+<div class="sheet">
+  <div class="top">
+    <img src="${esc(site.logo || "/assets/img/logo-mrdtf.png")}" alt="Mr.DTF">
+    <div class="badge"><h1>Ofertă</h1><div class="n">Nr. ${esc(o.number)} · ${esc(dateStr)}</div><div class="n">Valabilă până la ${esc(valid)}</div></div>
+  </div>
+  <div class="meta">
+    <div class="box"><h4>De la</h4><p><strong>${esc(co.name || "Mr.DTF")}</strong>${co.cui ? "<br>CUI: " + esc(co.cui) : ""}${co.reg ? "<br>Reg. Com.: " + esc(co.reg) : ""}${co.address ? "<br>" + esc(co.address) : ""}${site.phone ? "<br>" + esc(site.phoneDisplay || site.phone) : ""}${site.email ? "<br>" + esc(site.email) : ""}</p></div>
+    <div class="box"><h4>Pentru</h4><p>${clientLines || "—"}</p></div>
+  </div>
+  <table><thead><tr><th>#</th><th>Descriere</th><th class="r">Cant.</th><th class="r">Preț unitar</th><th class="r">Valoare</th></tr></thead><tbody>${rows}</tbody></table>
+  <div class="tot">
+    <div class="row"><span>Subtotal</span><span>${money(o.net)}</span></div>
+    ${o.vatRate ? '<div class="row"><span>TVA (' + esc(o.vatRate) + '%)</span><span>' + money(o.vat) + "</span></div>" : '<div class="row"><span>TVA</span><span>neaplicabil</span></div>'}
+    <div class="row grand"><span>Total</span><span>${money(o.total)}</span></div>
+  </div>
+  ${o.notes ? '<div class="notes"><strong>Mențiuni:</strong>\n' + esc(o.notes) + "</div>" : ""}
+  <div class="foot">Mulțumim pentru interes! Pentru confirmare, răspunde la ${esc(site.email || "comenzi@unilevelnetwork.ro")} sau sună la ${esc(site.phoneDisplay || site.phone || "")}.<br>Prețurile ${o.vatRate ? "includ" : "nu includ"} TVA conform celor de mai sus. Oferta are caracter orientativ și poate fi ajustată în funcție de specificațiile finale.</div>
+</div>
+</body></html>`;
+  return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
+}
+
 // ---- Mod mentenanță (site în construcție) ----
 function escHtml(s) {
   return String(s == null ? "" : s)
@@ -1178,6 +1329,7 @@ function isMaintenanceExempt(path) {
   return path === "/admin" || path.startsWith("/admin/")
     || path.startsWith("/api/")
     || path.startsWith("/assets/")
+    || path.startsWith("/oferta/")
     || /\.[a-z0-9]+$/i.test(path);
 }
 async function maintenanceState(env) {
@@ -1351,6 +1503,7 @@ export default {
       }
 
       if (path === "/" || path === "/index.html") return serveHome(request, env);
+      if (path.startsWith("/oferta/")) return serveOfferPage(request, env, decodeURIComponent(path.slice(8)));
 
       // Pagini vechi eliminate în tema nouă → redirect permanent la homepage.
       if (path === "/produs" || path.startsWith("/produs/")
