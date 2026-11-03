@@ -29,7 +29,7 @@ const STATUSES = ["Nouă", "În lucru", "Trimisă", "Finalizată", "Anulată"];
 // ---- Conținut implicit (folosit dacă KV e gol) ----
 const DEFAULT_CONTENT = {
   maintenance: {
-    enabled: true,
+    enabled: false,
     title: "Revenim în curând",
     mesaj: "Lucrăm la câteva îmbunătățiri pentru tine. Site-ul revine online în scurt timp. Mulțumim pentru răbdare!",
   },
@@ -138,10 +138,10 @@ const DEFAULT_CONTENT = {
   ],
   footer: {
     tagline: "Specialiști în print DTF premium la metru liniar și produse blank pentru personalizare.",
-    phone: "+40 123 456 789",
+    phone: "+40786022893",
     email: "comenzi@unilevelnetwork.ro",
-    schedule: "L–V: 09:00 – 17:00",
-    copyright: "© 2024 MrDTF — Print DTF Premium. Toate drepturile rezervate.",
+    schedule: "Luni – Vineri: NON STOP",
+    copyright: "© 2026 MrDTF — Print DTF Premium. Toate drepturile rezervate.",
   },
   banners: {
     heroBg: "",
