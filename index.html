@@ -595,11 +595,12 @@ const cal=document.querySelector('.cal');
 cal.onclick=()=>{cal.classList.add('rs');void cal.offsetWidth;cal.classList.remove('rs')};
 (function(){
 const PROFILE=(TT.profileUrl||'');
-const REELS=(Array.isArray(TT.videos)?TT.videos:[]).map(v=>typeof v==='string'?({u:v,t:''}):({u:(v.url||v.u||v.id||''),t:(v.title||v.t||'')}));
-const row=document.getElementById('rrow'),ttp=document.getElementById('ttp');
+const REELS=(Array.isArray(TT.videos)?TT.videos:[]).map(v=>typeof v==='string'?({u:v,t:''}):({u:(v.url||v.u||v.id||''),t:(v.title||v.t||'')})).filter(r=>r.u);
+const sec=document.getElementById('reels'),row=document.getElementById('rrow'),ttp=document.getElementById('ttp');
+/* Secțiunea TikTok apare doar când e activată din admin ȘI există videoclipuri. */
+if(!(TT.enabled===true&&REELS.length)){if(sec)sec.style.display='none';return;}
 if(PROFILE)ttp.href=PROFILE;else ttp.style.display='none';
-const items=REELS.length?REELS:Array.from({length:5},()=>({t:'Aici vor apărea reels-urile tale'}));
-items.forEach((r,i)=>{
+REELS.forEach((r,i)=>{
   const m=(r.u||'').match(/video\/(\d+)/),id=m?m[1]:(/^\d+$/.test(r.u||'')?r.u:'');
   const c=document.createElement('div');c.className='rc glass rv';c.style.transitionDelay=(i*.08)+'s';
   const s=document.createElement('div');s.className='scr';
@@ -607,6 +608,7 @@ items.forEach((r,i)=>{
   b.innerHTML='<span class="pl"><svg class="i" viewBox="0 0 24 24" style="fill:#fff;stroke:none"><path d="M8 5v14l11-7z"/></svg></span><span class="cap2"></span>';
   b.querySelector('.cap2').textContent=r.t||('Reel '+(i+1));
   if(id)b.onclick=()=>{const f=document.createElement('iframe');f.src='https://www.tiktok.com/player/v1/'+id+'?autoplay=1&description=1&music_info=1&rel=0';f.allow='autoplay; fullscreen';f.allowFullscreen=true;f.title=r.t||'Reel TikTok';s.replaceChildren(f)};
+  else if(r.u)b.onclick=()=>window.open(r.u,'_blank','noopener');
   s.appendChild(b);c.appendChild(s);row.appendChild(c);
 });
 })();
