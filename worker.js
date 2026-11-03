@@ -466,7 +466,7 @@ async function handleAdmin(request, env, segs) {
       price: Math.max(0, Number(it.price) || 0),
     })).filter((it) => it.desc);
     if (!items.length) return err("Adaugă cel puțin o linie în ofertă.");
-    const vatRate = (b.vat === false) ? 0 : (Number(b.vatRate) >= 0 ? Number(b.vatRate) : 19);
+    const vatRate = (b.vat === false) ? 0 : (Number(b.vatRate) >= 0 ? Number(b.vatRate) : 21);
     const net = Number(items.reduce((s, it) => s + it.qty * it.price, 0).toFixed(2));
     const vat = Number((net * vatRate / 100).toFixed(2));
     const total = Number((net + vat).toFixed(2));
