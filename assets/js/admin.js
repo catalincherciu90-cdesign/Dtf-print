@@ -177,6 +177,7 @@
     sec("Date firmă", function (p) { if (s.company) buildInto(p, s.company, "site.company"); });
     sec("Prețuri pe metru (trepte)", function (p) { if (s.dtfTiers) buildInto(p, s.dtfTiers, "site.dtfTiers"); });
     sec("Galerie „Ce facem noi” (4 imagini)", function (p) { if (s.gallery) buildInto(p, s.gallery, "site.gallery"); });
+    sec("Mod mentenanță (site în construcție)", function (p) { if (content.maintenance) buildInto(p, content.maintenance, "maintenance"); });
   }
 
   function buildTiktok() {
@@ -275,7 +276,7 @@
     else if ($("tab-promo") && !$("tab-promo").hidden) buildPromo();
     else if ($("tab-tiktok") && !$("tab-tiktok").hidden) buildTiktok();
     else if ($("tab-social") && !$("tab-social").hidden) buildSocial();
-    else buildForm();
+    else if ($("tab-content") && !$("tab-content").hidden) buildForm();
   }
 
   function buildInto(parent, value, path) {
@@ -634,10 +635,9 @@
     api("GET", "/api/content").then(function (r) { return r.json(); }).then(function (data) {
       content = data; normalizeContent(content);
       templates = {}; captureTemplates(content, "");
-      buildForm();
+      buildSite();
       handleTiktokReturn();
     });
-    refreshMessagesBadge();
   }
   function showLogin(msg) {
     editorView.hidden = true; topActions.hidden = true; loginView.hidden = false;
@@ -677,25 +677,19 @@
       setMsg(msgId, "✓ Salvat! Schimbările sunt live pe site.", false);
     }).catch(function () { setMsg(msgId, "Eroare de rețea.", true); });
   }
-  $("saveBtn").addEventListener("click", function () { save("editorMsg"); });
-  $("saveBtn2").addEventListener("click", function () { save("editorMsg"); });
-  $("saveOrderBtn").addEventListener("click", function () { save("orderMsg"); });
-  $("saveOrderBtn2").addEventListener("click", function () { save("orderMsg"); });
-  $("saveProductsBtn").addEventListener("click", function () { save("productsMsg"); });
-  $("saveProductsBtn2").addEventListener("click", function () { save("productsMsg"); });
-  $("saveBannersBtn").addEventListener("click", function () { save("bannersMsg"); });
-  $("saveBannersBtn2").addEventListener("click", function () { save("bannersMsg"); });
-  $("savePromoBtn").addEventListener("click", function () { save("promoMsg"); });
-  $("savePromoBtn2").addEventListener("click", function () { save("promoMsg"); });
-  $("saveTiktokBtn").addEventListener("click", function () { save("tiktokMsg"); });
-  $("saveTiktokBtn2").addEventListener("click", function () { save("tiktokMsg"); });
-  $("saveSocialBtn").addEventListener("click", function () { save("socialMsg"); });
-  $("saveSocialBtn2").addEventListener("click", function () { save("socialMsg"); });
-  if ($("saveSiteBtn")) $("saveSiteBtn").addEventListener("click", function () { save("siteMsg"); });
-  if ($("saveSiteBtn2")) $("saveSiteBtn2").addEventListener("click", function () { save("siteMsg"); });
+  // Leagă butoanele de salvare doar dacă există (unele tab-uri vechi au fost scoase).
+  function wireSave(id, msgId) { if ($(id)) $(id).addEventListener("click", function () { save(msgId); }); }
+  wireSave("saveBtn", "editorMsg"); wireSave("saveBtn2", "editorMsg");
+  wireSave("saveOrderBtn", "orderMsg"); wireSave("saveOrderBtn2", "orderMsg");
+  wireSave("saveProductsBtn", "productsMsg"); wireSave("saveProductsBtn2", "productsMsg");
+  wireSave("saveBannersBtn", "bannersMsg"); wireSave("saveBannersBtn2", "bannersMsg");
+  wireSave("savePromoBtn", "promoMsg"); wireSave("savePromoBtn2", "promoMsg");
+  wireSave("saveTiktokBtn", "tiktokMsg"); wireSave("saveTiktokBtn2", "tiktokMsg");
+  wireSave("saveSocialBtn", "socialMsg"); wireSave("saveSocialBtn2", "socialMsg");
+  wireSave("saveSiteBtn", "siteMsg"); wireSave("saveSiteBtn2", "siteMsg");
 
   /* ---------- Reset ---------- */
-  $("resetBtn").addEventListener("click", function () {
+  if ($("resetBtn")) $("resetBtn").addEventListener("click", function () {
     if (!confirm("Sigur resetezi toate textele la valorile implicite?")) return;
     api("DELETE", "/api/content", null, true).then(function (r) {
       return r.json().then(function (d) { return { ok: r.ok, status: r.status, d: d }; });
@@ -716,17 +710,10 @@
       document.querySelectorAll(".tab").forEach(function (b) { b.classList.remove("is-active"); });
       btn.classList.add("is-active");
       var which = btn.dataset.tab;
-      $("tab-content").hidden = which !== "content";
-      if ($("tab-site")) $("tab-site").hidden = which !== "site";
-      $("tab-order").hidden = which !== "order";
-      $("tab-banners").hidden = which !== "banners";
-      $("tab-products").hidden = which !== "products";
-      $("tab-promo").hidden = which !== "promo";
-      $("tab-tiktok").hidden = which !== "tiktok";
-      $("tab-social").hidden = which !== "social";
-      $("tab-orders").hidden = which !== "orders";
-      $("tab-messages").hidden = which !== "messages";
-      $("tab-crm").hidden = which !== "crm";
+      // Afișează doar panoul activ (tab-urile vechi pot lipsi din DOM).
+      document.querySelectorAll(".tab-panel").forEach(function (panel) {
+        panel.hidden = panel.id !== "tab-" + which;
+      });
       if (which === "orders") loadOrders();
       else if (which === "messages") loadMessages();
       else if (which === "site") buildSite();
@@ -737,11 +724,11 @@
       else if (which === "tiktok") buildTiktok();
       else if (which === "social") buildSocial();
       else if (which === "crm") loadCRM();
-      else buildForm();
+      else if (which === "content") buildForm();
     });
   });
-  $("ordersRefresh").addEventListener("click", loadOrders);
-  $("messagesRefresh").addEventListener("click", loadMessages);
+  if ($("ordersRefresh")) $("ordersRefresh").addEventListener("click", loadOrders);
+  if ($("messagesRefresh")) $("messagesRefresh").addEventListener("click", loadMessages);
 
   /* ---------- Comenzi ---------- */
   function esc(s) {
@@ -980,9 +967,9 @@
   /* ---------- CRM ---------- */
   var crmAll = [], crmFiltered = [], crmTagFilter = "", crmDetailTags = [];
   var COMMON_TAGS = ["Client fidel", "En-gros", "VIP", "Nou", "De urmărit"];
-  $("crmRefresh").addEventListener("click", loadCRM);
-  $("crmSearch").addEventListener("input", applyCustomerFilter);
-  $("crmExport").addEventListener("click", exportCSV);
+  if ($("crmRefresh")) $("crmRefresh").addEventListener("click", loadCRM);
+  if ($("crmSearch")) $("crmSearch").addEventListener("input", applyCustomerFilter);
+  if ($("crmExport")) $("crmExport").addEventListener("click", exportCSV);
   function money(n) { return (Number(n) || 0).toFixed(2) + " RON"; }
 
   function loadCRM() {

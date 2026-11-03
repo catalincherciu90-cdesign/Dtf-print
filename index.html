@@ -8,9 +8,19 @@
 <meta name="description" content="Mr.DTF — transfer DTF premium la metru liniar, pe lățime de 90 cm. Producție non-stop 24/24, culori puternice, rezistență la spălare. Trimite comanda online.">
 <meta name="theme-color" content="#f5f5f7">
 <link rel="icon" href="/assets/img/logo-mrdtf.png">
+<link rel="canonical" href="https://mrdtf.ro/">
+<meta property="og:site_name" content="Mr.DTF">
 <meta property="og:title" content="Mr.DTF – Printuri DTF de calitate">
 <meta property="og:description" content="Transfer DTF premium la metru liniar, lățime 90 cm. Producție non-stop 24/24.">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://mrdtf.ro/">
+<meta property="og:locale" content="ro_RO">
+<meta property="og:image" content="https://mrdtf.ro/assets/img/galerie-3-culori-puternice.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Mr.DTF – Printuri DTF de calitate">
+<meta name="twitter:description" content="Transfer DTF premium la metru liniar, lățime 90 cm. Producție non-stop 24/24.">
+<meta name="twitter:image" content="https://mrdtf.ro/assets/img/galerie-3-culori-puternice.jpg">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","@id":"https://mrdtf.ro/#business","name":"Mr.DTF","legalName":"UNILEVEL NETWORK SRL","url":"https://mrdtf.ro/","logo":"https://mrdtf.ro/assets/img/logo-mrdtf.png","image":"https://mrdtf.ro/assets/img/galerie-3-culori-puternice.jpg","description":"Transfer DTF premium la metru liniar, pe lățime de 90 cm. Producție non-stop 24/24, culori puternice, rezistență la spălare.","telephone":"+40786022893","email":"comenzi@mrdtf.ro","vatID":"RO52548180","priceRange":"$$","address":{"@type":"PostalAddress","streetAddress":"Str. Constantin Marin 2, Bl. Z1, Sc. 1, Et. 4, Ap. 20","addressLocality":"București","postalCode":"052593","addressCountry":"RO"},"areaServed":"RO","openingHours":"Mo-Fr 00:00-23:59"}</script>
 <style>
 :root{--img:none;--bg:#f5f5f7;--ink:#0f0f10;--mute:#5c5c63;--y:#ffc800;--glass:rgba(255,255,255,.28);--glass2:rgba(255,255,255,.5);--edge:rgba(255,255,255,.85);--edge2:rgba(255,255,255,.35);--sh:0 12px 40px rgba(0,0,0,.09);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
 *{box-sizing:border-box}
@@ -516,8 +526,9 @@ go.addEventListener('click',()=>{
     fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),keepalive:true}).catch(()=>{});
   }catch(e){}
 });
-function openM(){build();ov.classList.add('open');ov.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';setTimeout(()=>F.n.focus(),250)}
-function closeM(){ov.classList.remove('open');ov.setAttribute('aria-hidden','true');document.body.style.overflow=''}
+ov.inert=true;
+function openM(){build();ov.inert=false;ov.classList.add('open');ov.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';setTimeout(()=>F.n.focus(),250)}
+function closeM(){ov.classList.remove('open');ov.setAttribute('aria-hidden','true');ov.inert=true;document.body.style.overflow=''}
 document.querySelectorAll('button.btn-dark,.cta').forEach(b=>b.onclick=openM);
 document.getElementById('x').onclick=closeM;
 ov.addEventListener('click',e=>{if(e.target===ov)closeM()});
@@ -583,8 +594,10 @@ if(!a||!pop)return;
 a.addEventListener('click',e=>{if(!matchMedia('(pointer:coarse)').matches){e.preventDefault();pop.hidden=!pop.hidden}});
 document.addEventListener('click',e=>{if(!pop.hidden&&!e.target.closest('.acts'))pop.hidden=true});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')pop.hidden=true});
-cp.onclick=()=>{let ok=false;try{navigator.clipboard.writeText('0786022893').then(()=>{cp.textContent='Copiat ✓'},()=>{cp.textContent='Selectează numărul'});ok=true}catch(err){}if(!ok)cp.textContent='Selectează numărul';setTimeout(()=>{cp.textContent='Copiază'},1800)};
+const cpNum=(SITE.phone||'+40786022893').replace(/\s+/g,'');
+cp.onclick=()=>{let ok=false;try{navigator.clipboard.writeText(cpNum).then(()=>{cp.textContent='Copiat ✓'},()=>{cp.textContent='Selectează numărul'});ok=true}catch(err){}if(!ok)cp.textContent='Selectează numărul';setTimeout(()=>{cp.textContent='Copiază'},1800)};
 })();
 </script>
+<script src="/assets/js/consent.js" defer></script>
 </body>
 </html>
