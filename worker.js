@@ -970,7 +970,14 @@ export default {
         const segs = path.replace(/^\/api\//, "").replace(/\/+$/, "").split("/");
 
         if (segs[0] === "status" && request.method === "GET") {
-          return json({ ok: true, kv: !!env.CONTENT, files: !!env.CONTENT, auth: !!(env.JWT_SECRET && env.ADMIN_PASSWORD) });
+          return json({
+            ok: true,
+            kv: !!env.CONTENT,
+            files: !!env.CONTENT,
+            auth: !!(env.JWT_SECRET && env.ADMIN_PASSWORD),
+            // Notificări email (Resend) — doar dacă sunt setate ambele secrete.
+            email: !!(env.RESEND_API_KEY && env.NOTIFY_EMAIL),
+          });
         }
 
         if (segs[0] === "login" && request.method === "POST") {
