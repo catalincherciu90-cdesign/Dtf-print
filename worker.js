@@ -1174,7 +1174,8 @@ const PWA_HEAD =
   '<meta name="apple-mobile-web-app-status-bar-style" content="default">' +
   '<meta name="apple-mobile-web-app-title" content="MrDTF">' +
   '<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">' +
-  '<script>if("serviceWorker" in navigator){addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})});}</script>';
+  '<script>if("serviceWorker" in navigator){addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})});}</script>' +
+  '<script src="/assets/js/pwa-install.js" defer></script>';
 class PwaHead { element(el) { el.append(PWA_HEAD, { html: true }); } }
 
 async function serveAsset(request, env) {
