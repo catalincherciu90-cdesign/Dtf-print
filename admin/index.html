@@ -10,6 +10,7 @@
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" /></noscript>
   <link rel="stylesheet" href="/assets/css/styles.css" />
   <link rel="stylesheet" href="/assets/css/admin.css" />
+  <link rel="stylesheet" href="/assets/css/admin-theme.css" />
 </head>
 <body class="admin">
   <header class="admin__top">
@@ -41,6 +42,7 @@
       <button class="tab" type="button" data-tab="tiktok"><span class="mr-ico tab__ico" data-icon="smartphone" data-icon-size="16"></span> TikTok</button>
       <button class="tab" type="button" data-tab="social"><span class="mr-ico tab__ico" data-icon="link" data-icon-size="16"></span> Social</button>
       <button class="tab" type="button" data-tab="orders"><span class="mr-ico tab__ico" data-icon="box" data-icon-size="16"></span> Comenzi <span class="tab-badge" id="ordersBadge" hidden>0</span></button>
+      <button class="tab" type="button" data-tab="crm"><span class="mr-ico tab__ico" data-icon="chart" data-icon-size="16"></span> CRM</button>
     </div>
 
     <!-- Tab: Conținut -->
@@ -99,6 +101,32 @@
     </div>
 
     <!-- Tab: Comenzi -->
+    <div class="tab-panel" id="tab-crm" hidden>
+      <div class="editor-head">
+        <div>
+          <h1>CRM</h1>
+          <p class="muted">Clienți, comenzi și statistici.</p>
+        </div>
+        <div class="editor-actions">
+          <button class="btn btn--ghost" id="crmRefresh" type="button">↻ Reîmprospătează</button>
+        </div>
+      </div>
+      <p class="form-msg" id="crmMsg" role="status"></p>
+
+      <div class="crm-stats" id="crmStats"></div>
+
+      <h2 class="crm-h">Clienți</h2>
+      <div class="crm-toolbar">
+        <input type="search" id="crmSearch" placeholder="Caută client (nume, email, telefon)…" />
+        <button class="btn btn--ghost btn--sm" id="crmExport" type="button">⬇ Export CSV</button>
+      </div>
+      <div class="crm-filters" id="crmFilters"></div>
+      <div class="crm-list" id="crmCustomers"></div>
+
+      <!-- Fișa clientului -->
+      <div class="crm-detail" id="crmDetail" hidden></div>
+    </div>
+
     <div class="tab-panel" id="tab-orders" hidden>
       <div class="editor-head">
         <div>

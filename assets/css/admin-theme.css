@@ -1,0 +1,107 @@
+/* ===========================================================
+   MrDTF — Temă admin în stilul site-ului (light / glass / galben)
+   Se încarcă DUPĂ styles.css + admin.css și le suprascrie paleta.
+   Majoritatea componentelor folosesc tokeni (--lg-bg, --panel,
+   --grad etc.), deci redefinirea lor flipează automat aspectul;
+   restul sunt override-uri țintite pentru culorile hard-codate.
+   =========================================================== */
+:root {
+  --bg: #f5f5f7;
+  --bg-2: #eceef3;
+  --text: #0f0f10;
+  --muted: #5c5c63;
+  --y: #ffc800;
+  --panel: rgba(255, 255, 255, .62);
+  --panel-border: rgba(255, 255, 255, .85);
+  --grad: linear-gradient(100deg, #ffcf33, #ffb800);
+  --grad-soft: linear-gradient(100deg, rgba(255, 200, 0, .18), rgba(255, 160, 0, .16));
+  --grad-orange: linear-gradient(180deg, #ffd84a, #ffbf00);
+  --violet: #0f0f10;
+  --blue: #0f0f10;
+  --orange: #ff9f00;
+  --shadow: 0 14px 44px rgba(0, 0, 0, .10);
+  /* liquid glass → alb translucid */
+  --lg-bg: linear-gradient(135deg, rgba(255, 255, 255, .78) 0%, rgba(255, 255, 255, .5) 55%, rgba(255, 255, 255, .66) 100%);
+  --lg-border: rgba(255, 255, 255, .85);
+  --lg-hi: inset 0 1px 0 rgba(255, 255, 255, .7), inset 0 -1px 2px rgba(255, 255, 255, .25);
+}
+
+/* Fundal luminos cu două aure discrete (ca pe site) + font sistem */
+body.admin {
+  font-family: -apple-system, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background:
+    radial-gradient(900px 600px at 85% -10%, #fff4cc 0%, transparent 55%),
+    radial-gradient(820px 600px at -10% 20%, #e3ecff 0%, transparent 55%),
+    var(--bg) !important;
+  color: var(--text);
+}
+.admin h1, .admin h2, .admin h3, .admin h4, .admin h5 { font-family: inherit; letter-spacing: -.02em; }
+.admin .muted, .editor-head .muted, .login-card .muted { color: var(--muted); }
+
+/* Bara de sus — glass alb lipicios */
+.admin__top {
+  background: linear-gradient(180deg, rgba(255, 255, 255, .85), rgba(255, 255, 255, .6));
+  backdrop-filter: blur(26px) saturate(180%); -webkit-backdrop-filter: blur(26px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, .85);
+  box-shadow: 0 10px 36px rgba(0, 0, 0, .08);
+}
+
+/* Taburi */
+.tabs { border-bottom: 1px solid rgba(0, 0, 0, .08); }
+.tab { color: var(--muted); }
+.tab:hover, .tab.is-active { color: var(--text); }
+.tab.is-active::after { background: var(--y); }
+.tab-badge { background: var(--y); color: #111; }
+
+/* Separatoare / borduri interne închise → clare */
+.edit-section > h2 { border-bottom-color: rgba(0, 0, 0, .08); }
+
+/* Butoane: primar/CTA = negru (ca „btn-dark" de pe site); ghost = alb glass */
+.btn--primary, .btn--cta {
+  background: #0b0b0c !important; color: #fff !important;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .25) !important; animation: none !important;
+}
+.btn--primary:hover, .btn--cta:hover { filter: brightness(1.14); transform: translateY(-2px); }
+.btn--ghost {
+  background: rgba(255, 255, 255, .65) !important; border: 1px solid rgba(15, 15, 16, .16) !important;
+  color: var(--text) !important;
+}
+.btn--ghost:hover { background: #fff !important; }
+.btn--add { background: rgba(255, 255, 255, .45) !important; border: 1px dashed rgba(15, 15, 16, .28) !important; color: var(--muted) !important; }
+
+/* Inputuri / select / textarea — alb cu text închis, focus galben */
+.admin input[type="text"], .admin input[type="password"], .admin input[type="number"],
+.admin input[type="search"], .admin input[type="url"], .admin input[type="tel"],
+.admin input[type="email"], .admin textarea, .admin select,
+.crm-toolbar input[type="search"] {
+  background: #fff !important; border: 1px solid rgba(15, 15, 16, .16) !important; color: var(--text) !important;
+}
+.admin input:focus, .admin textarea:focus, .admin select:focus,
+.crm-toolbar input[type="search"]:focus {
+  outline: none !important; border-color: var(--y) !important; box-shadow: 0 0 0 3px rgba(255, 200, 0, .28) !important;
+}
+
+/* Texte hard-codate pentru fundal închis → întunecate */
+.order-grid, .order-items, .msg-card .order-grid a { color: var(--text) !important; }
+.order-meta, .crm-kv, .crm-row__main em, .crm-card em { color: var(--muted) !important; }
+.edit-card__head h4 { color: var(--text) !important; }
+.form-msg.is-error { color: #c0392b; }
+.form-msg.is-ok { color: #1b8a5a; }
+
+/* CRM: chips, filtre, taguri, comenzi */
+.crm-chip { background: rgba(0, 0, 0, .04); border: 1px solid rgba(0, 0, 0, .14); color: var(--text); }
+.crm-chip[data-status] { color: var(--text); }
+.crm-filter { background: rgba(255, 255, 255, .6); border: 1px solid rgba(15, 15, 16, .16); color: var(--muted); }
+.crm-filter:hover { color: var(--text); }
+.crm-filter.is-active { background: var(--y); color: #111; border-color: transparent; }
+.crm-tag { color: var(--text); }
+.crm-order, .crm-tagedit { background: rgba(255, 255, 255, .5) !important; border: 1px solid rgba(15, 15, 16, .10) !important; }
+.crm-row:hover { border-color: rgba(255, 184, 0, .7); }
+
+/* Preview imagine / iconițe */
+.media-prev, .icon-prev { background: rgba(255, 255, 255, .55); }
+.icon-grid__btn:hover { border-color: var(--y); background: rgba(255, 200, 0, .12); }
+.icon-grid__btn.is-active { border-color: var(--y); background: rgba(255, 200, 0, .18); }
+
+/* Accent brand (text gradient) rămâne galben pe fundal alb */
+.grad-text { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
