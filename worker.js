@@ -447,8 +447,11 @@ async function handleAdmin(request, env, segs) {
     if (!items.length) return err("Adaugă cel puțin o linie în ofertă.");
     const vatRate = (b.vat === false) ? 0 : (Number(b.vatRate) >= 0 ? Number(b.vatRate) : 21);
     const net = Number(items.reduce((s, it) => s + it.qty * it.price, 0).toFixed(2));
-    const vat = Number((net * vatRate / 100).toFixed(2));
-    const total = Number((net + vat).toFixed(2));
+    const discountPercent = Math.max(0, Math.min(100, Number(b.discount) || 0));
+    const discount = Number((net * discountPercent / 100).toFixed(2));
+    const base = Number((net - discount).toFixed(2));
+    const vat = Number((base * vatRate / 100).toFixed(2));
+    const total = Number((base + vat).toFixed(2));
     const oid = genId();
     const cl = b.client || {};
     const offer = {
@@ -459,7 +462,7 @@ async function handleAdmin(request, env, segs) {
         phone: String(cl.phone || "").slice(0, 40), company: String(cl.company || "").slice(0, 1200),
         type: cl.type === "pj" ? "pj" : "pf",
       },
-      items, vatRate, net, vat, total,
+      items, vatRate, net, discountPercent, discount, vat, total,
       validity: Math.max(0, Math.min(365, Number(b.validity) || 14)),
       notes: String(b.notes || "").slice(0, 2000),
     };
@@ -516,7 +519,7 @@ async function handleAdmin(request, env, segs) {
       "<p>Vă transmitem oferta solicitată. O puteți vedea și printa aici:</p>" +
       "<p><a href=\"" + link + "\" style=\"background:#111;color:#fff;padding:12px 22px;border-radius:10px;text-decoration:none;display:inline-block;font-weight:700\">Vezi oferta ↗</a></p>" +
       "<table style=\"border-collapse:collapse;margin:10px 0\"><thead><tr><th style=\"padding:6px 10px;text-align:left;color:#888\">Descriere</th><th style=\"padding:6px 10px;text-align:right;color:#888\">Cant.</th><th style=\"padding:6px 10px;text-align:right;color:#888\">Preț</th><th style=\"padding:6px 10px;text-align:right;color:#888\">Valoare</th></tr></thead><tbody>" + rows + "</tbody></table>" +
-      "<p>Subtotal: " + money(o.net) + (o.vatRate ? " · TVA (" + esc(o.vatRate) + "%): " + money(o.vat) : "") + "<br><strong style=\"font-size:17px\">Total: " + money(o.total) + "</strong></p>" +
+      "<p>Subtotal: " + money(o.net) + (o.discountPercent ? " · Discount (" + esc(o.discountPercent) + "%): − " + money(o.discount) : "") + (o.vatRate ? " · TVA (" + esc(o.vatRate) + "%): " + money(o.vat) : "") + "<br><strong style=\"font-size:17px\">Total: " + money(o.total) + "</strong></p>" +
       (o.notes ? "<p style=\"background:#fff8e1;padding:12px;border-radius:8px;white-space:pre-wrap\">" + esc(o.notes) + "</p>" : "") +
       "<p style=\"color:#888;font-size:13px\">Oferta este valabilă " + esc(o.validity) + " zile. Pentru confirmare, răspundeți la acest e-mail sau sunați la " + esc(site.phoneDisplay || site.phone || "") + ".</p>" +
       "<p>Cu stimă,<br>Echipa Mr.DTF</p></div>";
@@ -1189,6 +1192,7 @@ thead th:first-child,tbody td:first-child{width:34px;color:var(--mute)}
   <table><thead><tr><th>#</th><th>Descriere</th><th class="r">Cant.</th><th class="r">Preț unitar</th><th class="r">Valoare</th></tr></thead><tbody>${rows}</tbody></table>
   <div class="tot">
     <div class="row"><span>Subtotal</span><span>${money(o.net)}</span></div>
+    ${o.discountPercent ? '<div class="row" style="color:#c0392b"><span>Discount (' + esc(o.discountPercent) + '%)</span><span>− ' + money(o.discount) + "</span></div>" : ""}
     ${o.vatRate ? '<div class="row"><span>TVA (' + esc(o.vatRate) + '%)</span><span>' + money(o.vat) + "</span></div>" : '<div class="row"><span>TVA</span><span>neaplicabil</span></div>'}
     <div class="row grand"><span>Total</span><span>${money(o.total)}</span></div>
   </div>
