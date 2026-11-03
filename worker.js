@@ -1407,6 +1407,13 @@ export default {
     const path = url.pathname;
 
     try {
+      // Canonic: www.mrdtf.ro → mrdtf.ro (301 permanent), ca să avem o singură
+      // adresă indexată (fără conținut duplicat în Google).
+      if (url.hostname.toLowerCase().startsWith("www.")) {
+        url.hostname = url.hostname.slice(4);
+        return Response.redirect(url.toString(), 301);
+      }
+
       // Preview pentru proprietar: /?preview=<token> setează un cookie care ocolește
       // mentenanța (publicul rămâne pe pagina de construcție). /?preview=off iese.
       // Tokenul e secret (derivat din JWT_SECRET) — îl iei din admin, nu e „on".
