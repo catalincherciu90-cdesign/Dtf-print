@@ -607,8 +607,13 @@ REELS.forEach((r,i)=>{
   const b=document.createElement('button');b.type='button';b.className='cov';b.setAttribute('aria-label','Redă reel '+(i+1));
   b.innerHTML='<span class="pl"><svg class="i" viewBox="0 0 24 24" style="fill:#fff;stroke:none"><path d="M8 5v14l11-7z"/></svg></span><span class="cap2"></span>';
   b.querySelector('.cap2').textContent=r.t||('Reel '+(i+1));
-  if(id)b.onclick=()=>{const f=document.createElement('iframe');f.src='https://www.tiktok.com/player/v1/'+id+'?autoplay=1&description=1&music_info=1&rel=0';f.allow='autoplay; fullscreen';f.allowFullscreen=true;f.title=r.t||'Reel TikTok';s.replaceChildren(f)};
-  else if(r.u)b.onclick=()=>window.open(r.u,'_blank','noopener');
+  let loaded=false;
+  const play=(mute)=>{if(loaded||!id)return;loaded=true;const f=document.createElement('iframe');f.src='https://www.tiktok.com/player/v1/'+id+'?autoplay=1&loop=1&description=1&music_info=1&rel=0'+(mute?'&muted=1':'');f.allow='autoplay; fullscreen; encrypted-media';f.allowFullscreen=true;f.title=r.t||'Reel TikTok';s.replaceChildren(f)};
+  if(id){
+    b.onclick=()=>play(false); /* click = pornire cu sunet (gest utilizator) */
+    if('IntersectionObserver' in window){const io2=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){play(true);io2.disconnect();}}),{threshold:.55});io2.observe(c);}
+    else play(true);
+  } else if(r.u){b.onclick=()=>window.open(r.u,'_blank','noopener');}
   if(r.u){const im=document.createElement('img');im.alt=r.t||('Reel '+(i+1));im.loading='lazy';im.decoding='async';im.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .45s';s.appendChild(im);fetch('/api/tiktok/thumb?u='+encodeURIComponent(r.u)).then(x=>x.ok?x.json():null).then(d=>{if(d&&d.thumbnail){im.onload=()=>{im.style.opacity='1';b.style.background='linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.52))'};im.src=d.thumbnail;}if(d&&d.title&&!r.t){const cp=b.querySelector('.cap2');if(cp)cp.textContent=d.title;}}).catch(()=>{});}
   s.appendChild(b);c.appendChild(s);row.appendChild(c);
 });
