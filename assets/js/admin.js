@@ -779,14 +779,14 @@
   });
   if ($("ordersRefresh")) $("ordersRefresh").addEventListener("click", loadOrders);
   if ($("messagesRefresh")) $("messagesRefresh").addEventListener("click", loadMessages);
-  if ($("dashRefresh")) $("dashRefresh").addEventListener("click", loadDashboard);
+  if ($("dashRefresh")) $("dashRefresh").addEventListener("click", function () { loadDashboard(false); });
 
   /* ---------- Dashboard (Acasă) ---------- */
   function okJson(r) { return r.status === 401 ? 401 : r.json(); }
   function orderTotalOf(o) { return Number(o.total != null ? o.total : (o.price != null ? o.price : 0)) || 0; }
 
-  function loadDashboard() {
-    var msg = $("dashMsg"); if (msg) { msg.textContent = "Se încarcă…"; msg.className = "form-msg"; }
+  function loadDashboard(silent) {
+    var msg = $("dashMsg"); if (msg && !silent) { msg.textContent = "Se încarcă…"; msg.className = "form-msg"; }
     Promise.all([
       api("GET", "/api/admin/stats", null, true).then(okJson),
       api("GET", "/api/orders", null, true).then(okJson),
@@ -803,9 +803,22 @@
       renderDashboard(stats, orders, messages, offers, unread);
       var ob = $("ordersBadge"); if (ob) { ob.textContent = orders.length; ob.hidden = orders.length === 0; }
       updateMessagesBadge(unread);
-      if (msg) msg.textContent = "";
-    }).catch(function () { if (msg) { msg.textContent = "Eroare la încărcare."; msg.className = "form-msg is-error"; } });
+      if (msg) { msg.textContent = "↻ Actualizat automat · " + new Date().toLocaleTimeString("ro-RO"); msg.className = "form-msg dash-updated"; }
+    }).catch(function () { if (msg && !silent) { msg.textContent = "Eroare la încărcare."; msg.className = "form-msg is-error"; } });
   }
+
+  // Reîmprospătare automată la 1 minut — doar pe dashboard, logat și cu fila vizibilă.
+  setInterval(function () {
+    if (!token) return;
+    var dp = $("tab-dashboard");
+    if (dp && !dp.hidden && !document.hidden) loadDashboard(true);
+  }, 60000);
+  // Reîmprospătează imediat la revenirea pe filă (dacă ești pe dashboard).
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden || !token) return;
+    var dp = $("tab-dashboard");
+    if (dp && !dp.hidden) loadDashboard(true);
+  });
 
   function kpi(icon, value, labelText, sub, accent) {
     return "<div class=\"kpi" + (accent ? " kpi--accent" : "") + "\">" +
