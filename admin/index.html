@@ -38,6 +38,7 @@
   <main class="admin__editor container" id="editorView" hidden>
     <div class="tabs" id="tabs">
       <button class="tab is-active" type="button" data-tab="content"><span class="mr-ico tab__ico" data-icon="edit" data-icon-size="16"></span> Conținut</button>
+      <button class="tab" type="button" data-tab="site"><span class="mr-ico tab__ico" data-icon="edit" data-icon-size="16"></span> Site (temă nouă)</button>
       <button class="tab" type="button" data-tab="order"><span class="mr-ico tab__ico" data-icon="ruler" data-icon-size="16"></span> Calculator DTF</button>
       <button class="tab" type="button" data-tab="banners"><span class="mr-ico tab__ico" data-icon="image" data-icon-size="16"></span> Bannere</button>
       <button class="tab" type="button" data-tab="products"><span class="mr-ico tab__ico" data-icon="bag" data-icon-size="16"></span> Produse</button>
@@ -160,6 +161,24 @@
     </div>
 
     <!-- Tab: Social -->
+    <!-- Tab: Site (temă nouă) -->
+    <div class="tab-panel" id="tab-site" hidden>
+      <div class="editor-head">
+        <div>
+          <h1>Site (temă nouă)</h1>
+          <p class="muted">Editează prețurile pe metru, datele de contact și firmă, și galeria. Schimbările apar imediat pe site.</p>
+        </div>
+        <div class="editor-actions">
+          <button class="btn btn--primary" id="saveSiteBtn" type="button"><span class="mr-ico" data-icon="save" data-icon-size="15"></span> Salvează</button>
+        </div>
+      </div>
+      <p class="form-msg" id="siteMsg" role="status"></p>
+      <form id="siteForm" autocomplete="off"></form>
+      <div class="editor-actions editor-actions--bottom">
+        <button class="btn btn--primary" id="saveSiteBtn2" type="button"><span class="mr-ico" data-icon="save" data-icon-size="15"></span> Salvează</button>
+      </div>
+    </div>
+
     <div class="tab-panel" id="tab-social" hidden>
       <div class="editor-head">
         <div>

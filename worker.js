@@ -31,6 +31,37 @@ const DEFAULT_CONTENT = {
     mesaj: "Lucrăm la câteva îmbunătățiri pentru tine. Site-ul revine online în scurt timp. Mulțumim pentru răbdare!",
   },
   brandTagline: "PRINT DTF PREMIUM",
+  // ---- Conținut temă nouă (Mr.DTF) ----
+  site: {
+    phone: "+40786022893",
+    phoneDisplay: "0786 022 893",
+    email: "comenzi@mrdtf.ro",
+    topNote: "PRINT DTF NON-STOP 24/24",
+    heroTitle: "calitate",
+    schedule: "Luni – Vineri: NON STOP\n(programul de print se termină vineri la ora 16:00)",
+    pickup: "Splaiul Unirii 313, Sector 3, București\nClădirea ICPE, corp M, etaj 2",
+    tagline: "Specialiști în print DTF premium la metru liniar.",
+    priceNote: "Suprafața printabilă este de 87 cm. Prețurile afișate nu includ TVA.",
+    company: {
+      name: "UNILEVEL NETWORK SRL",
+      cui: "RO52548180",
+      reg: "J2025071790007",
+      address: "Str. Constantin Marin 2, Bl. Z1, Sc. 1, Et. 4, Ap. 20, cod poștal 052593",
+    },
+    dtfTiers: [
+      { pret: 70, range: "1 – 2 ml" },
+      { pret: 65, range: "3 – 9 ml" },
+      { pret: 62, range: "10 – 24 ml" },
+      { pret: 58, range: "25 – 49 ml" },
+      { pret: 55, range: "50 – 100 ml" },
+    ],
+    gallery: [
+      { img: "/assets/img/galerie-1-desprinzi-folia.jpg", alt: "Transfer DTF aplicat pe un tricou negru" },
+      { img: "/assets/img/galerie-2-productie-non-stop.jpg", alt: "Role de print DTF gata de livrare" },
+      { img: "/assets/img/galerie-3-culori-puternice.jpg", alt: "Print DTF colorat pe folie, cu detalii fine" },
+      { img: "/assets/img/galerie-4-imprimante-profesionale.jpg", alt: "Imprimantă DTF în funcțiune" },
+    ],
+  },
   hero: {
     line1: "PRINT", hi: "DTF", line2: "LA METRU LINIAR",
     subPre: "LĂȚIME DE", subHi: "90 CM",
@@ -280,6 +311,17 @@ async function listUsers(env) {
 function orderTotal(o) {
   return Number(o.total != null ? o.total : (o.price || 0)) || 0;
 }
+// Preț lei/ml pentru un nr. de metri, pe baza treptelor (range ex. „3 – 9 ml").
+function dtfPriceForMeters(meters, tiers) {
+  if (!meters || !Array.isArray(tiers) || !tiers.length) return 0;
+  for (const t of tiers) {
+    const nums = String(t.range || "").match(/\d+/g) || [];
+    const lo = Number(nums[0]) || 0;
+    const hi = nums[1] != null ? Number(nums[1]) : Infinity;
+    if (meters >= lo && meters <= hi) return Number(t.pret) || 0;
+  }
+  return Number(tiers[tiers.length - 1].pret) || 0;
+}
 
 async function handleAdmin(request, env, segs) {
   if (!(await requireAuth(request, env))) return err("Neautorizat.", 401);
@@ -480,89 +522,30 @@ async function handleOrders(request, env, segs) {
   // segs: ["orders"] | ["orders", id] | ["orders", id, "file"]
   const id = segs[1];
 
-  // POST /api/orders — plasare comandă (necesită cont)
+  // POST /api/orders — comandă publică (tema nouă: formular → email + salvare în admin)
   if (!id && request.method === "POST") {
     if (!env.CONTENT) return err("Stocare neconfigurată.", 503);
-    const cust = await getCustomer(request, env);
-    if (!cust) return err("Trebuie să fii autentificat pentru a comanda.", 401);
+    const f = await request.json().catch(() => ({}));
+    const name = String(f.name || "").trim().slice(0, 140);
+    const phone = String(f.phone || "").trim().slice(0, 40);
+    if (!name && !phone) return err("Completează numele și telefonul.");
+    const width = Math.max(0, Number(f.width) || 0);
+    const meters = Math.max(0, Number(f.meters) || 0);
+    const billingType = f.billingType === "pj" ? "pj" : "pf";
+
+    const content = await getContent(env);
+    const tiers = (content.site && content.site.dtfTiers) || [];
+    const pretMl = dtfPriceForMeters(meters, tiers);
+    const total = Number((pretMl * meters).toFixed(2));
 
     const oid = genId();
-    let f = {}, items = [], fileList = [];
-    const ct = request.headers.get("Content-Type") || "";
-    if (ct.includes("multipart/form-data")) {
-      const form = await request.formData();
-      form.forEach((v, k) => { if (typeof v === "string") f[k] = v; });
-      try { items = JSON.parse(f.items || "[]"); } catch { items = []; }
-      fileList = form.getAll("file").filter((x) => x && typeof x !== "string" && x.size > 0);
-    } else {
-      f = await request.json().catch(() => ({}));
-      items = Array.isArray(f.items) ? f.items : [];
-    }
-
-    if (!Array.isArray(items) || !items.length) return err("Coșul este gol.");
-    const cleanItems = items.slice(0, 100).map((it) => {
-      const o = {
-        type: it.type === "dtf" ? "dtf" : "product",
-        name: String(it.name || "").slice(0, 140),
-        qty: Math.max(1, Math.min(999, Math.round(Number(it.qty) || 1))),
-        price: Math.max(0, Number(it.price) || 0),
-      };
-      if (o.type === "dtf") {
-        o.width = Math.max(0, Number(it.width) || 0); o.length = Math.max(0, Number(it.length) || 0);
-      } else {
-        if (it.cod) o.cod = String(it.cod).slice(0, 60);
-        if (it.marime) o.marime = String(it.marime).slice(0, 40);
-        if (it.img) o.img = String(it.img).slice(0, 400);
-        if (it.design && it.design.url) {
-          o.design = {
-            url: String(it.design.url).slice(0, 400),
-            name: String(it.design.name || "design").slice(0, 120),
-            x: Math.round(Number(it.design.x) || 0),
-            y: Math.round(Number(it.design.y) || 0),
-            size: Math.round(Number(it.design.size) || 0),
-            rot: Math.round(Number(it.design.rot) || 0),
-          };
-        }
-      }
-      return o;
-    });
-    const subtotal = Number(cleanItems.reduce((s, it) => s + it.price * it.qty, 0).toFixed(2));
-    const totalQty = cleanItems.reduce((s, it) => s + it.qty, 0);
-    const content = await getContent(env);
-    const dc = content.discount || {};
-    let discountPercent = 0, discount = 0;
-    if (dc.enabled && Number(dc.procent) > 0) {
-      const metric = dc.tipPrag === "cantitate" ? totalQty : subtotal;
-      if (metric >= Number(dc.prag || 0)) {
-        discountPercent = Number(dc.procent);
-        discount = Number((subtotal * discountPercent / 100).toFixed(2));
-      }
-    }
-    const total = Number((subtotal - discount).toFixed(2));
-
-    const storedFiles = [];
-    let fi = 0;
-    for (const file of fileList) {
-      if (file.size > MAX_FILE_BYTES) return err("Fișier prea mare (max " + MAX_FILE_MB + " MB).");
-      const key = FILE_PREFIX + oid + ":" + fi;
-      await env.CONTENT.put(key, await file.arrayBuffer());
-      storedFiles.push({ name: file.name, size: file.size, type: file.type || "application/octet-stream", key });
-      fi++;
-    }
-
-    const deliveryMethod = f.deliveryMethod === "ridicare" ? "ridicare" : "livrare";
-    const address = deliveryMethod === "livrare" ? String(f.address || "").slice(0, 600) : "";
-
-    const user = await env.CONTENT.get(USER_PREFIX + cust.sub, "json");
     const order = {
-      id: oid, createdAt: new Date().toISOString(), status: "Nouă",
-      userId: cust.sub,
-      name: (user && user.name) || cust.name || "",
-      email: cust.sub,
-      phone: (user && user.phone) || "",
-      deliveryMethod, address,
+      id: oid, createdAt: new Date().toISOString(), status: "Nouă", source: "web",
+      name, phone, width, meters,
+      pretMl, total,
+      billingType, billing: String(f.billing || "").slice(0, 1200),
+      graphicsLink: String(f.graphicsLink || "").slice(0, 500),
       note: String(f.note || "").slice(0, 2000),
-      items: cleanItems, subtotal, discount, discountPercent, total, files: storedFiles,
     };
     await env.CONTENT.put(ORDER_PREFIX + oid, JSON.stringify(order));
     return json({ ok: true, id: oid });
@@ -814,26 +797,21 @@ function absUrlW(u) {
 async function serveHome(request, env) {
   const res = await serveAsset(request, env);
   if (!/text\/html/.test(res.headers.get("Content-Type") || "")) return res;
-  let bg = "";
-  try { const c = await getContent(env); bg = absUrlW(c.banners && c.banners.heroBg); } catch { /* fallback */ }
+  // Injectăm conținutul editabil (contact, firmă, prețuri, TikTok, galerie) direct
+  // în <head>, ca pagina să-l aibă imediat (fără request suplimentar / fără FOUC).
+  let payload = "{}";
+  try {
+    const c = await getContent(env);
+    payload = JSON.stringify({ site: c.site || {}, tiktok: c.tiktok || {}, social: c.social || {} })
+      .replace(/</g, "\\u003c");
+  } catch { /* fallback: valorile statice din HTML */ }
 
-  class HeroBg {
-    element(el) {
-      el.setAttribute("fetchpriority", "high");
-      el.setAttribute("decoding", "async");
-      el.setAttribute("loading", "eager");
-      if (bg) { el.setAttribute("src", bg); el.setAttribute("style", ""); }
-    }
-  }
   class Head {
     element(el) {
-      if (bg) el.append('<link rel="preload" as="image" href="' + bg + '" fetchpriority="high" />', { html: true });
+      el.append("<script>window.__MRDTF__=" + payload + ";</script>", { html: true });
     }
   }
-  return new HTMLRewriter()
-    .on("img#heroImgBg", new HeroBg())
-    .on("head", new Head())
-    .transform(res);
+  return new HTMLRewriter().on("head", new Head()).transform(res);
 }
 
 // Pagini de produs „pretty URL" (/produs/<slug>) — servesc același template,
@@ -1027,7 +1005,25 @@ export default {
       }
 
       if (path === "/" || path === "/index.html") return serveHome(request, env);
-      if (path === "/produs" || path.startsWith("/produs/")) return serveProductPage(request, env);
+
+      // Pagini vechi eliminate în tema nouă → redirect permanent la homepage.
+      if (path === "/produs" || path.startsWith("/produs/")
+        || path === "/produse" || path.startsWith("/produse/")
+        || path === "/cont" || path.startsWith("/cont/")
+        || path === "/intrebari-frecvente" || path.startsWith("/intrebari-frecvente/")) {
+        return Response.redirect(url.origin + "/", 301);
+      }
+      // Slug-uri legale vechi → noile pagini din temă.
+      const legalMap = {
+        "/termeni": "/termeni-si-conditii",
+        "/confidentialitate": "/politica-de-confidentialitate",
+        "/livrare": "/politica-de-livrare",
+        "/retur": "/politica-de-retur",
+      };
+      for (const oldp in legalMap) {
+        if (path === oldp || path === oldp + "/") return Response.redirect(url.origin + legalMap[oldp], 301);
+      }
+
       return serveAsset(request, env);
     } catch (e) {
       if (!path.startsWith("/api/")) return env.ASSETS.fetch(request);
