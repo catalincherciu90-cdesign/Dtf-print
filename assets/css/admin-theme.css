@@ -134,3 +134,4 @@ body.admin {
 .offer-opts label { display: inline-flex; align-items: center; gap: 8px; }
 .offer-opts input[type=number] { width: 86px; }
 @media (max-width: 560px) { .offer-line { grid-template-columns: 1fr 1fr; } }
+.offer-addrow { display: flex; gap: 8px; flex-wrap: wrap; }
