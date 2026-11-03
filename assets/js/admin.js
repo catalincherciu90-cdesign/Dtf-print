@@ -54,6 +54,7 @@
     company: "Date firmă", cui: "CUI", reg: "Nr. Reg. Com.", address: "Adresă / sediu",
     dtfTiers: "Prețuri pe metru (trepte)", pret: "Preț (lei/ml)", range: "Interval (ex. 3 – 9 ml)",
     gallery: "Galerie „Ce facem noi” (4 imagini)", alt: "Descriere imagine (alt)",
+    logo: "Logo (imagine)",
   };
   var SINGULAR = { pills: "Avantaj", items: "Produs", steps: "Pas", trust: "Garanție", priceTiers: "prag", dtfTiers: "treaptă", gallery: "imagine", videos: "video" };
   function label(key) {
@@ -169,6 +170,14 @@
       render(section);
       form.appendChild(section);
     }
+    sec("Logo", function (p) {
+      if (!("logo" in s)) s.logo = "/assets/img/logo-mrdtf.png";
+      buildInto(p, s.logo, "site.logo");
+      var hint = document.createElement("p");
+      hint.className = "crm-kv"; hint.style.margin = "6px 0 0";
+      hint.textContent = "Recomandat: PNG transparent. Apare în antet și footer, pe toate paginile.";
+      p.appendChild(hint);
+    });
     sec("Contact și texte", function (p) {
       ["phone", "phoneDisplay", "email", "schedule", "pickup", "topNote", "heroTitle", "tagline", "priceNote"].forEach(function (k) {
         if (k in s) buildInto(p, s[k], "site." + k);
@@ -329,7 +338,7 @@
     } else if (keyOf(path) === "tipPrag") {
       parent.appendChild(selectField(label("tipPrag"), value, path,
         [["valoare", "După valoarea coșului (RON)"], ["cantitate", "După cantitatea de produse"]]));
-    } else if (keyOf(path) === "img" || (/^banners\./.test(path) && /(Bg|Left|Right)$/.test(keyOf(path)))) {
+    } else if (keyOf(path) === "img" || keyOf(path) === "logo" || (/^banners\./.test(path) && /(Bg|Left|Right)$/.test(keyOf(path)))) {
       parent.appendChild(mediaField(value, path, label(keyOf(path))));
     } else if (keyOf(path) === "ico") {
       parent.appendChild(iconField(value, path));

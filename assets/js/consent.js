@@ -7,6 +7,27 @@
    Scriptul este autonom: își injectează propriul CSS, deci nu
    depinde de stilurile paginii și nu afectează designul.
    =========================================================== */
+
+/* Sincronizare logo din admin (content.site.logo) pe toate paginile.
+   Pe homepage folosește window.__MRDTF__ (injectat de worker, fără fetch);
+   pe celelalte pagini face un singur fetch la /api/content. Fișierul din
+   HTML rămâne fallback, deci nu există „logo gol" dacă nu răspunde. */
+(function () {
+  "use strict";
+  function applyLogo(logo) {
+    if (!logo) return;
+    document.querySelectorAll("img.logo, img.flogo, img[alt=\"Mr.DTF\"]").forEach(function (i) { i.src = logo; });
+  }
+  try {
+    if (window.__MRDTF__ && window.__MRDTF__.site) { applyLogo(window.__MRDTF__.site.logo); return; }
+  } catch (e) { /* continuă cu fetch */ }
+  try {
+    fetch("/api/content").then(function (r) { return r.json(); })
+      .then(function (d) { applyLogo(d && d.site && d.site.logo); })
+      .catch(function () {});
+  } catch (e) {}
+})();
+
 (function () {
   "use strict";
 
