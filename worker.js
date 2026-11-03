@@ -509,9 +509,42 @@ async function handleAdmin(request, env, segs) {
   }
 
   // DELETE /api/admin/offers/:id
-  if (sub === "offers" && segs[2] && request.method === "DELETE") {
+  if (sub === "offers" && segs[2] && segs[3] !== "send" && request.method === "DELETE") {
     await env.CONTENT.delete(OFFER_PREFIX + segs[2]);
     return json({ ok: true });
+  }
+
+  // POST /api/admin/offers/:id/send — trimite oferta pe emailul clientului
+  if (sub === "offers" && segs[2] && segs[3] === "send" && request.method === "POST") {
+    const o = await env.CONTENT.get(OFFER_PREFIX + segs[2], "json");
+    if (!o) return err("Ofertă inexistentă.", 404);
+    const to = o.client && o.client.email;
+    if (!to) return err("Oferta nu are adresă de email a clientului.");
+    let site = {};
+    try { const c = await getContent(env); site = c.site || {}; } catch { /* fallback */ }
+    const origin = new URL(request.url).origin;
+    const link = origin + "/oferta/" + o.id;
+    const esc = escHtml;
+    const money = (n) => (Number(n) || 0).toFixed(2) + " lei";
+    const rows = (o.items || []).map((it) => "<tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">" + esc(it.desc) +
+      "</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">" + esc(it.qty) +
+      "</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">" + money(it.price) +
+      "</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">" + money(it.qty * it.price) + "</td></tr>").join("");
+    const subject = "Ofertă " + o.number + " — Mr.DTF";
+    const html = "<div style=\"font-family:Arial,sans-serif;font-size:15px;color:#222\">" +
+      "<h2 style=\"margin:0 0 10px\">Ofertă " + esc(o.number) + "</h2>" +
+      "<p>Bună ziua" + (o.client.name ? ", " + esc(o.client.name) : "") + ",</p>" +
+      "<p>Vă transmitem oferta solicitată. O puteți vedea și printa aici:</p>" +
+      "<p><a href=\"" + link + "\" style=\"background:#111;color:#fff;padding:12px 22px;border-radius:10px;text-decoration:none;display:inline-block;font-weight:700\">Vezi oferta ↗</a></p>" +
+      "<table style=\"border-collapse:collapse;margin:10px 0\"><thead><tr><th style=\"padding:6px 10px;text-align:left;color:#888\">Descriere</th><th style=\"padding:6px 10px;text-align:right;color:#888\">Cant.</th><th style=\"padding:6px 10px;text-align:right;color:#888\">Preț</th><th style=\"padding:6px 10px;text-align:right;color:#888\">Valoare</th></tr></thead><tbody>" + rows + "</tbody></table>" +
+      "<p>Subtotal: " + money(o.net) + (o.vatRate ? " · TVA (" + esc(o.vatRate) + "%): " + money(o.vat) : "") + "<br><strong style=\"font-size:17px\">Total: " + money(o.total) + "</strong></p>" +
+      (o.notes ? "<p style=\"background:#fff8e1;padding:12px;border-radius:8px;white-space:pre-wrap\">" + esc(o.notes) + "</p>" : "") +
+      "<p style=\"color:#888;font-size:13px\">Oferta este valabilă " + esc(o.validity) + " zile. Pentru confirmare, răspundeți la acest e-mail sau sunați la " + esc(site.phoneDisplay || site.phone || "") + ".</p>" +
+      "<p>Cu stimă,<br>Echipa Mr.DTF</p></div>";
+    const text = "Ofertă " + o.number + "\n\nVedeți oferta: " + link + "\nTotal: " + money(o.total) +
+      "\n\nOfertă valabilă " + o.validity + " zile. Răspundeți la acest e-mail pentru confirmare.\n\nEchipa Mr.DTF";
+    const ok = await sendMail(env, { to, subject, html, text, replyTo: site.email || env.NOTIFY_EMAIL });
+    return json({ ok: ok, to: to, error: ok ? undefined : "Trimiterea a eșuat (verifică setările email)." });
   }
 
   return err("Endpoint inexistent.", 404);

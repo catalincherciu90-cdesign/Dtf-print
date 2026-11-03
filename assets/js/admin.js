@@ -1255,15 +1255,30 @@
         var offers = (d && d.offers) || [];
         if (!offers.length) { box.innerHTML = "<p class=\"order-meta\">Nicio ofertă încă.</p>"; return; }
         box.innerHTML = offers.map(function (o) {
+          var cemail = (o.client && o.client.email) || "";
           return "<div class=\"crm-order\"><div><strong>" + esc(o.number) + "</strong> <span class=\"order-meta\">" + fmtDate(o.createdAt) + "</span></div>" +
             "<div class=\"crm-order__total\"><strong>" + money(o.total) + "</strong></div>" +
-            "<div style=\"display:flex;gap:8px\"><a class=\"btn btn--ghost btn--sm\" href=\"/oferta/" + esc(o.id) + "\" target=\"_blank\" rel=\"noopener\">Deschide ↗</a>" +
+            "<div style=\"display:flex;gap:8px;flex-wrap:wrap\"><a class=\"btn btn--ghost btn--sm\" href=\"/oferta/" + esc(o.id) + "\" target=\"_blank\" rel=\"noopener\">Deschide ↗</a>" +
+            (cemail ? "<button class=\"btn btn--primary btn--sm offer-send\" data-id=\"" + esc(o.id) + "\" data-email=\"" + esc(cemail) + "\">" + icName("mail", 14) + " Trimite pe email</button>" : "") +
             "<button class=\"order-del offer-del\" data-id=\"" + esc(o.id) + "\" title=\"Șterge oferta\">" + icName("trash", 15) + "</button></div></div>";
         }).join("");
         box.querySelectorAll(".offer-del").forEach(function (b) {
           b.addEventListener("click", function () {
             if (!confirm("Ștergi oferta?")) return;
             api("DELETE", "/api/admin/offers/" + encodeURIComponent(b.dataset.id), null, true).then(function () { loadOffers(email); });
+          });
+        });
+        box.querySelectorAll(".offer-send").forEach(function (b) {
+          b.addEventListener("click", function () {
+            if (!confirm("Trimit oferta pe email la " + b.dataset.email + "?")) return;
+            var old = b.innerHTML; b.disabled = true; b.textContent = "Se trimite…";
+            api("POST", "/api/admin/offers/" + encodeURIComponent(b.dataset.id) + "/send", {}, true)
+              .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+              .then(function (res) {
+                b.disabled = false;
+                if (res.ok && res.d.ok) { b.innerHTML = "✓ Trimis"; b.classList.remove("btn--primary"); b.classList.add("btn--ghost"); }
+                else { b.innerHTML = old; alert((res.d && res.d.error) || "Eroare la trimitere."); }
+              }).catch(function () { b.disabled = false; b.innerHTML = old; alert("Eroare de rețea."); });
           });
         });
       }).catch(function () { box.innerHTML = "<p class=\"form-msg is-error\">Eroare la încărcarea ofertelor.</p>"; });
