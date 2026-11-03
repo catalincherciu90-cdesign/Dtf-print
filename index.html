@@ -321,7 +321,7 @@ nav .btn-dark{justify-self:end}
   <nav>
     <img class="logo" alt="Mr.DTF" src="/assets/img/logo-mrdtf.png">
     <div class="st"><span class="dot"></span>PRINT DTF NON-STOP <b>24/24</b></div>
-    <div class="acts"><a class="call" href="tel:+40786022893" aria-label="Sună acum: 0786 022 893"><svg class="i" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg><span>Sună acum</span></a><div class="callpop glass" id="callpop" hidden><b>0786 022 893</b><button type="button" id="cpnum">Copiază</button><a href="tel:+40786022893">Deschide aplicația</a></div><button class="btn-dark"><svg class="i"><use href="#up"/></svg><span>Trimite comanda</span></button></div>
+    <div class="acts"><a class="call" href="tel:+40786022893" aria-label="Sună acum: 0786 022 893"><svg class="i" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg><span>Sună acum</span></a><div class="callpop glass" id="callpop" hidden><b>0786 022 893</b><button type="button" id="cpnum">Copiază</button><a href="tel:+40786022893">Deschide aplicația</a></div><button class="btn-dark" data-contact><svg class="i" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg><span>Contact</span></button></div>
   </nav>
 
   <header class="hero">
@@ -580,7 +580,7 @@ go.addEventListener('click',e=>{
 ov.inert=true;
 function openM(){build();resetSent();ov.inert=false;ov.classList.add('open');ov.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';setTimeout(()=>F.n.focus(),250)}
 function closeM(){ov.classList.remove('open');ov.setAttribute('aria-hidden','true');ov.inert=true;document.body.style.overflow=''}
-document.querySelectorAll('button.btn-dark,.cta').forEach(b=>b.onclick=openM);
+document.querySelectorAll('button.btn-dark:not([data-contact]),.cta').forEach(b=>b.onclick=openM);
 document.getElementById('x').onclick=closeM;
 (function(){var dc=document.getElementById('doneClose');if(dc)dc.onclick=closeM;})();
 ov.addEventListener('click',e=>{if(e.target===ov)closeM()});
