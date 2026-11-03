@@ -180,6 +180,7 @@
       p.appendChild(hint);
     });
     sec("Contact și texte", function (p) {
+      if (!("webmailUrl" in s)) s.webmailUrl = "https://mail.unilevelnetwork.ro:2096";
       ["phone", "phoneDisplay", "email", "webmailUrl", "schedule", "pickup", "topNote", "heroTitle", "tagline", "priceNote"].forEach(function (k) {
         if (k in s) buildInto(p, s[k], "site." + k);
       });
@@ -767,8 +768,8 @@
   function setInboxMsg(t, e) { var m = $("inboxMsg"); if (m) { m.textContent = t || ""; m.className = "form-msg" + (e ? " is-error" : ""); } }
   function loadInbox() {
     // Buton webmail (soluție sigură, independentă de IMAP)
-    var wb = $("webmailBtn"), wurl = content && content.site && content.site.webmailUrl;
-    if (wb) { if (wurl) { wb.href = wurl; wb.hidden = false; } else { wb.hidden = true; } }
+    var wb = $("webmailBtn"), wurl = (content && content.site && content.site.webmailUrl) || "https://mail.unilevelnetwork.ro:2096";
+    if (wb) { wb.href = wurl; wb.hidden = false; }
     if (inboxLoaded) return; inboxLoaded = true;
     if ($("inboxDetail")) $("inboxDetail").hidden = true;
     setInboxMsg("Se încarcă… (poate dura câteva secunde)", false);
