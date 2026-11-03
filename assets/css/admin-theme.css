@@ -136,7 +136,8 @@ body.admin {
 .tab.is-active { background: #0b0b0c; color: #fff; box-shadow: 0 6px 16px rgba(0, 0, 0, .22); }
 .tab.is-active .mr-icon { color: #fff; }
 .tab-badge { background: var(--y); color: #111; }
-@media (max-width: 560px) { .tabs { flex-wrap: nowrap; overflow-x: auto; } }
+/* Pe mobil taburile trec pe mai multe rânduri (nu se taie, fără scroll lateral). */
+@media (max-width: 560px) { .tabs { flex-wrap: wrap; overflow-x: visible; } .tab { padding: 8px 12px; } }
 
 /* Bara de sus — logo în culorile brandului (galben + negru), nu cyanul vechi */
 .admin .logo__mark { color: var(--text); }
@@ -198,6 +199,17 @@ body.admin {
 .crm-add-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .crm-add-grid label { display: grid; gap: 4px; font-size: .82rem; color: var(--muted); }
 @media (max-width: 560px) { .crm-add-grid { grid-template-columns: 1fr; } }
+
+/* Evită depășirea pe mobil: texte lungi se încadrează, fișa clientului se stivuiește. */
+.crm-row__main strong, .crm-row__main em, .crm-detail__head h2, .crm-detail__head p { overflow-wrap: anywhere; }
+.crm-detail { scroll-margin-top: 84px; }
+@media (max-width: 560px) {
+  .crm-detail__head { flex-direction: column; align-items: stretch; gap: 12px; }
+  .crm-detail__head-actions { width: 100%; }
+  .crm-detail__head-actions .btn { flex: 1 1 0; justify-content: center; }
+  .crm-row__main em { white-space: normal; overflow: visible; text-overflow: clip; }
+  .crm-recent__row, .crm-order { word-break: break-word; }
+}
 
 .dash-bars { display: grid; gap: 10px; }
 .dash-bar { display: grid; grid-template-columns: 96px 1fr 34px; align-items: center; gap: 10px; font-size: .84rem; }
