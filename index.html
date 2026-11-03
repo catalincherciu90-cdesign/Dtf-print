@@ -1,368 +1,590 @@
 <!DOCTYPE html>
 <html lang="ro">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MrDTF — Print DTF la metru liniar | Print DTF Premium</title>
-  <meta name="description" content="MrDTF — print DTF premium la metru liniar, lățime 90 cm, de la 6,50 lei/ml. Culori vibrante, rezistență maximă, livrare 24-48h. Tu creezi, noi printăm." />
-  <meta name="theme-color" content="#0a0a1a" />
+<script>document.documentElement.className="js"</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mr.DTF – Printuri DTF de calitate</title>
+<meta name="description" content="Mr.DTF — transfer DTF premium la metru liniar, pe lățime de 90 cm. Producție non-stop 24/24, culori puternice, rezistență la spălare. Trimite comanda online.">
+<meta name="theme-color" content="#f5f5f7">
+<link rel="icon" href="/assets/img/logo-mrdtf.png">
+<meta property="og:title" content="Mr.DTF – Printuri DTF de calitate">
+<meta property="og:description" content="Transfer DTF premium la metru liniar, lățime 90 cm. Producție non-stop 24/24.">
+<meta property="og:type" content="website">
+<style>
+:root{--img:none;--bg:#f5f5f7;--ink:#0f0f10;--mute:#5c5c63;--y:#ffc800;--glass:rgba(255,255,255,.28);--glass2:rgba(255,255,255,.5);--edge:rgba(255,255,255,.85);--edge2:rgba(255,255,255,.35);--sh:0 12px 40px rgba(0,0,0,.09);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:-apple-system,"SF Pro Display","Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);overflow-x:hidden}
+svg.i{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
 
-  <!-- Open Graph -->
-  <meta property="og:title" content="MrDTF — Print DTF la metru liniar" />
-  <meta property="og:description" content="Print DTF premium, lățime 90 cm, de la 6,50 lei/ml. Culori vibrante, rezistență maximă, livrare 24-48h." />
-  <meta property="og:type" content="website" />
+/* animated blurred background */
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.ghost{position:absolute;inset:-10%;background:var(--img) center/cover;filter:blur(46px) saturate(.3);opacity:.3;animation:ghost 28s ease-in-out infinite alternate}
+.b{position:absolute;border-radius:50%;filter:blur(80px);will-change:transform}
+.b1{width:420px;height:420px;background:#e6dcc3;opacity:.85;top:-120px;left:30%;animation:d1 38s ease-in-out infinite alternate}
+.b2{width:360px;height:360px;background:#c3cfe0;opacity:.65;bottom:-80px;left:-90px;animation:d2 44s ease-in-out infinite alternate}
+.b3{width:300px;height:300px;background:#fff;opacity:.9;top:40%;right:10%;animation:d3 34s ease-in-out infinite alternate}
+@keyframes ghost{from{transform:scale(1) translate(0,0)}to{transform:scale(1.18) translate(-4%,3%)}}
+@keyframes d1{to{transform:translate(-220px,200px) scale(1.2)}}
+@keyframes d2{to{transform:translate(260px,-140px) scale(1.15)}}
+@keyframes d3{to{transform:translate(-200px,-120px) scale(.8)}}
+.b4{width:380px;height:380px;background:#d8cde0;opacity:.55;top:55%;left:48%;animation:d4 40s ease-in-out infinite alternate}
+@keyframes d4{to{transform:translate(-300px,-200px) scale(1.25)}}
+@media (prefers-reduced-motion:reduce){.ghost,.b,.photo,.f1,.f2,.cal,.cal em,.cal .yl,.cal::before,.cal::after{animation:none!important}}
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" media="print" onload="this.media='all'" />
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" /></noscript>
-  <link rel="stylesheet" href="assets/css/styles.css" />
+.wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:0 20px}
+.glass{background:var(--glass);backdrop-filter:blur(26px) saturate(180%);-webkit-backdrop-filter:blur(26px) saturate(180%);border:1px solid var(--edge2);box-shadow:var(--sh),inset 0 1px 0 var(--edge),inset 0 -1px 0 rgba(255,255,255,.15)}
+
+/* nav */
+nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;position:relative;z-index:3}
+.logo{height:56px;display:block}
+.top{display:flex;justify-content:center;align-items:center;gap:12px;padding:14px 0 0;font-size:13px;font-weight:600;letter-spacing:.34em;color:var(--mute);text-align:center;position:relative;z-index:3}
+.top b{color:var(--y);font-weight:800}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--y);box-shadow:0 0 0 0 rgba(255,200,0,.6);animation:pulse 2.4s ease-out infinite;flex:none}
+@keyframes pulse{70%{box-shadow:0 0 0 10px rgba(255,200,0,0)}100%{box-shadow:0 0 0 0 rgba(255,200,0,0)}}
+@media(max-width:520px){.top{letter-spacing:.18em;font-size:11px}}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}}
+.links{display:none;gap:34px;font-size:15px}
+.links span{padding:10px 0;position:relative;cursor:pointer}
+.links span.on{font-weight:600}
+.links span.on::after{content:"";position:absolute;left:0;right:0;bottom:2px;height:3px;border-radius:3px;background:var(--y)}
+@media(min-width:1000px){.links{display:flex}}
+.btn-dark{display:inline-flex;align-items:center;gap:10px;background:#0b0b0c;color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:14px;padding:14px 22px;font-weight:600;font-size:15px;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.25)}
+.btn-dark .i{font-size:22px}
+
+/* hero */
+.hero{position:relative;padding:34px 0 40px;min-height:470px}
+.photo{position:absolute;top:-80px;right:-20px;width:64%;height:calc(100% + 80px);background:var(--img) 30% center/cover;-webkit-mask-image:linear-gradient(to right,transparent 0,#000 38%),linear-gradient(to top,transparent 0,#000 22%);-webkit-mask-composite:source-in;mask-image:linear-gradient(to right,transparent 0,#000 38%),linear-gradient(to top,transparent 0,#000 22%);mask-composite:intersect;animation:kb 24s ease-in-out infinite alternate;transform-origin:70% 50%;z-index:0}
+@keyframes kb{from{transform:scale(1)}to{transform:scale(1.07) translate(-1.5%,1%)}}
+.copy{position:relative;z-index:2;max-width:640px}
+.art{position:absolute;top:-30px;right:-10px;width:min(58%,640px);z-index:0;pointer-events:none}
+.art svg{width:100%;height:auto;display:block;overflow:visible;filter:drop-shadow(0 26px 30px rgba(0,0,0,.12))}
+.f1{animation:fl1 9s ease-in-out infinite alternate}
+.f2{animation:fl2 12s ease-in-out infinite alternate}
+@keyframes fl1{from{transform:translate(0,0) rotate(0)}to{transform:translate(10px,-16px) rotate(2deg)}}
+@keyframes fl2{from{transform:translate(0,0) rotate(0)}to{transform:translate(-8px,12px) rotate(-1.5deg)}}
+@media(max-width:820px){.art{width:100%;opacity:.45;top:-10px;right:0}}
+.eyebrow{letter-spacing:.34em;font-size:14px;color:var(--mute);margin-bottom:14px}
+.eyebrow b{color:var(--y);font-weight:700}
+h1{font-size:clamp(46px,8.2vw,88px);line-height:.98;letter-spacing:-.045em;margin:0 0 30px;font-weight:800}
+h1 em{font-style:normal;background:linear-gradient(90deg,#111 5%,#9b9ba0 95%);-webkit-background-clip:text;background-clip:text;color:transparent}
+h1 i{font-style:normal;color:var(--y)}
+.cal{position:relative;display:inline-block;transform-origin:left bottom;cursor:pointer;animation:shape 2.2s cubic-bezier(.2,1.3,.4,1) both}
+.cal::before,.cal::after,.cal .yl{position:absolute;left:0;top:0;white-space:nowrap;pointer-events:none;mix-blend-mode:multiply;opacity:0;font-style:normal;font-weight:inherit}
+.cal::before{content:attr(data-t);color:#00b4f0;animation:rc 2.2s ease-out both,pc 7s 4s infinite}
+.cal::after{content:attr(data-t);color:#ec008c;animation:rm 2.2s ease-out both,pm 7s 4s infinite}
+.cal .yl{color:#ffe600;animation:ry 2.2s ease-out both,py 7s 4s infinite}
+.cal em{animation:fin 2.2s both}
+.cal.rs,.cal.rs em,.cal.rs .yl,.cal.rs::before,.cal.rs::after{animation:none}
+@keyframes shape{0%{transform:scale(1.2,.7) skewX(-16deg)}45%{transform:scale(.96,1.08) skewX(3deg)}70%{transform:scale(1.02,.99)}100%{transform:none}}
+@keyframes fin{0%,30%{opacity:0}70%,100%{opacity:1}}
+@keyframes rc{0%{transform:translate(-30px,-14px);opacity:0}12%{opacity:1}65%{transform:translate(-4px,-2px);opacity:1}100%{transform:none;opacity:0}}
+@keyframes rm{0%{transform:translate(30px,14px);opacity:0}12%{opacity:1}65%{transform:translate(4px,2px);opacity:1}100%{transform:none;opacity:0}}
+@keyframes ry{0%{transform:translate(0,26px);opacity:0}12%{opacity:1}65%{transform:translate(0,3px);opacity:1}100%{transform:none;opacity:0}}
+@keyframes pc{0%,90%{opacity:0;transform:none}94%{opacity:.85;transform:translate(-4px,-2px)}100%{opacity:0;transform:none}}
+@keyframes pm{0%,90%{opacity:0;transform:none}94%{opacity:.85;transform:translate(4px,2px)}100%{opacity:0;transform:none}}
+@keyframes py{0%,90%{opacity:0;transform:none}94%{opacity:.85;transform:translate(0,4px)}100%{opacity:0;transform:none}}
+.feats{display:flex;flex-wrap:wrap;gap:14px 26px;margin-bottom:34px}
+.feat{display:flex;align-items:center;gap:12px;font-size:14px;line-height:1.25;color:#2a2a2e}
+.circ{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-size:22px;background:var(--glass2);border:1px solid var(--edge);box-shadow:0 6px 16px rgba(0,0,0,.08),inset 0 1px 0 #fff;flex:none;position:relative}
+.cta{display:inline-flex;align-items:center;gap:22px;background:linear-gradient(180deg,#ffd84a,#ffbf00);color:#111;border:0;border-radius:18px;padding:20px 38px;font-size:20px;font-weight:700;cursor:pointer;box-shadow:0 10px 26px rgba(255,190,0,.25),inset 0 1px 0 rgba(255,255,255,.7)}
+.cta .i{font-size:26px}
+@media(max-width:820px){
+ .photo{width:100%;top:-60px;opacity:.5;height:70%;-webkit-mask-image:linear-gradient(to bottom,#000 0,transparent 100%);mask-image:linear-gradient(to bottom,#000 0,transparent 100%)}
+ .hero{padding-top:20px}
+ .logo{height:46px}
+ .btn-dark span{display:none}
+}
+
+/* pricing */
+.price{padding:26px 28px 28px;border-radius:30px;position:relative;z-index:2}
+.head{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:center;justify-content:space-between;margin-bottom:22px}
+.head h2{margin:0;font-size:clamp(17px,2.3vw,22px);font-weight:500;letter-spacing:-.01em;line-height:1.3}
+.seg{position:relative;display:grid;grid-template-columns:1fr 1fr;padding:5px;border-radius:999px;background:rgba(255,255,255,.18);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--edge2);box-shadow:inset 0 2px 8px rgba(0,0,0,.09),inset 0 1px 0 var(--edge);width:min(100%,300px)}
+.seg button{position:relative;z-index:1;background:none;border:0;padding:13px 0;font-size:17px;font-weight:700;color:var(--mute);cursor:pointer;border-radius:999px;transition:color .25s}
+.seg button.on{color:#111}
+.pill{position:absolute;top:5px;bottom:5px;left:5px;width:calc(50% - 5px);border-radius:999px;background:linear-gradient(180deg,rgba(255,226,92,.97),rgba(255,190,0,.88));box-shadow:0 4px 14px rgba(255,190,0,.5),inset 0 1px 0 rgba(255,255,255,.85);transition:transform .45s cubic-bezier(.3,1.3,.5,1)}
+.seg[data-v="60"] .pill{transform:translateX(100%)}
+.tiers{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
+@media(min-width:800px){.tiers{grid-template-columns:repeat(5,1fr)}}
+.tier{--mx:50%;--my:0%;position:relative;text-align:center;padding:22px 8px 16px;border-radius:24px;border:1px solid var(--edge2);background:linear-gradient(180deg,rgba(255,255,255,.42),rgba(255,255,255,.12));backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);box-shadow:inset 0 1px 0 var(--edge),0 8px 24px rgba(0,0,0,.07);cursor:pointer;color:inherit;font:inherit;transition:transform .35s cubic-bezier(.3,1.3,.5,1),box-shadow .3s,background .3s;overflow:hidden}
+.tier::before{content:"";position:absolute;inset:0;background:radial-gradient(170px circle at var(--mx) var(--my),rgba(255,255,255,.7),transparent 65%);opacity:0;transition:opacity .3s;pointer-events:none}
+.tier:hover{transform:translateY(-4px)}
+.tier:hover::before{opacity:.9}
+.tier.on{transform:translateY(-4px) scale(1.03);background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.4));border-color:var(--y);box-shadow:inset 0 1px 0 #fff,0 0 0 2px rgba(255,200,0,.6),0 14px 30px rgba(0,0,0,.1)}
+.n{display:block;font-size:clamp(40px,5vw,54px);font-weight:800;letter-spacing:-.04em;line-height:1;color:#111}
+.u{display:block;font-weight:700;margin:4px 0 14px;font-size:17px}
+.r{display:block;font-size:15px;color:var(--mute);padding-top:12px;border-top:1px solid var(--edge2)}
+.note{margin:16px 4px 0;color:var(--mute);font-size:14px}
+
+/* how */
+.how{display:grid;gap:26px;padding:48px 0 70px;position:relative;z-index:2}
+@media(min-width:1000px){.how{grid-template-columns:.8fr 2fr;align-items:center;gap:40px}}
+.how .eyebrow{font-size:13px;margin-bottom:8px}
+.how h2{margin:0;font-size:clamp(30px,4.4vw,46px);letter-spacing:-.035em;line-height:1}
+.steps{display:grid;gap:22px 14px;grid-template-columns:repeat(2,1fr)}
+@media(min-width:760px){.steps{grid-template-columns:repeat(4,1fr)}}
+.step{position:relative;padding-right:22px}
+.step .circ{width:58px;height:58px;font-size:26px;margin-bottom:10px}
+.badge{position:absolute;top:-6px;right:-8px;width:24px;height:24px;border-radius:50%;background:var(--y);font-size:13px;font-weight:700;display:grid;place-items:center;box-shadow:0 3px 8px rgba(255,190,0,.5)}
+.step h4{margin:0 0 4px;font-size:15px}
+.step p{margin:0;color:var(--mute);font-size:14px;line-height:1.35}
+.step .ar{position:absolute;right:0;top:34px;color:var(--mute);font-size:18px;display:none}
+@media(min-width:760px){.step:not(:last-child) .ar{display:block}}
+.ov{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));background:rgba(235,235,240,.45);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);opacity:0;pointer-events:none;transition:opacity .3s;overflow-y:auto}
+.ov.open{opacity:1;pointer-events:auto}
+.modal{position:relative;width:min(100%,520px);padding:26px 22px 22px;border-radius:30px;background:rgba(255,255,255,.62);transform:translateY(16px) scale(.98);transition:transform .4s cubic-bezier(.3,1.3,.5,1)}
+.ov.open .modal{transform:none}
+.modal h3{margin:0 0 6px;font-size:26px;letter-spacing:-.03em}
+.x{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;border:1px solid var(--edge2);background:rgba(255,255,255,.6);font-size:22px;line-height:1;cursor:pointer;color:var(--ink)}
+.to{margin:0 0 16px;color:var(--mute);font-size:15px;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.to b{color:var(--ink)}
+.cpy{border:1px solid var(--edge2);background:rgba(255,255,255,.7);border-radius:999px;padding:5px 12px;font-size:13px;cursor:pointer;color:var(--ink)}
+.grid{display:grid;gap:12px;grid-template-columns:1fr 1fr;margin-bottom:12px}
+.modal label{display:block;font-size:13px;color:var(--mute);font-weight:600}
+.modal input,.modal select,.modal textarea{display:block;width:100%;margin-top:6px;padding:12px 14px;border-radius:14px;border:1px solid rgba(0,0,0,.08);background:rgba(255,255,255,.7);font:inherit;font-size:16px;color:var(--ink);box-shadow:inset 0 1px 3px rgba(0,0,0,.06);outline:none}
+.modal input:focus,.modal select:focus,.modal textarea:focus{border-color:var(--y);box-shadow:0 0 0 3px rgba(255,200,0,.3)}
+.modal textarea{resize:vertical}
+.hint{margin:12px 2px 16px;font-size:13px;color:var(--mute)}
+.go{display:block;text-align:center;text-decoration:none;background:linear-gradient(180deg,#ffd84a,#ffbf00);color:#111;border-radius:16px;padding:16px;font-size:18px;font-weight:700;box-shadow:0 10px 26px rgba(255,190,0,.28),inset 0 1px 0 rgba(255,255,255,.7)}
+@media(max-width:480px){.grid{grid-template-columns:1fr}}
+
+.js .rv{opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1)}
+.js .rv.in{opacity:1;transform:none}
+.tile:nth-child(2){transition-delay:.08s}.tile:nth-child(3){transition-delay:.16s}.tile:nth-child(4){transition-delay:.24s}
+.gal{padding:56px 0 8px;position:relative;z-index:2}
+.gal .eyebrow{font-size:13px;margin-bottom:8px}
+.gal h2{margin:0 0 22px;font-size:clamp(30px,4.4vw,46px);letter-spacing:-.035em;line-height:1}
+.mos{display:grid;gap:14px;grid-template-columns:repeat(4,1fr);grid-auto-rows:clamp(150px,21vw,250px)}
+.tile{position:relative;border-radius:28px;overflow:hidden;padding:0;border:1px solid var(--edge2);box-shadow:var(--sh);cursor:zoom-in;background:var(--glass);font:inherit;color:inherit;text-align:left}
+.tile img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .9s cubic-bezier(.2,.8,.2,1)}
+.tile:hover img{transform:scale(1.06)}
+.tile::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 1px 0 rgba(255,255,255,.7),inset 0 0 0 1px rgba(255,255,255,.22);pointer-events:none}
+.cap{position:absolute;left:12px;bottom:12px;max-width:calc(100% - 24px);padding:9px 15px;border-radius:999px;font-size:13px;font-weight:600;color:#111;background:rgba(255,255,255,.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,255,255,.65);box-shadow:inset 0 1px 0 #fff,0 6px 18px rgba(0,0,0,.12);transition:transform .35s cubic-bezier(.3,1.3,.5,1)}
+.tile:hover .cap{transform:translateY(-3px)}
+.t1{grid-column:span 2;grid-row:span 2}.t4{grid-column:span 2}
+@media(max-width:700px){.mos{grid-template-columns:repeat(2,1fr);grid-auto-rows:42vw}}
+.lb{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:20px;background:rgba(235,235,240,.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);opacity:0;pointer-events:none;transition:opacity .3s;cursor:zoom-out}
+.lb.open{opacity:1;pointer-events:auto}
+.lb img{max-width:min(100%,1100px);max-height:82vh;border-radius:26px;border:1px solid rgba(255,255,255,.7);box-shadow:0 30px 80px rgba(0,0,0,.3);transform:scale(.95);transition:transform .45s cubic-bezier(.3,1.3,.5,1)}
+.lb.open img{transform:none}
+@media (prefers-reduced-motion:reduce){.js .rv{opacity:1;transform:none;transition:none}}
+:root{--nh:84px}
+@media(max-width:820px){:root{--nh:72px}}
+nav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;height:var(--nh);padding:0 calc(50vw - 50%);margin:0 calc(50% - 50vw);position:sticky;top:0;z-index:20;background:linear-gradient(180deg,rgba(255,255,255,.84),rgba(255,255,255,.6));backdrop-filter:blur(26px) saturate(180%);-webkit-backdrop-filter:blur(26px) saturate(180%);border-bottom:1px solid rgba(255,255,255,.85);box-shadow:0 10px 36px rgba(0,0,0,.09),inset 0 1px 0 #fff}
+nav .logo{justify-self:start}
+nav .btn-dark{justify-self:end}
+.st{display:flex;align-items:center;justify-content:center;gap:12px;font-size:13px;font-weight:600;letter-spacing:.34em;color:var(--mute);text-align:center;white-space:nowrap}
+.st b{color:var(--y);font-weight:800}
+.photo{top:calc(-1 * var(--nh));bottom:0;left:calc(50% - 50vw);right:calc(50% - 50vw);width:auto;height:auto;background:var(--img) 62% center/cover;-webkit-mask-image:linear-gradient(to right,transparent 0,rgba(0,0,0,.3) 28%,#000 58%),linear-gradient(to top,transparent 0,#000 24%);mask-image:linear-gradient(to right,transparent 0,rgba(0,0,0,.3) 28%,#000 58%),linear-gradient(to top,transparent 0,#000 24%);-webkit-mask-composite:source-in;mask-composite:intersect}
+@media(max-width:820px){.st{letter-spacing:.12em;font-size:10px;white-space:normal;line-height:1.3}.dot{width:6px;height:6px}.photo{bottom:auto;height:calc(var(--nh) + 420px);background-position:60% center;opacity:.6;-webkit-mask-image:linear-gradient(to bottom,#000 35%,transparent 100%);mask-image:linear-gradient(to bottom,#000 35%,transparent 100%);-webkit-mask-composite:source-over;mask-composite:add}}
+.seg[data-v="pj"] .pill{transform:translateX(100%)}
+.modal .seg{width:100%;margin:4px 0 12px}
+.modal .seg button{font-size:15px;padding:11px 0}
+.modal>label{margin-bottom:12px}
+.notice{margin:0 0 16px;padding:12px 14px;border-radius:16px;font-size:13.5px;line-height:1.45;color:#2a2a2e;background:rgba(255,200,0,.14);border:1px solid rgba(255,200,0,.5)}
+.ft{position:relative;z-index:2;padding:10px 0 28px}
+.ftg{border-radius:30px;padding:32px 30px 26px;display:grid;gap:28px;grid-template-columns:1fr}
+@media(min-width:900px){.ftg{grid-template-columns:1.2fr 1fr 1.3fr 1.2fr}}
+.ftg h5{margin:0 0 14px;font-size:15px;letter-spacing:-.01em}
+.ftg p,.ftg a,.ftg span{font-size:14.5px;line-height:1.5}
+.ftg p{margin:0 0 6px;color:var(--mute)}
+.ftg a{color:var(--mute);text-decoration:none}
+.ftg a:hover{color:var(--ink)}
+.fl{display:flex;flex-direction:column;gap:10px}
+.fi{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px;color:var(--mute)}
+.fi .i{font-size:18px;margin-top:2px;color:var(--ink)}
+.flogo{height:50px;display:block;margin-bottom:12px}
+.soc{display:flex;gap:10px;margin-top:16px}
+.ftg .soc a{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:18px;background:var(--glass2);border:1px solid var(--edge);color:var(--ink);box-shadow:inset 0 1px 0 #fff,0 4px 12px rgba(0,0,0,.08)}
+.fbot{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center;justify-content:space-between;padding:18px 6px 0;color:var(--mute);font-size:13px}
+.fbot .lg{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.fbot a{color:var(--mute);text-decoration:none}
+.fbot a.sal{display:inline-flex;align-items:center;justify-content:center;width:250px;max-width:100%;height:50px;border-radius:12px;background:#fff;border:1px solid rgba(0,0,0,.12);color:#111;font-weight:700;font-size:13px;text-align:center;line-height:1.2;padding:0 10px}
+.todo{background:rgba(255,200,0,.3);border-radius:6px;padding:0 4px;color:#111}
+.hint.legal{margin:-4px 2px 14px;font-size:12.5px}
+.hint.legal a{color:var(--ink)}
+.rolls{position:absolute;right:0;top:10px;width:560px;height:430px;z-index:1;pointer-events:none;transform-origin:top right;transform:scale(var(--k,1))}
+.rl{position:absolute;width:var(--w);height:var(--h);left:var(--x);top:var(--y);transform:rotate(var(--r));animation:drop 1.7s both;animation-delay:calc(var(--i)*.4s + .3s);filter:drop-shadow(0 14px 14px rgba(0,0,0,.18))}
+@keyframes drop{0%{opacity:0;transform:translate(0,-640px) rotate(calc(var(--r) + 55deg));animation-timing-function:cubic-bezier(.5,0,.9,.6)}10%{opacity:1}52%{transform:translate(0,0) rotate(var(--r));animation-timing-function:cubic-bezier(.2,.7,.4,1)}68%{transform:translate(0,-34px) rotate(var(--r));animation-timing-function:cubic-bezier(.6,0,.9,.5)}82%{transform:translate(0,0) rotate(var(--r));animation-timing-function:ease-out}90%{transform:translate(0,-9px) rotate(var(--r))}100%{transform:translate(0,0) rotate(var(--r))}}
+@media(max-width:1150px){.rolls{--k:.8}}
+@media(max-width:820px){.hero{display:flex;flex-direction:column}.rolls{order:2;position:relative;right:auto;top:auto;left:50%;margin:20px 0 -165px -280px;--k:.62;transform-origin:top center}}
+@media (prefers-reduced-motion:reduce){.rl{animation:none!important}}
+.play{position:absolute;right:0;top:0;width:min(640px,54%);z-index:1}
+.play svg{width:100%;height:auto;display:block;overflow:visible;user-select:none;-webkit-user-select:none}
+.tee{animation:teein .9s cubic-bezier(.2,.9,.3,1.2) both}
+@keyframes teein{from{opacity:0;transform:translateY(26px)}}
+.pr{cursor:grab;touch-action:none;transition:transform .5s cubic-bezier(.3,1.4,.5,1),opacity .4s}
+.pr.drag{cursor:grabbing;transition:opacity .4s}
+.pr .sh{transition:opacity .3s}.pr.on .sh{opacity:0}
+.zone{opacity:0;transition:opacity .25s;pointer-events:none}.dragging .zone{opacity:.9}
+.rst{position:absolute;right:14px;bottom:-6px;border:1px solid var(--edge);background:var(--glass2);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:999px;padding:8px 16px;font:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;box-shadow:inset 0 1px 0 #fff,0 6px 16px rgba(0,0,0,.1)}
+@media(max-width:1150px){.play{width:48%}}
+@media(max-width:820px){.play{order:2;position:relative;width:100%;margin-top:18px}}
+.reels{padding-bottom:8px}
+.reels .rh{text-align:center}
+.reels .rh h2{margin:0}
+.rsub{max-width:560px;margin:12px auto 0;color:var(--mute);font-size:clamp(15px,2vw,18px);line-height:1.45}
+.chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:20px 0 26px}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;font-size:13.5px;font-weight:600;background:var(--glass2);border:1px solid var(--edge);box-shadow:inset 0 1px 0 #fff,0 6px 16px rgba(0,0,0,.07);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.chip i{display:block;width:8px;height:8px;border-radius:50%;background:var(--y)}
+.rrow{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px 4px 22px;margin:0 -4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.rrow::-webkit-scrollbar{display:none}
+.rc{flex:0 0 min(228px,68vw);scroll-snap-align:center;position:relative;aspect-ratio:9/17;border-radius:34px}
+.rc:first-child{margin-left:auto}.rc:last-child{margin-right:auto}
+.js .rc.rv{transition:opacity .8s ease,transform .5s cubic-bezier(.3,1.3,.5,1)}
+.js .rc.rv.in:hover{transform:translateY(-8px)}
+.rc .scr{position:absolute;inset:8px;border-radius:26px;overflow:hidden;background:#17171e}
+.rc iframe{width:100%;height:100%;border:0;display:block}
+.cov{position:absolute;inset:0;width:100%;height:100%;border:0;padding:0;cursor:pointer;color:#fff;font:inherit;display:grid;place-items:center;background:radial-gradient(120% 80% at 20% 0%,rgba(255,200,0,.38),transparent 60%),linear-gradient(160deg,#16161d,#2c2c38)}
+.cov .pl{width:68px;height:68px;border-radius:50%;display:grid;place-items:center;font-size:28px;background:rgba(255,255,255,.2);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 10px 30px rgba(0,0,0,.35);transition:transform .35s cubic-bezier(.3,1.4,.5,1)}
+.cov:hover .pl{transform:scale(1.1)}
+.cov .cap2{position:absolute;left:12px;right:12px;bottom:14px;font-size:13px;font-weight:600;padding:9px 14px;border-radius:999px;text-align:left;background:rgba(255,255,255,.18);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.35)}
+.rcta{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;align-items:center;margin-top:10px}
+.ttk{display:inline-flex;align-items:center;gap:10px;background:#0b0b0c;color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:14px;padding:14px 22px;font-weight:600;font-size:15px;text-decoration:none;box-shadow:0 8px 22px rgba(0,0,0,.25)}
+.ttk .i{font-size:22px}
+.rnote{margin:16px 4px 0;font-size:13px;color:var(--mute);text-align:center}
+.lead{display:flex;align-items:center;gap:14px;margin-bottom:34px;max-width:460px}
+.lead p{margin:0;font-size:clamp(16px,2.2vw,19px);line-height:1.35;color:#2a2a2e}
+.lead b{font-weight:700;color:var(--ink)}
+.hl{white-space:nowrap;color:#f5b800}
+.t4 img{object-position:50% 100%}
+.t4 .cap{top:12px;bottom:auto}
+.logo{height:62px;width:auto}
+.t3 img{object-position:100% 50%}
+.pick{position:relative;z-index:2;margin:0 0 18px;padding:22px 26px;border-radius:30px;display:flex;flex-wrap:wrap;align-items:center;gap:16px 20px}
+.pick .circ{width:56px;height:56px;font-size:26px}
+.pick .tx{flex:1 1 240px}
+.pick h3{margin:0 0 2px;font-size:19px;letter-spacing:-.01em}
+.pick p{margin:0;color:var(--mute);font-size:15px;line-height:1.45}
+.pick .btn-dark{text-decoration:none}
+.acts{justify-self:end;display:flex;align-items:center;gap:10px}
+.call{display:inline-flex;align-items:center;gap:8px;padding:13px 18px;border-radius:14px;font-weight:600;font-size:15px;text-decoration:none;color:var(--ink);background:rgba(255,255,255,.62);border:1px solid var(--edge);box-shadow:inset 0 1px 0 #fff,0 6px 16px rgba(0,0,0,.08);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);white-space:nowrap}
+.call .i{font-size:20px}
+@media(max-width:820px){.acts{gap:8px}.call{padding:12px}.call span{display:none}}
+@media(max-width:820px){nav{grid-template-columns:auto minmax(0,1fr) auto;gap:10px}nav .logo{height:40px}.st{min-width:0;gap:6px;font-size:9.5px;letter-spacing:.1em}.btn-dark{padding:12px}}
+.duo{position:relative;z-index:2;display:grid;gap:18px;grid-template-columns:1fr;margin:0 0 18px}
+@media(min-width:900px){.duo{grid-template-columns:1fr 1fr}}
+.duo .pick{margin:0}
+.blogbtn{display:inline-flex;align-items:center;gap:8px;text-decoration:none;background:linear-gradient(180deg,#ffd84a,#ffbf00);color:#111;font-weight:700;font-size:15px;border-radius:14px;padding:13px 20px;box-shadow:0 8px 22px rgba(255,190,0,.35),inset 0 1px 0 rgba(255,255,255,.7)}
+.blogbtn .i{font-size:20px}
+.pick .btn-dark span{display:inline}
+.pick .btn-dark{padding:14px 22px}
+@media(max-width:799px){.tier:last-child{grid-column:1/-1}}
+.acts{position:relative}
+.callpop{position:absolute;top:calc(100% + 12px);right:0;z-index:40;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 16px;border-radius:20px;background:rgba(255,255,255,.88);min-width:300px}
+.callpop[hidden]{display:none}
+.callpop b{font-size:20px;letter-spacing:-.01em;margin-right:4px;user-select:all}
+.callpop button,.callpop a{font:inherit;font-size:13.5px;font-weight:600;color:var(--ink);text-decoration:none;cursor:pointer;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.8);border:1px solid var(--edge);box-shadow:inset 0 1px 0 #fff,0 4px 12px rgba(0,0,0,.08)}
+</style>
 </head>
 <body>
-  <!-- ===== Background decor ===== -->
-  <div class="bg-decor" aria-hidden="true">
-    <span class="orb orb--1"></span>
-    <span class="orb orb--2"></span>
-    <span class="orb orb--3"></span>
-  </div>
+<svg width="0" height="0" style="position:absolute">
+<defs><linearGradient id="sh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".35" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".3"/></linearGradient></defs>
+<symbol id="rollA" viewBox="0 0 300 200"><defs><clipPath id="cpA"><path d="M32 96 L238 16 C262 6 278 30 270 62 C266 78 262 86 258 90 L70 166 C44 176 20 160 24 126 C25 112 28 102 32 96Z"/></clipPath></defs><path d="M32 96 L238 16 C262 6 278 30 270 62 C266 78 262 86 258 90 L70 166 C44 176 20 160 24 126 C25 112 28 102 32 96Z" style="fill:var(--a)"/><g clip-path="url(#cpA)"><g transform="rotate(-21 150 90)"><g style="fill:var(--b)"><rect x="70" y="60" width="34" height="90" rx="8"/><circle cx="150" cy="96" r="28"/><rect x="200" y="52" width="26" height="84" rx="8"/></g><g style="fill:var(--c)"><rect x="112" y="70" width="14" height="60" rx="5"/><rect x="236" y="70" width="18" height="50" rx="6"/></g></g></g><path d="M32 96 L238 16 C262 6 278 30 270 62 C266 78 262 86 258 90 L70 166 C44 176 20 160 24 126 C25 112 28 102 32 96Z" fill="url(#sh)"/><path d="M32 96 L238 16 C262 6 278 30 270 62 C266 78 262 86 258 90 L70 166 C44 176 20 160 24 126 C25 112 28 102 32 96Z" fill="none" stroke="#111" stroke-width="5" stroke-linejoin="round"/><g transform="rotate(-18 48 130)"><ellipse cx="48" cy="130" rx="22" ry="38" fill="#fff" stroke="#111" stroke-width="5"/><ellipse cx="48" cy="130" rx="12" ry="22" fill="#c9a574" stroke="#111" stroke-width="4"/><ellipse cx="48" cy="130" rx="5" ry="11" fill="#6f5233"/></g><path d="M96 154 C92 172 104 188 120 196 C150 190 178 186 198 178 C214 160 216 130 210 109Z" style="fill:var(--f)"/><path d="M96 154 C92 172 104 188 120 196 C150 190 178 186 198 178 C214 160 216 130 210 109" fill="none" stroke="#111" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/><path d="M104 162 C108 173 114 182 124 188" stroke="#fff" stroke-opacity=".75" stroke-width="3" fill="none" stroke-linecap="round"/></symbol>
+<symbol id="rollB" viewBox="0 0 200 250"><defs><clipPath id="cpB"><path d="M28 60 L112 14 C140 50 150 100 148 158 C146 190 130 214 106 224 C84 232 66 214 62 180 C58 130 50 90 28 60Z"/></clipPath></defs><path d="M28 60 L112 14 C140 50 150 100 148 158 C146 190 130 214 106 224 C84 232 66 214 62 180 C58 130 50 90 28 60Z" style="fill:var(--a)"/><g clip-path="url(#cpB)"><g transform="rotate(-24 100 120)"><g style="fill:var(--b)"><rect x="40" y="70" width="110" height="26" rx="8"/><circle cx="100" cy="150" r="26"/></g><g style="fill:var(--c)"><rect x="52" y="104" width="86" height="12" rx="5"/></g></g></g><path d="M28 60 L112 14 C140 50 150 100 148 158 C146 190 130 214 106 224 C84 232 66 214 62 180 C58 130 50 90 28 60Z" fill="url(#sh)"/><path d="M28 60 L112 14 C140 50 150 100 148 158 C146 190 130 214 106 224 C84 232 66 214 62 180 C58 130 50 90 28 60Z" fill="none" stroke="#111" stroke-width="5" stroke-linejoin="round"/><g transform="rotate(-38 118 206)"><rect x="96" y="190" width="74" height="40" rx="20" fill="#fff" stroke="#111" stroke-width="5"/><ellipse cx="108" cy="210" rx="12" ry="19" fill="#c9a574" stroke="#111" stroke-width="4"/><ellipse cx="108" cy="210" rx="5" ry="9" fill="#6f5233"/></g></symbol>
+<symbol id="up" viewBox="0 0 24 24"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 8.5 4 4 0 0 1 17.5 18"/><path d="M12 20v-8m-3 3 3-3 3 3"/></symbol>
+<symbol id="bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol>
+<symbol id="gem" viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M9 3l3 6 3-6M12 21 9 9m3 12 3-12"/></symbol>
+<symbol id="shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></symbol>
+<symbol id="gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+<symbol id="box" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></symbol>
+<symbol id="tee" viewBox="0 0 24 24"><path d="m8 3-5 3 2 4 3-1v12h8V9l3 1 2-4-5-3a4 4 0 0 1-8 0z"/></symbol>
+<symbol id="arr" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></symbol>
+</svg>
 
-  <!-- ===== Header ===== -->
-  <header class="header" id="top">
-    <div class="container header__inner">
-      <a class="logo" href="#top" aria-label="MrDTF — acasă">
-        <span class="logo__mark"><span class="logo__mr">Mr</span>DTF</span>
-        <span class="logo__sub" data-edit="brandTagline">PRINT DTF PREMIUM</span>
-      </a>
+<div class="bg"><div class="b b1"></div><div class="b b2"></div><div class="b b3"></div><div class="b b4"></div></div>
 
-      <nav class="nav" id="nav">
-        <a href="#top" class="is-active">Acasă</a>
-        <a href="#comanda">Comandă DTF</a>
-        <a href="/produse">Produse Blank</a>
-        <a href="#despre">Despre noi</a>
-        <a href="#contact">Contact</a>
-      </nav>
+<div class="wrap">
+  <nav>
+    <img class="logo" alt="Mr.DTF" src="/assets/img/logo-mrdtf.png">
+    <div class="st"><span class="dot"></span>PRINT DTF NON-STOP <b>24/24</b></div>
+    <div class="acts"><a class="call" href="tel:+40786022893" aria-label="Sună acum: 0786 022 893"><svg class="i" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg><span>Sună acum</span></a><div class="callpop glass" id="callpop" hidden><b>0786 022 893</b><button type="button" id="cpnum">Copiază</button><a href="tel:+40786022893">Deschide aplicația</a></div><button class="btn-dark"><svg class="i"><use href="#up"/></svg><span>Trimite comanda</span></button></div>
+  </nav>
 
-      <div class="header__actions">
-        <a class="icon-btn" href="/cont" aria-label="Contul meu">
-          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4 0-8 2-8 6v1h16v-1c0-4-4-6-8-6Z"/></svg>
-        </a>
-        <button class="icon-btn icon-btn--cart" id="cartBtn" aria-label="Coș">
-          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M7 4h-2L4 2H1v2h2l3.6 7.6-1.35 2.45A2 2 0 0 0 7 17h12v-2H7.4l1.1-2h7a2 2 0 0 0 1.8-1.1L21 4H7Zm0 15a2 2 0 1 0 2 2 2 2 0 0 0-2-2Zm10 0a2 2 0 1 0 2 2 2 2 0 0 0-2-2Z"/></svg>
-          <span class="cart-count" id="cartCount" hidden>0</span>
-        </button>
-        <button class="burger" id="burger" aria-label="Meniu" aria-expanded="false">
-          <span></span><span></span><span></span>
-        </button>
-      </div>
+  <header class="hero">
+    <div class="play"><svg id="stage" viewBox="0 0 640 440" role="group" aria-label="Tricou interactiv: trage printurile peste tricou"><defs><linearGradient id="tg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#dcdce2"/></linearGradient><filter id="ts" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="14" stdDeviation="14" flood-color="#000" flood-opacity=".18"/></filter><symbol id="a1" viewBox="0 0 100 100"><g style="fill:var(--c)"><circle cx="24" cy="26" r="15"/><circle cx="76" cy="26" r="15"/><ellipse cx="50" cy="57" rx="37" ry="35"/></g><g fill="#fff"><circle cx="24" cy="26" r="6"/><circle cx="76" cy="26" r="6"/><ellipse cx="50" cy="69" rx="15" ry="11"/><circle cx="35" cy="48" r="4"/><circle cx="65" cy="48" r="4"/></g><ellipse cx="50" cy="64" rx="6" ry="4" style="fill:var(--c)"/></symbol>
+<symbol id="a2" viewBox="0 0 100 100"><polygon points="6,6 36,32 64,32 94,6 98,54 50,98 2,54" style="fill:var(--c)"/><g fill="#fff"><polygon points="12,56 50,94 34,60"/><polygon points="88,56 50,94 66,60"/><polygon points="30,46 45,52 32,57"/><polygon points="70,46 55,52 68,57"/><polygon points="14,18 30,34 20,42"/><polygon points="86,18 70,34 80,42"/></g><circle cx="50" cy="92" r="4" style="fill:var(--c)"/></symbol>
+<symbol id="a3" viewBox="0 0 100 100"><path d="M16 14 L36 28 L64 28 L84 14 L92 56 C92 82 72 96 50 96 C28 96 8 82 8 56Z" style="fill:var(--c)"/><g fill="#fff"><circle cx="34" cy="52" r="16"/><circle cx="66" cy="52" r="16"/><polygon points="50,60 43,74 57,74"/></g><g style="fill:var(--c)"><circle cx="34" cy="52" r="7"/><circle cx="66" cy="52" r="7"/></g></symbol>
+<symbol id="a4" viewBox="0 0 100 100"><g fill="none" stroke-width="6" stroke-linecap="round" style="stroke:var(--c)"><path d="M40 50 C34 32 24 26 22 8M34 36 C26 36 18 32 14 24M32 26 C26 20 28 12 30 6"/><path d="M60 50 C66 32 76 26 78 8M66 36 C74 36 82 32 86 24M68 26 C74 20 72 12 70 6"/></g><g style="fill:var(--c)"><ellipse cx="27" cy="56" rx="12" ry="6" transform="rotate(-25 27 56)"/><ellipse cx="73" cy="56" rx="12" ry="6" transform="rotate(25 73 56)"/><path d="M33 48 H67 L58 92 Q50 100 42 92Z"/></g><g fill="#fff"><circle cx="43" cy="64" r="3.5"/><circle cx="57" cy="64" r="3.5"/><circle cx="50" cy="91" r="3.5"/></g></symbol>
+<symbol id="a5" viewBox="0 0 100 100"><g style="fill:var(--c)"><circle cx="84.0" cy="52.0" r="13"/><circle cx="77.5" cy="72.0" r="13"/><circle cx="60.5" cy="84.3" r="13"/><circle cx="39.5" cy="84.3" r="13"/><circle cx="22.5" cy="72.0" r="13"/><circle cx="16.0" cy="52.0" r="13"/><circle cx="22.5" cy="32.0" r="13"/><circle cx="39.5" cy="19.7" r="13"/><circle cx="60.5" cy="19.7" r="13"/><circle cx="77.5" cy="32.0" r="13"/><circle cx="50" cy="52" r="34"/></g><circle cx="50" cy="54" r="25" fill="#fff"/><g style="fill:var(--c)"><circle cx="40" cy="48" r="3.5"/><circle cx="60" cy="48" r="3.5"/><polygon points="43,56 57,56 50,66"/><circle cx="31" cy="30" r="9"/><circle cx="69" cy="30" r="9"/></g><path d="M50 66 V72 M42 74 Q50 80 58 74" fill="none" stroke-width="3" stroke-linecap="round" style="stroke:var(--c)"/></symbol></defs>
+<g transform="translate(10 50)"><g class="tee" filter="url(#ts)"><path d="M120 30 60 55 10 120l50 30 35-30v220q0 15 15 15h180q15 0 15-15V120l35 30 50-30-50-65-60-25Q250 70 200 70T120 30z" fill="url(#tg2)" stroke="#000" stroke-opacity=".08" stroke-width="2"/><path d="M150 34Q200 78 250 34" fill="none" stroke="#000" stroke-opacity=".1" stroke-width="3"/><path d="M95 120v60M305 120v60" fill="none" stroke="#000" stroke-opacity=".05" stroke-width="2"/></g></g>
+<rect class="zone" x="130" y="165" width="160" height="180" rx="22" fill="none" stroke="#ffc800" stroke-width="3" stroke-dasharray="8 8"/>
+<rect x="420" y="30" width="210" height="380" rx="28" fill="#fff" fill-opacity=".42" stroke="#fff" stroke-opacity=".85" stroke-width="1.5"/>
+<text x="525" y="56" text-anchor="middle" font-size="13" font-weight="700" letter-spacing="3" fill="#5c5c63">PRINTURI</text>
+<text id="hint" x="215" y="432" text-anchor="middle" font-size="15" font-weight="600" fill="#5c5c63">Trage un print peste tricou</text>
+<g class="pr" data-i="0" style="--c:#111"><rect class="sh" x="-47" y="-47" width="94" height="94" rx="14" fill="#fff" fill-opacity=".6" stroke="#000" stroke-opacity=".14" stroke-dasharray="5 5"/><rect x="-48" y="-48" width="96" height="96" fill="transparent"/><use href="#a1" x="-50" y="-50" width="100" height="100"/></g><g class="pr" data-i="1" style="--c:#ec008c"><rect class="sh" x="-47" y="-47" width="94" height="94" rx="14" fill="#fff" fill-opacity=".6" stroke="#000" stroke-opacity=".14" stroke-dasharray="5 5"/><rect x="-48" y="-48" width="96" height="96" fill="transparent"/><use href="#a2" x="-50" y="-50" width="100" height="100"/></g><g class="pr" data-i="2" style="--c:#00a8e8"><rect class="sh" x="-47" y="-47" width="94" height="94" rx="14" fill="#fff" fill-opacity=".6" stroke="#000" stroke-opacity=".14" stroke-dasharray="5 5"/><rect x="-48" y="-48" width="96" height="96" fill="transparent"/><use href="#a3" x="-50" y="-50" width="100" height="100"/></g><g class="pr" data-i="3" style="--c:#3a56d4"><rect class="sh" x="-47" y="-47" width="94" height="94" rx="14" fill="#fff" fill-opacity=".6" stroke="#000" stroke-opacity=".14" stroke-dasharray="5 5"/><rect x="-48" y="-48" width="96" height="96" fill="transparent"/><use href="#a4" x="-50" y="-50" width="100" height="100"/></g><g class="pr" data-i="4" style="--c:#ffb300"><rect class="sh" x="-47" y="-47" width="94" height="94" rx="14" fill="#fff" fill-opacity=".6" stroke="#000" stroke-opacity=".14" stroke-dasharray="5 5"/><rect x="-48" y="-48" width="96" height="96" fill="transparent"/><use href="#a5" x="-50" y="-50" width="100" height="100"/></g></svg><button class="rst" id="reset" type="button">Resetează</button></div>
+    <div class="copy">
+      <h1>Printuri DTF<br>de <span class="cal" data-t="calitate"><b class="yl" aria-hidden="true">calitate</b><em>calitate</em></span><i>.</i></h1>
+      <div class="lead"><span class="circ"><svg class="i" viewBox="0 0 24 24"><path d="M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4"/></svg></span><p><b>Printăm pe lățime de 90 cm.</b><br>Mai mult spațiu pentru ideile tale.</p></div>
+      <button class="cta"><svg class="i"><use href="#up"/></svg>Trimite comanda<svg class="i"><use href="#arr"/></svg></button>
     </div>
   </header>
 
-  <main>
-    <!-- ===== Hero ===== -->
-    <section class="hero">
-      <div class="hero__media" aria-hidden="true">
-        <img class="hero__bg" id="heroImgBg" alt="" fetchpriority="high" decoding="async" style="display:none" />
-        <img class="hero__photo hero__photo--left" id="heroImgLeft" src="assets/img/hero-prints.jpg" alt="" />
-        <img class="hero__photo hero__photo--right" id="heroImgRight" src="assets/img/hero-printer.jpg" alt="" />
-        <div class="hero__veil" id="heroVeil"></div>
-      </div>
+  <section class="glass price">
+    <div class="head"><h2>Prețuri pe metru liniar, pe lățime de <span class="hl">90 cm</span></h2></div>
+    <div class="tiers" id="tiers"><button class="tier"><span class="n">70</span><span class="u">lei/ml</span><span class="r">1 – 2 ml</span></button><button class="tier"><span class="n">65</span><span class="u">lei/ml</span><span class="r">3 – 9 ml</span></button><button class="tier"><span class="n">62</span><span class="u">lei/ml</span><span class="r">10 – 24 ml</span></button><button class="tier"><span class="n">58</span><span class="u">lei/ml</span><span class="r">25 – 49 ml</span></button><button class="tier on"><span class="n">55</span><span class="u">lei/ml</span><span class="r">50 – 100 ml</span></button></div>
+    <p class="note" id="priceNote">Suprafața printabilă este de 87 cm. Prețurile afișate nu includ TVA.</p>
+  </section>
 
-      <div class="container hero__content">
-        <h1 class="hero__title" id="heroTitle">
-          PRINT <span class="grad-text">DTF</span><br />
-          LA METRU LINIAR
-        </h1>
-        <p class="hero__sub" id="heroSub">LĂȚIME DE <span class="grad-text">90 CM</span></p>
-
-        <ul class="hero__stats" id="heroStats">
-          <li><span class="mr-ico" data-icon="tag" data-icon-size="18"></span> De la 6,50 lei/ml</li>
-          <li><span class="mr-ico" data-icon="ruler" data-icon-size="18"></span> Lățime 90 cm</li>
-          <li><span class="mr-ico" data-icon="truck" data-icon-size="18"></span> Livrare 24-48h</li>
-        </ul>
-        <ul class="hero__stats hero__stats--check" id="heroChecks">
-          <li>Comandă online</li>
-          <li>Livrare rapidă</li>
-          <li>Culori vibrante</li>
-        </ul>
-
-        <div class="hero__cta">
-          <a href="#comanda" class="btn btn--cta">
-            <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M7 4h-2L4 2H1v2h2l3.6 7.6-1.35 2.45A2 2 0 0 0 7 17h12v-2H7.4l1.1-2h7a2 2 0 0 0 1.8-1.1L21 4H7Zm0 15a2 2 0 1 0 2 2 2 2 0 0 0-2-2Zm10 0a2 2 0 1 0 2 2 2 2 0 0 0-2-2Z"/></svg>
-            <span data-edit="hero.cta">COMANDĂ ACUM</span>
-            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M5 12h12l-5-5 1.4-1.4L21 13l-7.6 7.4L12 19l5-5H5Z"/></svg>
-          </a>
-        </div>
-        <p class="hero__hint" data-edit="hero.hint">Încarcă fișierele în 2 minute</p>
-        <span class="hero__chevron" aria-hidden="true">⌄</span>
-      </div>
-
-      <div class="container">
-        <ul class="feature-pills feature-pills--hero" id="heroPills">
-          <li class="pill">
-            <span class="pill__ico" data-icon="shield" data-icon-size="20"></span>
-            <span><strong>Culori vibrante</strong><em>Calitate premium</em></span>
-          </li>
-          <li class="pill">
-            <span class="pill__ico" data-icon="ruler" data-icon-size="20"></span>
-            <span><strong>Lățime 90 cm</strong><em>Print la metru liniar</em></span>
-          </li>
-          <li class="pill">
-            <span class="pill__ico" data-icon="bolt" data-icon-size="20"></span>
-            <span><strong>Livrare rapidă</strong><em>Termene scurte</em></span>
-          </li>
-          <li class="pill">
-            <span class="pill__ico" data-icon="award" data-icon-size="20"></span>
-            <span><strong>Rezistență maximă</strong><em>Spălări multiple</em></span>
-          </li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- ===== Comandă / Calculator ===== -->
-    <section class="order" id="comanda">
-      <div class="container">
-        <div class="panel order__panel">
-          <div class="order__info">
-            <span class="eyebrow" data-edit="order.eyebrow">Comandă rapid și ușor</span>
-            <h2 class="order__title grad-text" data-edit="order.title">Comandă DTF</h2>
-            <p class="order__desc" data-edit="order.desc">
-              Încarci designul, alegi dimensiunea și primești printul DTF la
-              metru liniar, gata de aplicat.
-            </p>
-            <ul class="check-list" id="orderChecklist">
-              <li>Preț afișat la metru liniar</li>
-              <li>Lățime print: 90 cm</li>
-              <li>Print de înaltă rezoluție</li>
-              <li>Folie premium, cerneală certificată</li>
-              <li>Ideal pentru textile din bumbac, poliester și mix</li>
-            </ul>
-          </div>
-
-          <!-- Formular comandă -->
-          <form class="calc" id="calc" novalidate>
-            <h3 class="calc__title" data-edit="order.calcTitle">Calculează prețul</h3>
-
-            <div class="calc__row calc__row--fixed">
-              <span class="calc__fixed-label">Lățime print</span>
-              <span class="calc__fixed-val" id="widthFixed">90 cm</span>
-            </div>
-
-            <div class="calc__row">
-              <label for="length">Lungime (m liniari) <output id="lengthOut">5 m</output></label>
-              <input type="range" id="length" min="1" max="50" step="1" value="5" />
-            </div>
-
-            <div class="calc__total">
-              <span>Preț total <em class="calc__vat">TVA inclus</em></span>
-              <strong id="price">125.00 RON</strong>
-            </div>
-            <p class="calc__unit" id="calcUnit"></p>
-
-            <button type="button" class="btn btn--cta btn--block" id="dtfAddCart">
-              Adaugă în coș
-              <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M7 4h-2L4 2H1v2h2l3.6 7.6-1.35 2.45A2 2 0 0 0 7 17h12v-2H7.4l1.1-2h7a2 2 0 0 0 1.8-1.1L21 4H7Zm0 15a2 2 0 1 0 2 2 2 2 0 0 0-2-2Zm10 0a2 2 0 1 0 2 2 2 2 0 0 0-2-2Z"/></svg>
-            </button>
-            <p class="calc__note">Vei putea atașa fișierul de design la finalizarea comenzii.</p>
-          </form>
-        </div>
-
-        <!-- Steps -->
-        <div class="steps" id="stepsWrap">
-          <div class="step">
-            <span class="step__ico" data-icon="upload" data-icon-size="24"></span>
-            <div class="step__txt"><h4>1. Încarcă design</h4><p>Trimite fișierul tău</p></div>
-          </div>
-          <div class="step">
-            <span class="step__ico" data-icon="printer" data-icon-size="24"></span>
-            <div class="step__txt"><h4>2. Noi printăm</h4><p>Calitate premium</p></div>
-          </div>
-          <div class="step">
-            <span class="step__ico" data-icon="search" data-icon-size="24"></span>
-            <div class="step__txt"><h4>3. Verificare</h4><p>Control calitate</p></div>
-          </div>
-          <div class="step">
-            <span class="step__ico" data-icon="truck" data-icon-size="24"></span>
-            <div class="step__txt"><h4>4. Livrare rapidă</h4><p>Ambalare sigură</p></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== TikTok ===== -->
-    <section class="tiktok" id="tiktok" hidden>
-      <div class="container">
-        <div class="tiktok__head">
-          <h2 class="tiktok__title grad-text" id="tiktokTitle">Urmărește-ne pe TikTok</h2>
-          <a class="btn btn--ghost" id="tiktokProfile" target="_blank" rel="noopener" hidden>Vezi profilul ↗</a>
-        </div>
-        <div class="tiktok__grid" id="tiktokGrid"></div>
-      </div>
-    </section>
-
-    <!-- ===== Trust badges ===== -->
-    <section class="trust" id="despre">
-      <div class="container">
-        <div class="panel trust__panel" id="trustWrap">
-          <div class="trust__item">
-            <span class="trust__ico" data-icon="award" data-icon-size="24"></span>
-            <div><strong>Calitate garantată</strong><em>Materiale și print premium</em></div>
-          </div>
-          <div class="trust__item">
-            <span class="trust__ico" data-icon="truck" data-icon-size="24"></span>
-            <div><strong>Livrare rapidă</strong><em>2-3 zile lucrătoare oriunde în țară</em></div>
-          </div>
-          <div class="trust__item">
-            <span class="trust__ico" data-icon="lock" data-icon-size="24"></span>
-            <div><strong>Plăți securizate</strong><em>Datele tale sunt în siguranță</em></div>
-          </div>
-          <div class="trust__item">
-            <span class="trust__ico" data-icon="message" data-icon-size="24"></span>
-            <div><strong>Suport dedicat</strong><em>Suntem aici să te ajutăm</em></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== Contact ===== -->
-    <section class="order contact" id="contact">
-      <div class="container">
-        <div class="panel order__panel">
-          <div class="order__info">
-            <span class="eyebrow">Ia legătura cu noi</span>
-            <h2 class="order__title grad-text">Contact</h2>
-            <p class="order__desc">
-              Ai o întrebare despre comenzi, prețuri sau produse? Scrie-ne și
-              îți răspundem în cel mai scurt timp.
-            </p>
-            <ul class="contact-list">
-              <li><span class="mr-ico" data-icon="phone" data-icon-size="20"></span><span id="contactPhone">+40 123 456 789</span></li>
-              <li><span class="mr-ico" data-icon="mail" data-icon-size="20"></span><span id="contactEmail">contact@dtfprint.ro</span></li>
-              <li><span class="mr-ico" data-icon="clock" data-icon-size="20"></span><span id="contactSchedule">L–V: 09:00 – 17:00</span></li>
-            </ul>
-          </div>
-
-          <!-- Formular contact -->
-          <form class="calc" id="contactForm" novalidate>
-            <h3 class="calc__title">Trimite-ne un mesaj</h3>
-            <div class="order-fields">
-              <input type="text" id="contactName" name="name" placeholder="Numele tău *" autocomplete="name" required />
-              <input type="email" id="contactFormEmail" name="email" placeholder="Email *" autocomplete="email" required />
-              <input type="tel" id="contactFormPhone" name="phone" placeholder="Telefon (opțional)" autocomplete="tel" />
-              <input type="text" id="contactSubject" name="subject" placeholder="Subiect (opțional)" />
-              <textarea id="contactMessage" name="message" rows="4" placeholder="Mesajul tău *" required></textarea>
-            </div>
-            <label class="consent">
-              <input type="checkbox" id="contactConsent" required />
-              <span>Sunt de acord cu prelucrarea datelor mele conform <a href="/confidentialitate" target="_blank" rel="noopener">Politicii de confidențialitate</a>.</span>
-            </label>
-            <button type="submit" class="btn btn--cta btn--block" id="contactSubmit">
-              Trimite mesajul
-              <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M2 21l21-9L2 3v7l15 2-15 2v7Z"/></svg>
-            </button>
-            <p class="order-msg" id="contactMsg" role="status"></p>
-          </form>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- ===== Footer ===== -->
-  <footer class="footer">
-    <div class="container footer__grid">
-      <div class="footer__brand">
-        <a class="logo" href="#top">
-          <span class="logo__mark"><span class="logo__mr">Mr</span>DTF</span>
-          <span class="logo__sub" data-edit="brandTagline">PRINT DTF PREMIUM</span>
-        </a>
-        <p data-edit="footer.tagline">Specialiști în print DTF premium la metru liniar și produse blank pentru personalizare.</p>
-      </div>
-
-      <div class="footer__col">
-        <h5>Link-uri utile</h5>
-        <a href="#top">Acasă</a>
-        <a href="#comanda">Comandă DTF</a>
-        <a href="/produse">Produse Blank</a>
-        <a href="#despre">Despre noi</a>
-        <a href="#contact">Contact</a>
-      </div>
-
-      <div class="footer__col">
-        <h5>Informații</h5>
-        <a href="/intrebari-frecvente">Întrebări frecvente</a>
-        <a href="/termeni">Termeni și condiții</a>
-        <a href="/confidentialitate">Politică de confidențialitate</a>
-        <a href="/livrare">Politica de livrare</a>
-        <a href="/retur">Politica de retur</a>
-      </div>
-
-      <div class="footer__col footer__contact">
-        <h5>Contact</h5>
-        <a id="footerPhone" href="tel:+40123456789"><span class="mr-ico" data-icon="phone" data-icon-size="17"></span><span class="footer__contact-txt">+40 123 456 789</span></a>
-        <a id="footerEmail" href="mailto:contact@dtfprint.ro"><span class="mr-ico" data-icon="mail" data-icon-size="17"></span><span class="footer__contact-txt">contact@dtfprint.ro</span></a>
-        <span id="footerSchedule"><span class="mr-ico" data-icon="clock" data-icon-size="17"></span><span class="footer__contact-txt">L–V: 09:00 – 17:00</span></span>
-      </div>
-
-      <div class="footer__col">
-        <h5>Urmărește-ne</h5>
-        <div class="socials">
-          <a id="socialFacebook" href="#" data-label="Facebook" class="icon-btn" target="_blank" rel="noopener" hidden><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M13 22v-8h2.5l.5-3H13V9c0-.9.3-1.5 1.6-1.5H16V4.8A21 21 0 0 0 14 4.7C11.7 4.7 10 6 10 8.7V11H7.5v3H10v8Z"/></svg></a>
-          <a id="socialInstagram" href="#" data-label="Instagram" class="icon-btn" target="_blank" rel="noopener" hidden><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 9a3 3 0 1 0 3 3 3 3 0 0 0-3-3Zm0-2a5 5 0 1 1-5 5 5 5 0 0 1 5-5Zm5.5-.5a1 1 0 1 1-1-1 1 1 0 0 1 1 1ZM12 4.2c-2.6 0-2.9 0-3.9.1-1 0-1.5.2-1.9.4a3 3 0 0 0-1.1.7 3 3 0 0 0-.7 1.1c-.2.4-.3.9-.4 1.9C4 9.1 4 9.4 4 12s0 2.9.1 3.9c0 1 .2 1.5.4 1.9a3 3 0 0 0 .7 1.1 3 3 0 0 0 1.1.7c.4.2.9.3 1.9.4 1 .1 1.3.1 3.9.1s2.9 0 3.9-.1c1 0 1.5-.2 1.9-.4a3.2 3.2 0 0 0 1.8-1.8c.2-.4.3-.9.4-1.9.1-1 .1-1.3.1-3.9s0-2.9-.1-3.9c0-1-.2-1.5-.4-1.9a3 3 0 0 0-.7-1.1 3 3 0 0 0-1.1-.7c-.4-.2-.9-.3-1.9-.4-1-.1-1.3-.1-3.9-.1Z"/></svg></a>
-          <a id="socialTiktok" href="#" data-label="TikTok" class="icon-btn" target="_blank" rel="noopener" hidden><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M16 4c.3 1.9 1.5 3.3 3.4 3.5v2.4a6 6 0 0 1-3.4-1.1v5.6a5.2 5.2 0 1 1-5.2-5.2c.3 0 .5 0 .8.1v2.5a2.7 2.7 0 1 0 1.9 2.6V4Z"/></svg></a>
-          <a id="socialYoutube" href="#" data-label="YouTube" class="icon-btn" target="_blank" rel="noopener" hidden><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M23 12s0-3.2-.4-4.7a2.5 2.5 0 0 0-1.7-1.7C19.4 5.2 12 5.2 12 5.2s-7.4 0-8.9.4A2.5 2.5 0 0 0 1.4 7.3C1 8.8 1 12 1 12s0 3.2.4 4.7a2.5 2.5 0 0 0 1.7 1.7c1.5.4 8.9.4 8.9.4s7.4 0 8.9-.4a2.5 2.5 0 0 0 1.7-1.7C23 15.2 23 12 23 12ZM9.8 15.3V8.7l6.2 3.3-6.2 3.3Z"/></svg></a>
-        </div>
-      </div>
+  <section class="gal reels" id="reels">
+    <div class="rh">
+      <div class="eyebrow rv">PE TIKTOK</div>
+      <h2 class="rv">Lucrări reale, din atelierul nostru</h2>
+      <p class="rsub rv">Vezi cum ies transferurile DTF din imprimantă și cum arată aplicate. Fără filtre, doar muncă bine făcută.</p>
+      <div class="chips rv"><span class="chip"><i></i>Print non-stop 24/24</span><span class="chip"><i></i>Culori puternice, detalii fine</span><span class="chip"><i></i>Rezistență la spălare</span></div>
     </div>
-    <div class="footer__bottom">
-      <div class="container" data-edit="footer.copyright">© 2024 MrDTF — Print DTF Premium. Toate drepturile rezervate.</div>
+    <div class="rrow" id="rrow"></div>
+    <div class="rcta rv">
+      <button class="cta" type="button"><svg class="i"><use href="#up"/></svg>Trimite comanda<svg class="i"><use href="#arr"/></svg></button>
+      <a class="ttk" id="ttp" href="#" target="_blank" rel="noopener noreferrer"><svg class="i" viewBox="0 0 24 24"><path d="M14 3v11a3.5 3.5 0 1 1-3.5-3.5M14 3c.4 3 2.4 4.6 5 4.8"/></svg>Urmărește-ne pe TikTok</a>
     </div>
-  </footer>
+    <p class="rnote">Videoclipurile se încarcă de la TikTok doar după ce apăsi Play.</p>
+  </section>
 
-  <!-- ===== Coș (drawer) ===== -->
-  <div class="cart" id="cart" hidden>
-    <div class="cart__overlay" id="cartOverlay"></div>
-    <aside class="cart__panel" role="dialog" aria-label="Coș de cumpărături">
-      <div class="cart__head">
-        <h3>Coșul tău</h3>
-        <button class="cart__close" id="cartClose" aria-label="Închide">✕</button>
-      </div>
+  <section class="gal">
+    <div class="eyebrow rv">LUCRĂRILE NOASTRE</div>
+    <h2 class="rv">Ce facem noi</h2>
+    <div class="mos">
+      <button class="tile t1 rv"><img alt="Transfer DTF aplicat pe un tricou negru" src="/assets/img/galerie-1-desprinzi-folia.jpg"><span class="cap">Desprinzi folia și gata</span></button>
+      <button class="tile t2 rv"><img alt="Role de print DTF gata de livrare" src="/assets/img/galerie-2-productie-non-stop.jpg"><span class="cap">Producție non-stop 24/24</span></button>
+      <button class="tile t3 rv"><img alt="Print DTF colorat pe folie, cu detalii fine" src="/assets/img/galerie-3-culori-puternice.jpg"><span class="cap">Culori puternice, detalii fine</span></button>
+      <button class="tile t4 rv"><img alt="Imprimantă DTF în funcțiune" src="/assets/img/galerie-4-imprimante-profesionale.jpg"><span class="cap">Imprimante profesionale</span></button>
+    </div>
+  </section>
 
-      <div class="cart__items" id="cartItems"></div>
+  <section class="how">
+    <div><div class="eyebrow">SIMPLU ȘI RAPID</div><h2>Cum funcționează?</h2></div>
+    <div class="steps">
+      <div class="step"><span class="circ"><svg class="i"><use href="#up"/></svg><span class="badge">1</span></span><h4>Trimiți comanda</h4><p>PDF, PNG, AI, PSD<br>sau alte formate</p><svg class="i ar"><use href="#arr"/></svg></div>
+      <div class="step"><span class="circ"><svg class="i"><use href="#gear"/></svg><span class="badge">2</span></span><h4>Noi imprimăm</h4><p>Producție non-stop<br>24/24</p><svg class="i ar"><use href="#arr"/></svg></div>
+      <div class="step"><span class="circ"><svg class="i"><use href="#box"/></svg><span class="badge">3</span></span><h4>Primești comanda</h4><p>Livrare rapidă<br>în toată țara</p><svg class="i ar"><use href="#arr"/></svg></div>
+      <div class="step"><span class="circ"><svg class="i"><use href="#tee"/></svg><span class="badge">4</span></span><h4>Tu aplici</h4><p>Pe orice<br>material textil</p></div>
+    </div>
+  </section>
+</div>
 
-      <div class="cart__foot" id="cartFoot">
-        <div class="cart__summary" id="cartSummary"></div>
-        <div class="cart__total"><span>Total</span><strong id="cartTotal">0.00 RON</strong></div>
-
-        <button class="btn btn--cta btn--block" id="cartCheckoutBtn">Finalizează comanda →</button>
-        <div class="cart__checkout" id="cartCheckout" hidden>
-          <button type="button" class="cart__back" id="cartBack">← Înapoi la coș</button>
-          <div class="cart__files" id="cartFiles" hidden>
-            <label for="cartFileInput">Atașează fișierele de design</label>
-            <input type="file" id="cartFileInput" multiple accept=".pdf,.png,.tiff,.tif,image/*" />
-          </div>
-          <div class="cart__deliv">
-            <span class="cart__deliv-label">Livrare</span>
-            <div class="cart__deliv-opts">
-              <label class="deliv-opt"><input type="radio" name="deliv" value="livrare" checked /> <span class="mr-ico" data-icon="truck" data-icon-size="18"></span> Livrare la adresă</label>
-              <label class="deliv-opt"><input type="radio" name="deliv" value="ridicare" /> <span class="mr-ico" data-icon="store" data-icon-size="18"></span> Ridic personal</label>
-            </div>
-          </div>
-          <div class="cart__addr" id="cartAddr">
-            <textarea id="cartAddress" rows="2" placeholder="Adresa de livrare (nume destinatar, stradă, nr., bloc/ap., oraș, județ, cod poștal, telefon)"></textarea>
-          </div>
-          <textarea id="cartNote" rows="2" placeholder="Mesaj / detalii suplimentare (opțional)"></textarea>
-          <label class="consent">
-            <input type="checkbox" id="cartConsent" />
-            <span>Sunt de acord cu prelucrarea datelor mele conform <a href="/confidentialitate" target="_blank" rel="noopener">Politicii de confidențialitate</a>.</span>
-          </label>
-          <button class="btn btn--cta btn--block" id="cartSubmit">Trimite comanda</button>
-          <p class="order-msg" id="cartMsg" role="status"></p>
-        </div>
-      </div>
-    </aside>
+<div class="wrap" style="padding-top:0">
+<div class="duo">
+  <section class="pick blogbox glass rv">
+    <span class="circ"><svg class="i" viewBox="0 0 24 24"><path d="M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2z"/><path d="M12 6v14"/></svg></span>
+    <div class="tx"><h3>Blog: sfaturi din atelier</h3><p>Aplicare, pregătirea fișierelor, spălare și prețuri.</p></div>
+    <a class="blogbtn" href="blog.html"><span>Citește blogul</span><svg class="i"><use href="#arr"/></svg></a>
+  </section>
+  <section class="pick glass rv">
+    <span class="circ"><svg class="i" viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+    <div class="tx"><h3>Ridicare comenzi</h3><p id="pickupAddr">Splaiul Unirii 313, Sector 3, București<br>Clădirea ICPE, corp M, etaj 2</p></div>
+    <a class="btn-dark" href="https://www.google.com/maps/search/?api=1&query=Splaiul+Unirii+313+Bucuresti" target="_blank" rel="noopener noreferrer"><svg class="i" viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14m6-12v14"/></svg><span>Deschide harta</span></a>
+  </section>
   </div>
 
-  <script src="assets/js/icons.js"></script>
-  <script src="assets/js/main.js"></script>
-  <script src="assets/js/consent.js" defer></script>
+  <footer class="ft">
+  <div class="ftg glass">
+    <div>
+      <img class="flogo" alt="Mr.DTF">
+      <p id="fTagline">Specialiști în print DTF premium la metru liniar.</p>
+      <div class="soc">
+        <a id="fFb" href="#" aria-label="Facebook" target="_blank" rel="noopener" hidden><svg class="i" viewBox="0 0 24 24"><path d="M14 8h3V4h-3a4 4 0 0 0-4 4v3H7v4h3v6h4v-6h3l1-4h-4V8z"/></svg></a>
+        <a id="fIg" href="#" aria-label="Instagram" target="_blank" rel="noopener" hidden><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg></a>
+        <a id="fTt" href="#" aria-label="TikTok" target="_blank" rel="noopener" hidden><svg class="i" viewBox="0 0 24 24"><path d="M14 3v11a3.5 3.5 0 1 1-3.5-3.5M14 3c.4 3 2.4 4.6 5 4.8"/></svg></a>
+        <a id="fYt" href="#" aria-label="YouTube" target="_blank" rel="noopener" hidden><svg class="i" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="m10 9 5 3-5 3z"/></svg></a>
+      </div>
+    </div>
+    <div>
+      <h5>Informații</h5>
+      <div class="fl">
+        <a href="/blog">Blog</a>
+        <a href="/termeni-si-conditii">Termeni și condiții</a>
+        <a href="/politica-de-confidentialitate">Politică de confidențialitate</a>
+        <a href="/politica-de-livrare">Politică de livrare</a>
+        <a href="/politica-de-retur">Politică de retur</a>
+      </div>
+    </div>
+    <div>
+      <h5>Contact</h5>
+      <div class="fi"><svg class="i" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg><a id="fPhone" href="tel:+40786022893">+40 786 022 893</a></div>
+      <div class="fi"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m3 7 9 6 9-6"/></svg><a id="fEmail" href="mailto:comenzi@mrdtf.ro">comenzi@mrdtf.ro</a></div>
+      <div class="fi"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span id="fSchedule">Luni – Vineri: NON STOP<br>(programul de print se termină vineri la ora 16:00)</span></div>
+    </div>
+    <div>
+      <h5>Date firmă</h5>
+      <div id="fCompany">
+        <p>UNILEVEL NETWORK SRL</p>
+        <p>CUI: RO52548180</p>
+        <p>Nr. Reg. Com.: J2025071790007</p>
+        <p>Sediu: Str. Constantin Marin 2, Bl. Z1, Sc. 1, Et. 4, Ap. 20, cod poștal 052593</p>
+      </div>
+    </div>
+  </div>
+  <div class="fbot">
+    <span>© 2026 Mr.DTF – Print DTF Premium. Toate drepturile rezervate.</span>
+    <div class="lg">
+      <a href="https://anpc.ro" target="_blank" rel="noopener noreferrer">ANPC</a>
+      <a class="sal" href="https://reclamatiisal.anpc.ro" target="_blank" rel="noopener noreferrer">SAL · Soluționarea alternativă a litigiilor</a>
+    </div>
+  </div>
+</footer>
+</div>
+
+<div class="lb" id="lb" aria-hidden="true"><img alt=""></div>
+
+<div class="ov" id="ov" aria-hidden="true">
+ <div class="modal glass" role="dialog" aria-modal="true" aria-labelledby="mt">
+  <button class="x" id="x" aria-label="Închide">×</button>
+  <h3 id="mt">Trimite comanda</h3>
+  <p class="to">Comanda ajunge la <b id="addr">comenzi@mrdtf.ro</b> <button type="button" class="cpy" id="cp">Copiază</button></p>
+  <div class="grid">
+   <label>Nume<input id="fn" autocomplete="name"></label>
+   <label>Telefon<input id="ft" type="tel" autocomplete="tel"></label>
+   <label>Lățime<select id="fw"><option value="90">90 cm</option></select></label>
+   <label>Metri liniari (ml)<input id="fm" type="number" min="1" inputmode="decimal"></label>
+  </div>
+  <div class="seg" id="bt" data-v="pf"><span class="pill"></span><button type="button" class="on" data-v="pf">Persoană fizică</button><button type="button" data-v="pj">Persoană juridică</button></div>
+  <label>Date de facturare<textarea id="fb" rows="3"></textarea></label>
+  <label>Link grafică<input id="fl" type="url" inputmode="url" placeholder="WeTransfer, Google Drive, Dropbox..."></label>
+  <label>Detalii<textarea id="fd" rows="3"></textarea></label>
+  <p class="hint">Poți trimite grafica prin link (WeTransfer, Google Drive etc.) sau o poți atașa în e-mailul care se deschide. Formate: PDF, PNG, AI, PSD.</p>
+  <p class="notice">După preluarea comenzii veți primi pe e-mail confirmarea că fișierul este în regulă, împreună cu factura. Comanda intră în print după achitarea facturii.</p>
+  <p class="hint legal">Prin trimiterea comenzii accepți <a href="termeni-si-conditii.html" target="_blank" rel="noopener">Termenii și condițiile</a> și <a href="politica-de-confidentialitate.html" target="_blank" rel="noopener">Politica de confidențialitate</a>.</p>
+  <a class="go" id="go" href="mailto:comenzi@mrdtf.ro">Deschide e-mailul</a>
+ </div>
+</div>
+
+<script>
+/* ---- Conținut editabil din admin (injectat de worker ca window.__MRDTF__) ---- */
+const MR=(window.__MRDTF__||{}),SITE=MR.site||{},TT=MR.tiktok||{},SOC=MR.social||{};
+const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const brHtml=s=>esc(s).replace(/\n/g,'<br>');
+(function applyContent(){
+  // Prețuri pe trepte
+  if(Array.isArray(SITE.dtfTiers)&&SITE.dtfTiers.length){
+    const box=document.getElementById('tiers');
+    if(box){const act=SITE.dtfTiers.length-1;
+      box.innerHTML=SITE.dtfTiers.map((t,i)=>'<button class="tier'+(i===act?' on':'')+'"><span class="n">'+esc(t.pret)+'</span><span class="u">lei/ml</span><span class="r">'+esc(t.range)+'</span></button>').join('');}
+  }
+  // Galerie
+  if(Array.isArray(SITE.gallery)){
+    document.querySelectorAll('.mos .tile img').forEach((img,i)=>{const g=SITE.gallery[i]; const s=g&&(g.img||g.src); if(s){img.src=s; if(g.alt)img.alt=g.alt;}});
+  }
+  // Contact
+  const mail=SITE.email||'comenzi@mrdtf.ro', tel=SITE.phone||'+40786022893', telD=SITE.phoneDisplay||'0786 022 893';
+  const setTxt=(id,v)=>{const e=document.getElementById(id); if(e&&v!=null)e.textContent=v;};
+  const fEmail=document.getElementById('fEmail'); if(fEmail){fEmail.href='mailto:'+mail; fEmail.textContent=mail;}
+  const fPhone=document.getElementById('fPhone'); if(fPhone){fPhone.href='tel:'+tel; fPhone.textContent=telD;}
+  document.querySelectorAll('.call').forEach(a=>{a.href='tel:'+tel; a.setAttribute('aria-label','Sună acum: '+telD);});
+  const cpb=document.querySelector('#callpop b'); if(cpb)cpb.textContent=telD;
+  const cpa=document.querySelector('#callpop a'); if(cpa)cpa.href='tel:'+tel;
+  const fSched=document.getElementById('fSchedule'); if(fSched&&SITE.schedule)fSched.innerHTML=brHtml(SITE.schedule);
+  const pick=document.getElementById('pickupAddr'); if(pick&&SITE.pickup)pick.innerHTML=brHtml(SITE.pickup);
+  setTxt('fTagline',SITE.tagline); setTxt('priceNote',SITE.priceNote);
+  const addrEl=document.getElementById('addr'); if(addrEl)addrEl.textContent=mail;
+  // Date firmă
+  if(SITE.company){const c=SITE.company, fc=document.getElementById('fCompany');
+    if(fc)fc.innerHTML=['<p>'+esc(c.name)+'</p>', c.cui?'<p>CUI: '+esc(c.cui)+'</p>':'', c.reg?'<p>Nr. Reg. Com.: '+esc(c.reg)+'</p>':'', c.address?'<p>Sediu: '+esc(c.address)+'</p>':''].join('');}
+  // Social
+  const soc={fFb:SOC.facebook,fIg:SOC.instagram,fTt:SOC.tiktok,fYt:SOC.youtube};
+  for(const id in soc){const a=document.getElementById(id); if(a){if(soc[id]){a.href=soc[id];a.hidden=false;}else{a.hidden=true;}}}
+})();
+const tiers=document.querySelectorAll('.tier');
+tiers.forEach(t=>{
+  t.onclick=()=>{tiers.forEach(x=>x.classList.remove('on'));t.classList.add('on')};
+  t.addEventListener('pointermove',e=>{
+    const r=t.getBoundingClientRect();
+    t.style.setProperty('--mx',(e.clientX-r.left)+'px');
+    t.style.setProperty('--my',(e.clientY-r.top)+'px');
+  });
+});
+const MAIL=(SITE.email||'comenzi@mrdtf.ro'),ov=document.getElementById('ov'),go=document.getElementById('go');
+const F={n:document.getElementById('fn'),t:document.getElementById('ft'),w:document.getElementById('fw'),m:document.getElementById('fm'),d:document.getElementById('fd'),b:document.getElementById('fb'),l:document.getElementById('fl')};
+const bt=document.getElementById('bt');
+function build(){
+  const w=F.w.value,m=F.m.value.trim();
+  const sub='Comandă DTF – '+w+' cm'+(m?' – '+m+' ml':'');
+  const body='Bună ziua,\n\nVreau să plasez o comandă transfer DTF.\n\nNume: '+F.n.value+'\nTelefon: '+F.t.value+'\nLățime: '+w+' cm\nMetri liniari: '+m+'\nDetalii: '+F.d.value+'\n\nFacturare ('+(bt.dataset.v==='pj'?'persoană juridică':'persoană fizică')+'):\n'+F.b.value+'\n\nLink grafică: '+F.l.value+'\n\n(Dacă grafica nu e la link, o atașez în acest e-mail.)';
+  go.href='mailto:'+MAIL+'?subject='+encodeURIComponent(sub)+'&body='+encodeURIComponent(body);
+}
+// La „Deschide e-mailul" trimitem comanda și în backend (apare în Admin → Comenzi),
+// pe lângă deschiderea clientului de email. keepalive => supraviețuiește navigării mailto.
+let orderSent=false;
+go.addEventListener('click',()=>{
+  if(orderSent)return; orderSent=true; setTimeout(()=>orderSent=false,4000);
+  try{
+    const payload={name:F.n.value,phone:F.t.value,width:F.w.value,meters:F.m.value,
+      billingType:(bt.dataset.v==='pj'?'pj':'pf'),billing:F.b.value,graphicsLink:F.l.value,note:F.d.value};
+    if(!payload.name&&!payload.phone)return;
+    fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),keepalive:true}).catch(()=>{});
+  }catch(e){}
+});
+function openM(){build();ov.classList.add('open');ov.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';setTimeout(()=>F.n.focus(),250)}
+function closeM(){ov.classList.remove('open');ov.setAttribute('aria-hidden','true');document.body.style.overflow=''}
+document.querySelectorAll('button.btn-dark,.cta').forEach(b=>b.onclick=openM);
+document.getElementById('x').onclick=closeM;
+ov.addEventListener('click',e=>{if(e.target===ov)closeM()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM()});
+Object.values(F).forEach(el=>el.addEventListener('input',build));
+document.getElementById('cp').onclick=function(){
+  const b=this;
+  try{navigator.clipboard.writeText(MAIL).then(()=>{b.textContent='Copiat ✓'},()=>{b.textContent='Selectează adresa'})}catch(e){b.textContent='Selectează adresa'}
+  setTimeout(()=>{b.textContent='Copiază'},1800);
+};
+const cal=document.querySelector('.cal');
+cal.onclick=()=>{cal.classList.add('rs');void cal.offsetWidth;cal.classList.remove('rs')};
+(function(){
+const PROFILE=(TT.profileUrl||'');
+const REELS=(Array.isArray(TT.videos)?TT.videos:[]).map(v=>typeof v==='string'?({u:v,t:''}):({u:(v.url||v.u||v.id||''),t:(v.title||v.t||'')}));
+const row=document.getElementById('rrow'),ttp=document.getElementById('ttp');
+if(PROFILE)ttp.href=PROFILE;else ttp.style.display='none';
+const items=REELS.length?REELS:Array.from({length:5},()=>({t:'Aici vor apărea reels-urile tale'}));
+items.forEach((r,i)=>{
+  const m=(r.u||'').match(/video\/(\d+)/),id=m?m[1]:(/^\d+$/.test(r.u||'')?r.u:'');
+  const c=document.createElement('div');c.className='rc glass rv';c.style.transitionDelay=(i*.08)+'s';
+  const s=document.createElement('div');s.className='scr';
+  const b=document.createElement('button');b.type='button';b.className='cov';b.setAttribute('aria-label','Redă reel '+(i+1));
+  b.innerHTML='<span class="pl"><svg class="i" viewBox="0 0 24 24" style="fill:#fff;stroke:none"><path d="M8 5v14l11-7z"/></svg></span><span class="cap2"></span>';
+  b.querySelector('.cap2').textContent=r.t||('Reel '+(i+1));
+  if(id)b.onclick=()=>{const f=document.createElement('iframe');f.src='https://www.tiktok.com/player/v1/'+id+'?autoplay=1&description=1&music_info=1&rel=0';f.allow='autoplay; fullscreen';f.allowFullscreen=true;f.title=r.t||'Reel TikTok';s.replaceChildren(f)};
+  s.appendChild(b);c.appendChild(s);row.appendChild(c);
+});
+})();
+const lb=document.getElementById('lb'),lbi=lb.querySelector('img');
+document.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{lbi.src=b.querySelector('img').src;lbi.alt=b.querySelector('img').alt;lb.classList.add('open');lb.setAttribute('aria-hidden','false')});
+lb.onclick=()=>{lb.classList.remove('open');lb.setAttribute('aria-hidden','true')};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')lb.onclick()});
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.15});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+const ph={pf:'Nume și prenume\nAdresă (stradă, nr., oraș, județ)',pj:'Denumire firmă\nCUI\nNr. Reg. Com.\nAdresă sediu'};
+F.b.placeholder=ph.pf;
+bt.querySelectorAll('button').forEach(b=>b.onclick=()=>{bt.dataset.v=b.dataset.v;bt.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));F.b.placeholder=ph[b.dataset.v];build()});
+document.querySelector('.flogo').src=document.querySelector('.logo').src;
+(function(){
+const svg=document.getElementById('stage'),prs=[...svg.querySelectorAll('.pr')],hint=document.getElementById('hint');
+const H=[[475,118],[575,118],[475,222],[575,222],[525,326]],S0=.8,S1=1.25;
+function pt(e){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse())}
+function put(el,x,y,s){el.dataset.x=x;el.dataset.y=y;el.style.transform='translate('+x+'px,'+y+'px) scale('+s+')'}
+function home(el,i){el.classList.remove('on');put(el,H[i][0],H[i][1],S0)}
+prs.forEach((el,i)=>{
+  el.style.transition='none';el.style.opacity=0;put(el,H[i][0],-120,S0);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{el.style.transition='';setTimeout(()=>{el.style.opacity=1;home(el,i)},500+i*160)}));
+  let ox=0,oy=0;
+  el.addEventListener('pointerdown',e=>{e.preventDefault();svg.appendChild(el);el.setPointerCapture(e.pointerId);const p=pt(e);ox=p.x-(+el.dataset.x);oy=p.y-(+el.dataset.y);el.classList.add('drag');svg.classList.add('dragging');put(el,+el.dataset.x,+el.dataset.y,1.1)});
+  el.addEventListener('pointermove',e=>{if(!el.classList.contains('drag'))return;const p=pt(e);put(el,p.x-ox,p.y-oy,1.1)});
+  const end=()=>{if(!el.classList.contains('drag'))return;el.classList.remove('drag');svg.classList.remove('dragging');
+    const x=+el.dataset.x,y=+el.dataset.y;
+    if(x>40&&x<390&&y>100&&y<400){el.classList.add('on');put(el,Math.max(120,Math.min(300,x)),Math.max(165,Math.min(330,y)),S1);if(hint)hint.style.opacity=0}else home(el,i)};
+  el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);
+  el.addEventListener('dblclick',()=>home(el,i));
+});
+document.getElementById('reset').onclick=()=>prs.forEach((el,i)=>home(el,i));
+})();
+(function(){
+const a=document.querySelector('.call'),pop=document.getElementById('callpop'),cp=document.getElementById('cpnum');
+if(!a||!pop)return;
+a.addEventListener('click',e=>{if(!matchMedia('(pointer:coarse)').matches){e.preventDefault();pop.hidden=!pop.hidden}});
+document.addEventListener('click',e=>{if(!pop.hidden&&!e.target.closest('.acts'))pop.hidden=true});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')pop.hidden=true});
+cp.onclick=()=>{let ok=false;try{navigator.clipboard.writeText('0786022893').then(()=>{cp.textContent='Copiat ✓'},()=>{cp.textContent='Selectează numărul'});ok=true}catch(err){}if(!ok)cp.textContent='Selectează numărul';setTimeout(()=>{cp.textContent='Copiază'},1800)};
+})();
+</script>
 </body>
 </html>

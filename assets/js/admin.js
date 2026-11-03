@@ -46,8 +46,16 @@
     prag: "Prag (RON sau bucăți)", procent: "Procent reducere (%)",
     tiktok: "TikTok", profileUrl: "Link profil TikTok", videos: "Linkuri video (unul pe linie)",
     social: "Social media", facebook: "Facebook", instagram: "Instagram", youtube: "YouTube",
+    // ---- Tema nouă ----
+    site: "Site (temă nouă)",
+    phoneDisplay: "Telefon afișat (ex. 0786 022 893)",
+    topNote: "Text bară de sus", heroTitle: "Cuvânt accentuat în titlu (hero)",
+    pickup: "Adresă ridicare comenzi", priceNote: "Notă sub prețuri",
+    company: "Date firmă", cui: "CUI", reg: "Nr. Reg. Com.", address: "Adresă / sediu",
+    dtfTiers: "Prețuri pe metru (trepte)", pret: "Preț (lei/ml)", range: "Interval (ex. 3 – 9 ml)",
+    gallery: "Galerie „Ce facem noi” (4 imagini)", alt: "Descriere imagine (alt)",
   };
-  var SINGULAR = { pills: "Avantaj", items: "Produs", steps: "Pas", trust: "Garanție", priceTiers: "prag" };
+  var SINGULAR = { pills: "Avantaj", items: "Produs", steps: "Pas", trust: "Garanție", priceTiers: "prag", dtfTiers: "treaptă", gallery: "imagine", videos: "video" };
   function label(key) {
     return LABELS[key] || key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, " $1");
   }
@@ -147,6 +155,30 @@
     form.appendChild(section);
   }
 
+  function buildSite() {
+    var form = $("siteForm");
+    if (!form || !content.site) return;
+    form.innerHTML = "";
+    var s = content.site;
+    function sec(title, render) {
+      var section = document.createElement("section");
+      section.className = "edit-section";
+      var h = document.createElement("h2");
+      h.textContent = title;
+      section.appendChild(h);
+      render(section);
+      form.appendChild(section);
+    }
+    sec("Contact și texte", function (p) {
+      ["phone", "phoneDisplay", "email", "schedule", "pickup", "topNote", "heroTitle", "tagline", "priceNote"].forEach(function (k) {
+        if (k in s) buildInto(p, s[k], "site." + k);
+      });
+    });
+    sec("Date firmă", function (p) { if (s.company) buildInto(p, s.company, "site.company"); });
+    sec("Prețuri pe metru (trepte)", function (p) { if (s.dtfTiers) buildInto(p, s.dtfTiers, "site.dtfTiers"); });
+    sec("Galerie „Ce facem noi” (4 imagini)", function (p) { if (s.gallery) buildInto(p, s.gallery, "site.gallery"); });
+  }
+
   function buildTiktok() {
     var form = $("tiktokForm");
     if (!form || !content.tiktok) return;
@@ -236,7 +268,8 @@
 
   // reconstruiește tab-ul activ
   function rerender() {
-    if ($("tab-order") && !$("tab-order").hidden) buildOrder();
+    if ($("tab-site") && !$("tab-site").hidden) buildSite();
+    else if ($("tab-order") && !$("tab-order").hidden) buildOrder();
     else if ($("tab-banners") && !$("tab-banners").hidden) buildBanners();
     else if ($("tab-products") && !$("tab-products").hidden) buildProducts();
     else if ($("tab-promo") && !$("tab-promo").hidden) buildPromo();
@@ -658,6 +691,8 @@
   $("saveTiktokBtn2").addEventListener("click", function () { save("tiktokMsg"); });
   $("saveSocialBtn").addEventListener("click", function () { save("socialMsg"); });
   $("saveSocialBtn2").addEventListener("click", function () { save("socialMsg"); });
+  if ($("saveSiteBtn")) $("saveSiteBtn").addEventListener("click", function () { save("siteMsg"); });
+  if ($("saveSiteBtn2")) $("saveSiteBtn2").addEventListener("click", function () { save("siteMsg"); });
 
   /* ---------- Reset ---------- */
   $("resetBtn").addEventListener("click", function () {
@@ -682,6 +717,7 @@
       btn.classList.add("is-active");
       var which = btn.dataset.tab;
       $("tab-content").hidden = which !== "content";
+      if ($("tab-site")) $("tab-site").hidden = which !== "site";
       $("tab-order").hidden = which !== "order";
       $("tab-banners").hidden = which !== "banners";
       $("tab-products").hidden = which !== "products";
@@ -693,6 +729,7 @@
       $("tab-crm").hidden = which !== "crm";
       if (which === "orders") loadOrders();
       else if (which === "messages") loadMessages();
+      else if (which === "site") buildSite();
       else if (which === "order") buildOrder();
       else if (which === "products") buildProducts();
       else if (which === "banners") buildBanners();
@@ -767,8 +804,13 @@
           return "<li>" + esc(it.qty) + "× " + esc(it.name) + metaHtml +
             " <span class=\"order-meta\">— " + line + " RON</span>" + designHtml + "</li>";
         }).join("") + "</ul>";
-      } else if (o.width != null) {
-        itemsHtml = "<ul class=\"order-items\"><li>Print DTF " + esc(o.width) + "×" + esc(o.length) + " m</li></ul>";
+      } else if (o.meters != null || o.width != null) {
+        var dims = "Print DTF";
+        if (o.width) dims += " · lățime " + esc(o.width) + " cm";
+        if (o.meters) dims += " · " + esc(o.meters) + " ml";
+        if (o.length) dims += " · " + esc(o.length) + " m";
+        if (o.pretMl) dims += " <span class=\"order-meta\">(" + esc(o.pretMl) + " lei/ml)</span>";
+        itemsHtml = "<ul class=\"order-items\"><li>" + dims + "</li></ul>";
       }
 
       // fișiere (mai multe sau unul vechi)
@@ -788,6 +830,11 @@
       var discNote = (o.discount && o.discount > 0)
         ? " <span class=\"order-meta\">(−" + esc(o.discountPercent) + "% · −" + esc(o.discount) + " RON)</span>" : "";
       var note = o.note || o.message;
+      // Comandă web nouă: facturare (PF/PJ) + link grafică
+      var extra = [];
+      if (o.graphicsLink) extra.push("<p class=\"order-deliv\"><span class=\"adm-ic\">" + icName("link", 16) + "</span> <a href=\"" + esc(o.graphicsLink) + "\" target=\"_blank\" rel=\"noopener\">Link grafică</a></p>");
+      if (o.billing) extra.push("<p class=\"order-message\"><strong>Facturare (" + (o.billingType === "pj" ? "persoană juridică" : "persoană fizică") + "):</strong><br>" + esc(o.billing).replace(/\n/g, "<br>") + "</p>");
+      var extraHtml = extra.join("");
       var delivHtml = "";
       if (o.deliveryMethod === "ridicare") {
         delivHtml = "<p class=\"order-deliv\"><span class=\"adm-ic\">" + icName("store", 16) + "</span> <strong>Ridicare personală</strong></p>";
@@ -807,6 +854,7 @@
         "</div>" +
         itemsHtml +
         delivHtml +
+        extraHtml +
         (note ? "<p class=\"order-message\">„" + esc(note) + "”</p>" : "") +
         "<div class=\"order-card__foot\"><div class=\"order-files\">" + filesHtml + "</div>" +
           "<button class=\"order-del\" data-id=\"" + esc(o.id) + "\" title=\"Șterge comanda\">" + icName("trash", 17) + "</button>" +
