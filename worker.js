@@ -648,6 +648,29 @@ async function handleTikTok(request, env, segs, url) {
     return json({ videos: (rec && rec.videos) || [], syncedAt: rec && rec.syncedAt });
   }
 
+  // public — thumbnail (copertă) preview al unui clip, via oEmbed TikTok + cache KV.
+  if (action === "thumb" && request.method === "GET") {
+    const u = url.searchParams.get("u") || "";
+    if (!/^https?:\/\/([\w-]+\.)?tiktok\.com\//i.test(u)) return json({ thumbnail: null });
+    const key = "ttthumb:" + u;
+    if (env.CONTENT) {
+      const cached = await env.CONTENT.get(key, "json");
+      if (cached) return json(cached);
+    }
+    let out = { thumbnail: null, title: "", author: "" };
+    try {
+      const r = await fetch("https://www.tiktok.com/oembed?url=" + encodeURIComponent(u));
+      if (r.ok) {
+        const d = await r.json();
+        out = { thumbnail: d.thumbnail_url || null, title: d.title || "", author: d.author_name || "" };
+      }
+    } catch { /* best-effort */ }
+    if (env.CONTENT && out.thumbnail) {
+      try { await env.CONTENT.put(key, JSON.stringify(out), { expirationTtl: 21600 }); } catch { /* ignore */ }
+    }
+    return json(out);
+  }
+
   // callback OAuth — public (verificat prin state)
   if (action === "callback" && request.method === "GET") {
     if (!env.TIKTOK_CLIENT_KEY || !env.TIKTOK_CLIENT_SECRET || !env.CONTENT) {
