@@ -50,7 +50,7 @@
     site: "Site (temă nouă)",
     phoneDisplay: "Telefon afișat (ex. 0786 022 893)",
     topNote: "Text bară de sus", heroTitle: "Cuvânt accentuat în titlu (hero)",
-    pickup: "Adresă ridicare comenzi", priceNote: "Notă sub prețuri",
+    pickup: "Adresă ridicare comenzi", priceNote: "Notă sub prețuri", mapUrl: "Link hartă (Google Maps)",
     company: "Date firmă", cui: "CUI", reg: "Nr. Reg. Com.", address: "Adresă / sediu",
     dtfTiers: "Prețuri pe metru (trepte)", pret: "Preț (lei/ml)", range: "Interval (ex. 3 – 9 ml)",
     gallery: "Galerie „Ce facem noi” (4 imagini)", alt: "Descriere imagine (alt)",
@@ -179,7 +179,8 @@
       p.appendChild(hint);
     });
     sec("Contact și texte", function (p) {
-      ["phone", "phoneDisplay", "email", "schedule", "pickup", "topNote", "heroTitle", "tagline", "priceNote"].forEach(function (k) {
+      if (!("mapUrl" in s)) s.mapUrl = "https://maps.app.goo.gl/UswhjEHyyQy648768";
+      ["phone", "phoneDisplay", "email", "schedule", "pickup", "mapUrl", "topNote", "heroTitle", "tagline", "priceNote"].forEach(function (k) {
         if (k in s) buildInto(p, s[k], "site." + k);
       });
     });

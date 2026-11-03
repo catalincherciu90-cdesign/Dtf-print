@@ -44,6 +44,7 @@ const DEFAULT_CONTENT = {
     heroTitle: "calitate",
     schedule: "Luni – Vineri: NON STOP\n(programul de print se termină vineri la ora 16:00)",
     pickup: "Splaiul Unirii 313, Sector 3, București\nClădirea ICPE, corp M, etaj 2",
+    mapUrl: "https://maps.app.goo.gl/UswhjEHyyQy648768",
     tagline: "Specialiști în print DTF premium la metru liniar.",
     priceNote: "Suprafața printabilă este de 87 cm. Prețurile afișate nu includ TVA.",
     company: {
