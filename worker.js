@@ -36,7 +36,6 @@ const DEFAULT_CONTENT = {
   // ---- Conținut temă nouă (Mr.DTF) ----
   site: {
     logo: "/assets/img/logo-mrdtf.png",
-    webmailUrl: "https://mail.unilevelnetwork.ro:2096",
     phone: "+40786022893",
     phoneDisplay: "0786 022 893",
     email: "comenzi@unilevelnetwork.ro",

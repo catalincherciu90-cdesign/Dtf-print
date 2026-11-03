@@ -55,7 +55,6 @@
     dtfTiers: "Prețuri pe metru (trepte)", pret: "Preț (lei/ml)", range: "Interval (ex. 3 – 9 ml)",
     gallery: "Galerie „Ce facem noi” (4 imagini)", alt: "Descriere imagine (alt)",
     logo: "Logo (imagine)",
-    webmailUrl: "Link webmail (buton în tab-ul Căsuță)",
   };
   var SINGULAR = { pills: "Avantaj", items: "Produs", steps: "Pas", trust: "Garanție", priceTiers: "prag", dtfTiers: "treaptă", gallery: "imagine", videos: "video" };
   function label(key) {
@@ -180,8 +179,7 @@
       p.appendChild(hint);
     });
     sec("Contact și texte", function (p) {
-      if (!("webmailUrl" in s)) s.webmailUrl = "https://mail.unilevelnetwork.ro:2096";
-      ["phone", "phoneDisplay", "email", "webmailUrl", "schedule", "pickup", "topNote", "heroTitle", "tagline", "priceNote"].forEach(function (k) {
+      ["phone", "phoneDisplay", "email", "schedule", "pickup", "topNote", "heroTitle", "tagline", "priceNote"].forEach(function (k) {
         if (k in s) buildInto(p, s[k], "site." + k);
       });
     });
@@ -767,9 +765,6 @@
   if ($("inboxRefresh")) $("inboxRefresh").addEventListener("click", function () { inboxLoaded = false; loadInbox(); });
   function setInboxMsg(t, e) { var m = $("inboxMsg"); if (m) { m.textContent = t || ""; m.className = "form-msg" + (e ? " is-error" : ""); } }
   function loadInbox() {
-    // Buton webmail (soluție sigură, independentă de IMAP)
-    var wb = $("webmailBtn"), wurl = (content && content.site && content.site.webmailUrl) || "https://mail.unilevelnetwork.ro:2096";
-    if (wb) { wb.href = wurl; wb.hidden = false; }
     if (inboxLoaded) return; inboxLoaded = true;
     if ($("inboxDetail")) $("inboxDetail").hidden = true;
     setInboxMsg("Se încarcă… (poate dura câteva secunde)", false);
