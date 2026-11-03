@@ -186,7 +186,27 @@
     sec("Date firmă", function (p) { if (s.company) buildInto(p, s.company, "site.company"); });
     sec("Prețuri pe metru (trepte)", function (p) { if (s.dtfTiers) buildInto(p, s.dtfTiers, "site.dtfTiers"); });
     sec("Galerie „Ce facem noi” (4 imagini)", function (p) { if (s.gallery) buildInto(p, s.gallery, "site.gallery"); });
-    sec("Mod mentenanță (site în construcție)", function (p) { if (content.maintenance) buildInto(p, content.maintenance, "maintenance"); });
+    sec("Mod mentenanță (site în construcție)", function (p) {
+      if (content.maintenance) buildInto(p, content.maintenance, "maintenance");
+      var info = document.createElement("p");
+      info.className = "crm-kv"; info.style.margin = "6px 0 0";
+      info.textContent = "Link de previzualizare — deschide site-ul cât timp e în mentenanță (nu-l face public):";
+      var line = document.createElement("p"); line.style.margin = "6px 0 0";
+      line.innerHTML = "<span class=\"crm-kv\">Se încarcă…</span>";
+      p.appendChild(info); p.appendChild(line);
+      api("GET", "/api/admin/preview-url", null, true).then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (!d || !d.path) { line.innerHTML = "<span class=\"crm-kv\">Indisponibil.</span>"; return; }
+          var full = location.origin + d.path;
+          line.innerHTML = "<a href=\"" + esc(d.path) + "\" target=\"_blank\" rel=\"noopener\">" + esc(full) + "</a> ";
+          var btn = document.createElement("button");
+          btn.type = "button"; btn.className = "btn btn--ghost btn--sm"; btn.textContent = "Copiază";
+          btn.addEventListener("click", function () {
+            if (navigator.clipboard) navigator.clipboard.writeText(full).then(function () { btn.textContent = "✓ Copiat"; }, function () {});
+          });
+          line.appendChild(btn);
+        }).catch(function () { line.innerHTML = "<span class=\"crm-kv\">Indisponibil.</span>"; });
+    });
     sec("Notificări email", function (p) {
       var info = document.createElement("p");
       info.className = "crm-kv"; info.style.margin = "0 0 10px";
