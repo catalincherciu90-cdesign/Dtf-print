@@ -542,6 +542,7 @@ async function handleOrders(request, env, segs) {
     const f = await request.json().catch(() => ({}));
     const name = String(f.name || "").trim().slice(0, 140);
     const phone = String(f.phone || "").trim().slice(0, 40);
+    const email = String(f.email || "").trim().slice(0, 160);
     if (!name && !phone) return err("Completează numele și telefonul.");
     const width = Math.max(0, Number(f.width) || 0);
     const meters = Math.max(0, Number(f.meters) || 0);
@@ -555,7 +556,7 @@ async function handleOrders(request, env, segs) {
     const oid = genId();
     const order = {
       id: oid, createdAt: new Date().toISOString(), status: "Nouă", source: "web",
-      name, phone, width, meters,
+      name, phone, email, width, meters,
       pretMl, total,
       billingType, billing: String(f.billing || "").slice(0, 1200),
       graphicsLink: String(f.graphicsLink || "").slice(0, 500),
@@ -829,6 +830,7 @@ async function notifyNewOrder(env, order) {
     const rows = [
       ["Nume", order.name || "—"],
       ["Telefon", order.phone || "—"],
+      ["Email", order.email || "—"],
       ["Lățime", (order.width || "—") + " cm"],
       ["Metri liniari", (order.meters || "—") + " ml"],
       ["Preț estimat", pret],
@@ -851,7 +853,7 @@ async function notifyNewOrder(env, order) {
       "\nLățime: " + (order.width || "") + " cm\nMetri: " + (order.meters || "") + " ml\nPreț estimat: " + pret +
       "\nFacturare (" + bt + "):\n" + (order.billing || "") + "\n\nLink grafică: " + (order.graphicsLink || "—") +
       "\nDetalii: " + (order.note || "—");
-    return await sendMail(env, { subject, html, text });
+    return await sendMail(env, { subject, html, text, replyTo: order.email || undefined });
   } catch { return false; }
 }
 

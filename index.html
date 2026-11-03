@@ -404,6 +404,7 @@ nav .btn-dark{justify-self:end}
     <div>
       <h5>Informații</h5>
       <div class="fl">
+        <a href="#" data-contact>Contact</a>
         <a href="/blog">Blog</a>
         <a href="/termeni-si-conditii">Termeni și condiții</a>
         <a href="/politica-de-confidentialitate">Politică de confidențialitate</a>
@@ -447,6 +448,7 @@ nav .btn-dark{justify-self:end}
   <div class="grid">
    <label>Nume<input id="fn" autocomplete="name"></label>
    <label>Telefon<input id="ft" type="tel" autocomplete="tel"></label>
+   <label>Email<input id="fe" type="email" autocomplete="email" inputmode="email"></label>
    <label>Lățime<select id="fw"><option value="90">90 cm</option></select></label>
    <label>Metri liniari (ml)<input id="fm" type="number" min="1" inputmode="decimal"></label>
   </div>
@@ -459,6 +461,24 @@ nav .btn-dark{justify-self:end}
   <p class="hint legal">Prin trimiterea comenzii accepți <a href="termeni-si-conditii.html" target="_blank" rel="noopener">Termenii și condițiile</a> și <a href="politica-de-confidentialitate.html" target="_blank" rel="noopener">Politica de confidențialitate</a>.</p>
   <p id="sentMsg" hidden></p>
   <a class="go" id="go" href="mailto:comenzi@mrdtf.ro">Trimite comanda</a>
+ </div>
+</div>
+
+<!-- ===== Modal Contact ===== -->
+<div class="ov" id="ovc" aria-hidden="true">
+ <div class="modal glass" role="dialog" aria-modal="true" aria-labelledby="ctmt">
+  <button class="x" id="ctx" aria-label="Închide">×</button>
+  <h3 id="ctmt">Scrie-ne</h3>
+  <p class="to">Ai o întrebare? Îți răspundem cât de repede putem.</p>
+  <div class="grid">
+   <label>Nume<input id="ctn" autocomplete="name"></label>
+   <label>Email<input id="cte" type="email" autocomplete="email" inputmode="email"></label>
+   <label>Telefon (opțional)<input id="ctp" type="tel" autocomplete="tel"></label>
+   <label>Subiect (opțional)<input id="cts"></label>
+  </div>
+  <label>Mesaj<textarea id="ctm" rows="4"></textarea></label>
+  <p id="ctsent" hidden></p>
+  <a class="go" id="ctgo" href="#">Trimite mesajul</a>
  </div>
 </div>
 
@@ -507,12 +527,13 @@ tiers.forEach(t=>{
   });
 });
 const MAIL=(SITE.email||'comenzi@mrdtf.ro'),ov=document.getElementById('ov'),go=document.getElementById('go');
-const F={n:document.getElementById('fn'),t:document.getElementById('ft'),w:document.getElementById('fw'),m:document.getElementById('fm'),d:document.getElementById('fd'),b:document.getElementById('fb'),l:document.getElementById('fl')};
+const F={n:document.getElementById('fn'),t:document.getElementById('ft'),e:document.getElementById('fe'),w:document.getElementById('fw'),m:document.getElementById('fm'),d:document.getElementById('fd'),b:document.getElementById('fb'),l:document.getElementById('fl')};
 const bt=document.getElementById('bt');
+const emailOk=v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim());
 function build(){
   const w=F.w.value,m=F.m.value.trim();
   const sub='Comandă DTF – '+w+' cm'+(m?' – '+m+' ml':'');
-  const body='Bună ziua,\n\nVreau să plasez o comandă transfer DTF.\n\nNume: '+F.n.value+'\nTelefon: '+F.t.value+'\nLățime: '+w+' cm\nMetri liniari: '+m+'\nDetalii: '+F.d.value+'\n\nFacturare ('+(bt.dataset.v==='pj'?'persoană juridică':'persoană fizică')+'):\n'+F.b.value+'\n\nLink grafică: '+F.l.value+'\n\n(Dacă grafica nu e la link, o atașez în acest e-mail.)';
+  const body='Bună ziua,\n\nVreau să plasez o comandă transfer DTF.\n\nNume: '+F.n.value+'\nTelefon: '+F.t.value+'\nEmail: '+F.e.value+'\nLățime: '+w+' cm\nMetri liniari: '+m+'\nDetalii: '+F.d.value+'\n\nFacturare ('+(bt.dataset.v==='pj'?'persoană juridică':'persoană fizică')+'):\n'+F.b.value+'\n\nLink grafică: '+F.l.value+'\n\n(Dacă grafica nu e la link, o atașez în acest e-mail.)';
   go.href='mailto:'+MAIL+'?subject='+encodeURIComponent(sub)+'&body='+encodeURIComponent(body);
 }
 // Comanda se trimite pe SERVER: se salvează în admin ȘI pleacă emailul automat
@@ -525,9 +546,10 @@ go.addEventListener('click',e=>{
   e.preventDefault();
   if(go.dataset.done){closeM();return;}
   if(orderBusy)return;
-  const payload={name:F.n.value.trim(),phone:F.t.value.trim(),width:F.w.value,meters:F.m.value.trim(),
+  const payload={name:F.n.value.trim(),phone:F.t.value.trim(),email:F.e.value.trim(),width:F.w.value,meters:F.m.value.trim(),
     billingType:(bt.dataset.v==='pj'?'pj':'pf'),billing:F.b.value,graphicsLink:F.l.value,note:F.d.value};
   if(!payload.name||!payload.phone){setSent('Completează numele și telefonul.',false);F.n.focus();return;}
+  if(!emailOk(payload.email)){setSent('Completează o adresă de email validă.',false);F.e.focus();return;}
   orderBusy=true;const old=go.textContent;go.textContent='Se trimite…';
   fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
     .then(r=>r.json().catch(()=>({})).then(d=>({ok:r.ok,d:d})))
@@ -608,6 +630,39 @@ document.addEventListener('click',e=>{if(!pop.hidden&&!e.target.closest('.acts')
 document.addEventListener('keydown',e=>{if(e.key==='Escape')pop.hidden=true});
 const cpNum=(SITE.phone||'+40786022893').replace(/\s+/g,'');
 cp.onclick=()=>{let ok=false;try{navigator.clipboard.writeText(cpNum).then(()=>{cp.textContent='Copiat ✓'},()=>{cp.textContent='Selectează numărul'});ok=true}catch(err){}if(!ok)cp.textContent='Selectează numărul';setTimeout(()=>{cp.textContent='Copiază'},1800)};
+})();
+/* ===== Formular de contact (modal) → POST /api/messages ===== */
+(function(){
+  var ovc=document.getElementById('ovc'); if(!ovc)return;
+  var C={n:document.getElementById('ctn'),e:document.getElementById('cte'),p:document.getElementById('ctp'),s:document.getElementById('cts'),m:document.getElementById('ctm')};
+  var cgo=document.getElementById('ctgo');
+  function csent(t,ok){var el=document.getElementById('ctsent');if(!el)return;el.textContent=t;el.hidden=false;el.style.cssText='margin:8px 0 0;font-size:14px;font-weight:600;color:'+(ok===false?'#c0392b':'#1b8a5a');}
+  function cReset(){var el=document.getElementById('ctsent');if(el)el.hidden=true;cgo.textContent='Trimite mesajul';delete cgo.dataset.done;}
+  ovc.inert=true;
+  function openC(){cReset();ovc.inert=false;ovc.classList.add('open');ovc.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';setTimeout(function(){C.n.focus();},250);}
+  function closeC(){ovc.classList.remove('open');ovc.setAttribute('aria-hidden','true');ovc.inert=true;document.body.style.overflow='';}
+  document.querySelectorAll('[data-contact]').forEach(function(b){b.addEventListener('click',function(e){e.preventDefault();openC();});});
+  document.getElementById('ctx').onclick=closeC;
+  ovc.addEventListener('click',function(e){if(e.target===ovc)closeC();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&ovc.classList.contains('open'))closeC();});
+  var cbusy=false;
+  cgo.addEventListener('click',function(e){
+    e.preventDefault();
+    if(cgo.dataset.done){closeC();return;}
+    if(cbusy)return;
+    var payload={name:C.n.value.trim(),email:C.e.value.trim(),phone:C.p.value.trim(),subject:C.s.value.trim(),message:C.m.value.trim()};
+    if(!payload.name){csent('Completează numele.',false);C.n.focus();return;}
+    if(!emailOk(payload.email)){csent('Completează o adresă de email validă.',false);C.e.focus();return;}
+    if(!payload.message){csent('Scrie un mesaj.',false);C.m.focus();return;}
+    cbusy=true;var old=cgo.textContent;cgo.textContent='Se trimite…';
+    fetch('/api/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+      .then(function(r){return r.json().catch(function(){return{};}).then(function(d){return{ok:r.ok,d:d};});})
+      .then(function(res){cbusy=false;
+        if(res.ok){csent('✓ Mesaj trimis! Îți răspundem în curând.',true);cgo.textContent='Închide';cgo.dataset.done='1';}
+        else{cgo.textContent=old;csent((res.d&&res.d.error)||'Eroare la trimitere.',false);}
+      })
+      .catch(function(){cbusy=false;cgo.textContent=old;csent('Eroare de rețea.',false);});
+  });
 })();
 </script>
 <script src="/assets/js/consent.js" defer></script>
