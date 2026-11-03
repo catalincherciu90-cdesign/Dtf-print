@@ -211,6 +211,28 @@ body.admin {
   .crm-recent__row, .crm-order { word-break: break-word; }
 }
 
+/* ===========================================================
+   Mobil: optimizări de interacțiune
+   =========================================================== */
+@media (max-width: 820px) {
+  /* Inputuri la 16px → iOS nu mai face zoom la focus (care permitea pan lateral) */
+  .admin input, .admin select, .admin textarea,
+  .crm-toolbar input[type="search"] { font-size: 16px !important; }
+  /* Ținte de atingere mai confortabile */
+  .admin .btn--sm { padding: 10px 15px; }
+  .order-status { padding: 10px 13px; }
+  .card-del, .order-del { min-width: 38px; min-height: 38px; }
+  /* Butoanele de salvare din subsol să fie pe toată lățimea (ușor de atins) */
+  .editor-actions--bottom .btn { width: 100%; }
+  /* Rândurile de acțiuni din carduri se întind frumos */
+  .order-card__foot, .crm-notes__actions, .offer-addrow { gap: 8px; }
+}
+@media (max-width: 560px) {
+  /* Acțiunile din cardul de comandă: butoanele ocupă lățimea, nu se înghesuie */
+  .order-files { width: 100%; }
+  .order-files .btn, .order-files .crm-import { flex: 1 1 auto; justify-content: center; }
+}
+
 .dash-bars { display: grid; gap: 10px; }
 .dash-bar { display: grid; grid-template-columns: 96px 1fr 34px; align-items: center; gap: 10px; font-size: .84rem; }
 .dash-bar__lbl { color: var(--muted); }
