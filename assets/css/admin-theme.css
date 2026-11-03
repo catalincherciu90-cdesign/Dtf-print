@@ -117,3 +117,5 @@ body.admin {
 .offer-opts input[type=number] { width: 86px; }
 @media (max-width: 560px) { .offer-line { grid-template-columns: 1fr 1fr; } }
 .offer-addrow { display: flex; gap: 8px; flex-wrap: wrap; }
+.offer-head { display: grid; grid-template-columns: 1fr 90px 120px auto; gap: 8px; padding: 0 2px 2px; font-size: .72rem; letter-spacing: .03em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+@media (max-width: 560px) { .offer-head { display: none; } }

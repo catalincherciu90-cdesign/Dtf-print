@@ -1257,10 +1257,13 @@
     var tiers = (content && content.site && content.site.dtfTiers) || [];
     var tiersHint = tiers.length ? "<p class=\"crm-kv\" style=\"margin:4px 0 0\">Praguri preț DTF (din site): " + tiers.map(function (t) { return esc(t.pret) + " lei/ml (" + esc(t.range) + ")"; }).join(" · ") + "</p>" : "";
     box.innerHTML =
-      "<div class=\"offer-form\"><div class=\"offer-lines\" id=\"offerLines\"></div>" +
+      "<div class=\"offer-form\">" +
+      "<div class=\"offer-head\"><span>Descriere</span><span>Cantitate (buc)</span><span>Preț/buc (lei)</span><span></span></div>" +
+      "<div class=\"offer-lines\" id=\"offerLines\"></div>" +
       "<div class=\"offer-addrow\"><button class=\"btn btn--ghost btn--sm\" id=\"offerAddDtf\" type=\"button\">＋ Print DTF (preț după praguri)</button>" +
       "<button class=\"btn btn--ghost btn--sm\" id=\"offerAddLine\" type=\"button\">＋ Linie liberă</button></div>" + tiersHint +
       "<div class=\"offer-opts\"><label><input type=\"checkbox\" id=\"offerVat\" checked /> TVA 21%</label>" +
+      "<label>Discount (%) <input type=\"number\" id=\"offerDiscount\" value=\"0\" min=\"0\" max=\"100\" step=\"0.5\" /></label>" +
       "<label>Valabilitate (zile) <input type=\"number\" id=\"offerValidity\" value=\"14\" min=\"0\" max=\"365\" /></label></div>" +
       "<label class=\"crm-notes\"><span>Mențiuni (opțional)</span><textarea id=\"offerNotes\" rows=\"2\" placeholder=\"Termene, condiții, observații…\"></textarea></label>" +
       "<div class=\"crm-notes__actions\"><button class=\"btn btn--primary btn--sm\" id=\"offerCreate\" type=\"button\">Creează oferta</button><span class=\"form-msg\" id=\"offerMsg\"></span></div></div>";
@@ -1280,7 +1283,7 @@
       om.textContent = "Se creează…"; om.className = "form-msg";
       var payload = {
         client: { name: c.name, email: c.email, phone: c.phone, company: c.company, type: c.type },
-        items: items, vat: $("offerVat").checked, validity: Number($("offerValidity").value) || 14, notes: $("offerNotes").value,
+        items: items, vat: $("offerVat").checked, discount: Number($("offerDiscount").value) || 0, validity: Number($("offerValidity").value) || 14, notes: $("offerNotes").value,
       };
       api("POST", "/api/admin/offers", payload, true).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
         .then(function (res) {
