@@ -123,3 +123,14 @@ body.admin {
 .inbox-body { white-space: normal; line-height: 1.6; font-size: .95rem; border-top: 1px solid rgba(0,0,0,.08); padding-top: 14px; max-height: 50vh; overflow: auto; word-break: break-word; }
 .inbox-reply { margin-top: 18px; border-top: 1px solid rgba(0,0,0,.08); padding-top: 14px; display: grid; gap: 10px; }
 .inbox-reply h4 { margin: 0; }
+
+/* ---- Oferte (CRM) ---- */
+.crm-offers { display: grid; gap: 8px; margin-bottom: 12px; }
+.offer-form { margin-top: 12px; padding: 16px; border-radius: 14px; background: rgba(255,255,255,.6); border: 1px solid rgba(15,15,16,.1); display: grid; gap: 10px; }
+.offer-lines { display: grid; gap: 8px; }
+.offer-line { display: grid; grid-template-columns: 1fr 90px 120px auto; gap: 8px; align-items: center; }
+.offer-line input { margin: 0 !important; }
+.offer-opts { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; font-size: .9rem; }
+.offer-opts label { display: inline-flex; align-items: center; gap: 8px; }
+.offer-opts input[type=number] { width: 86px; }
+@media (max-width: 560px) { .offer-line { grid-template-columns: 1fr 1fr; } }
