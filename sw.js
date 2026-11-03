@@ -3,7 +3,7 @@
    - Asset-uri statice (css/js/img/fonturi): cache-first + revalidare în fundal.
    - NU se pune niciodată în cache /api/ sau /admin (date dinamice + autentificare).
 */
-const CACHE = "mrdtf-v2";
+const CACHE = "mrdtf-v3";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
