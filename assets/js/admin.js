@@ -1238,8 +1238,8 @@
     row.className = "offer-line";
     if (cfg.tiered) row.dataset.tiered = "1";
     row.innerHTML = "<input class=\"ol-desc\" placeholder=\"Descriere\" value=\"" + esc(cfg.desc || "") + "\" />" +
-      "<input class=\"ol-qty\" type=\"number\" min=\"0\" step=\"0.01\" value=\"" + (cfg.qty != null ? cfg.qty : 1) + "\" placeholder=\"" + (cfg.tiered ? "Metri" : "Cant.") + "\" />" +
-      "<input class=\"ol-price\" type=\"number\" min=\"0\" step=\"0.01\" value=\"" + (cfg.price != null ? cfg.price : 0) + "\" placeholder=\"Preț/buc\" />" +
+      "<input class=\"ol-qty\" type=\"number\" min=\"0\" step=\"0.01\" value=\"" + (cfg.qty != null ? cfg.qty : 1) + "\" placeholder=\"Metri\" />" +
+      "<input class=\"ol-price\" type=\"number\" min=\"0\" step=\"0.01\" value=\"" + (cfg.price != null ? cfg.price : 0) + "\" placeholder=\"Preț/m.l.\" />" +
       "<button class=\"btn btn--ghost btn--sm ol-rm\" type=\"button\" title=\"Șterge linia\">✕</button>";
     row.querySelector(".ol-rm").addEventListener("click", function () { row.remove(); });
     if (cfg.tiered) {
@@ -1260,7 +1260,7 @@
     var tiersHint = tiers.length ? "<p class=\"crm-kv\" style=\"margin:4px 0 0\">Praguri preț DTF (din site): " + tiers.map(function (t) { return esc(t.pret) + " lei/ml (" + esc(t.range) + ")"; }).join(" · ") + "</p>" : "";
     box.innerHTML =
       "<div class=\"offer-form\">" +
-      "<div class=\"offer-head\"><span>Descriere</span><span>Cantitate (buc)</span><span>Preț/buc (lei)</span><span></span></div>" +
+      "<div class=\"offer-head\"><span>Descriere</span><span>Metri liniari</span><span>Preț/m.l. (lei)</span><span></span></div>" +
       "<div class=\"offer-lines\" id=\"offerLines\"></div>" +
       "<div class=\"offer-addrow\"><button class=\"btn btn--ghost btn--sm\" id=\"offerAddDtf\" type=\"button\">＋ Print DTF (preț după praguri)</button>" +
       "<button class=\"btn btn--ghost btn--sm\" id=\"offerAddLine\" type=\"button\">＋ Linie liberă</button></div>" + tiersHint +
