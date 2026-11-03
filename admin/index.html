@@ -38,12 +38,33 @@
   <!-- Editor -->
   <main class="admin__editor container" id="editorView" hidden>
     <div class="tabs" id="tabs">
-      <button class="tab is-active" type="button" data-tab="site"><span class="mr-ico tab__ico" data-icon="edit" data-icon-size="16"></span> Site (temă nouă)</button>
-      <button class="tab" type="button" data-tab="tiktok"><span class="mr-ico tab__ico" data-icon="smartphone" data-icon-size="16"></span> TikTok</button>
-      <button class="tab" type="button" data-tab="social"><span class="mr-ico tab__ico" data-icon="link" data-icon-size="16"></span> Social</button>
+      <button class="tab is-active" type="button" data-tab="dashboard"><span class="mr-ico tab__ico" data-icon="chart" data-icon-size="16"></span> Acasă</button>
       <button class="tab" type="button" data-tab="orders"><span class="mr-ico tab__ico" data-icon="box" data-icon-size="16"></span> Comenzi <span class="tab-badge" id="ordersBadge" hidden>0</span></button>
       <button class="tab" type="button" data-tab="messages"><span class="mr-ico tab__ico" data-icon="message" data-icon-size="16"></span> Mesaje <span class="tab-badge" id="messagesBadge" hidden>0</span></button>
-      <button class="tab" type="button" data-tab="crm"><span class="mr-ico tab__ico" data-icon="chart" data-icon-size="16"></span> CRM</button>
+      <button class="tab" type="button" data-tab="crm"><span class="mr-ico tab__ico" data-icon="users" data-icon-size="16"></span> CRM</button>
+      <button class="tab" type="button" data-tab="site"><span class="mr-ico tab__ico" data-icon="edit" data-icon-size="16"></span> Site</button>
+      <button class="tab" type="button" data-tab="tiktok"><span class="mr-ico tab__ico" data-icon="smartphone" data-icon-size="16"></span> TikTok</button>
+      <button class="tab" type="button" data-tab="social"><span class="mr-ico tab__ico" data-icon="link" data-icon-size="16"></span> Social</button>
+    </div>
+
+    <!-- Tab: Acasă (dashboard) -->
+    <div class="tab-panel" id="tab-dashboard">
+      <div class="dash">
+        <div class="dash-head">
+          <div>
+            <h1>Panou de control</h1>
+            <p class="muted" id="dashHello">Sumar rapid: comenzi, mesaje și rapoarte.</p>
+          </div>
+          <button class="btn btn--ghost" id="dashRefresh" type="button">↻ Reîmprospătează</button>
+        </div>
+        <p class="form-msg" id="dashMsg" role="status"></p>
+        <div class="dash-kpis" id="dashKpis"></div>
+        <div class="dash-grid">
+          <section class="dash-panel" id="dashOrders"></section>
+          <section class="dash-panel" id="dashMessages"></section>
+        </div>
+        <div class="dash-reports" id="dashReports"></div>
+      </div>
     </div>
 
     <!-- Tab: Conținut -->
@@ -67,7 +88,7 @@
 
     <!-- Tab: Social -->
     <!-- Tab: Site (temă nouă) -->
-    <div class="tab-panel" id="tab-site">
+    <div class="tab-panel" id="tab-site" hidden>
       <div class="editor-head">
         <div>
           <h1>Site (temă nouă)</h1>
