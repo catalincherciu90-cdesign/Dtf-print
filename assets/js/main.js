@@ -33,6 +33,14 @@
       .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
   }
+  /* Acceptă doar URL-uri http(s) (sau relative). Blochează scheme periculoase
+     (javascript:, data:) care ar putea ajunge din conținutul editabil. */
+  function safeUrl(u) {
+    u = String(u == null ? "" : u).trim();
+    if (!u) return "";
+    if (/^https?:\/\//i.test(u) || /^\//.test(u)) return u;
+    return "";
+  }
   /* Normalizează o cale relativă „assets/..." la absolută, ca să meargă
      și pe paginile din subdirectoare (ex. /produse). URL-urile absolute
      (http..., /...) rămân neschimbate. */
@@ -207,7 +215,7 @@
   function setSocial(id, url) {
     var el = document.getElementById(id);
     if (!el) return;
-    url = (url || "").trim();
+    url = safeUrl(url);
     if (url) {
       el.href = url; el.hidden = false;
       var lbl = el.getAttribute("data-label");
@@ -263,7 +271,8 @@
     if (t) t.textContent = tk.title || "TikTok";
     var link = document.getElementById("tiktokProfile");
     if (link) {
-      if (tk.profileUrl) { link.href = tk.profileUrl; link.hidden = false; } else link.hidden = true;
+      var purl = safeUrl(tk.profileUrl);
+      if (purl) { link.href = purl; link.hidden = false; } else link.hidden = true;
     }
     document.getElementById("tiktokGrid").innerHTML = vids.map(function (url) {
       url = String(url).trim();

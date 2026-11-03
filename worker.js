@@ -275,11 +275,60 @@ async function getContent(env) {
 }
 
 // ---- Orders ----
+// ID imposibil de ghicit: timp (pentru sortare) + 24 hex criptografic aleator.
 function genId() {
-  return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
+  const b = crypto.getRandomValues(new Uint8Array(12));
+  let s = "";
+  for (const x of b) s += x.toString(16).padStart(2, "0");
+  return Date.now().toString(36) + "-" + s;
 }
 function sanitize(name) {
   return String(name || "fisier").replace(/[^\w.\-]+/g, "_").slice(0, 80);
+}
+
+// Curăță o valoare care intră într-un antet (email/SMTP): elimină CR/LF, ca să
+// nu se poată injecta anteturi sau destinatari suplimentari (CRLF injection).
+function cleanHeader(s) { return String(s == null ? "" : s).replace(/[\r\n]+/g, " ").trim(); }
+
+// Detectează tipul real al unei imagini după „magic bytes". Întoarce MIME-ul
+// sau null. SVG NU e recunoscut aici → e respins la upload (poate conține script).
+function sniffImageType(buf) {
+  const b = new Uint8Array(buf);
+  if (b.length < 12) return null;
+  if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return "image/png";
+  if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return "image/jpeg";
+  if (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x38) return "image/gif";
+  if (b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 &&
+      b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50) return "image/webp";
+  return null;
+}
+
+// IP-ul clientului (Cloudflare) pentru limitarea de rată.
+function clientIp(request) {
+  return request.headers.get("CF-Connecting-IP") || request.headers.get("X-Forwarded-For") || "";
+}
+// Limitare de rată simplă pe IP (fereastră fixă), stocată în KV. Best-effort:
+// dacă KV lipsește sau nu avem IP, nu blochează. Întoarce true dacă s-a depășit.
+async function rateLimited(env, bucket, ip, limit, windowSec) {
+  if (!env.CONTENT || !ip) return false;
+  const slot = Math.floor(Date.now() / 1000 / windowSec);
+  const key = "rl:" + bucket + ":" + ip + ":" + slot;
+  let n = 0;
+  try { n = Number(await env.CONTENT.get(key)) || 0; } catch { /* ignore */ }
+  if (n >= limit) return true;
+  try { await env.CONTENT.put(key, String(n + 1), { expirationTtl: Math.max(60, windowSec * 2) }); } catch { /* ignore */ }
+  return false;
+}
+
+// Token secret pentru previzualizarea site-ului în mentenanță, derivat din
+// JWT_SECRET (nu e o valoare fixă ghicibilă ca „on"). Se obține din admin.
+async function previewToken(env) {
+  const secret = env.JWT_SECRET || env.ADMIN_PASSWORD || "mrdtf";
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("preview:" + secret));
+  const b = new Uint8Array(digest);
+  let s = "";
+  for (let i = 0; i < 10; i++) s += b[i].toString(16).padStart(2, "0");
+  return s;
 }
 async function listOrders(env) {
   if (!env.CONTENT) return [];
@@ -342,6 +391,12 @@ async function handleAdmin(request, env, segs) {
       text: "Test reusit. Trimiterea de emailuri functioneaza. Metoda: " + method,
     });
     return json({ ok, method, error: ok ? undefined : "Trimiterea a eșuat. Verifică setările (host/port/user/parolă) sau logurile Worker." });
+  }
+
+  // GET /api/admin/preview-url — link secret de previzualizare în mentenanță.
+  if (sub === "preview-url" && request.method === "GET") {
+    const tok = await previewToken(env);
+    return json({ ok: true, path: "/?preview=" + tok, token: tok });
   }
 
   // GET /api/admin/stats — dashboard
@@ -661,11 +716,13 @@ async function handleOrders(request, env, segs) {
   // POST /api/orders — comandă publică (tema nouă: formular → email + salvare în admin)
   if (!id && request.method === "POST") {
     if (!env.CONTENT) return err("Stocare neconfigurată.", 503);
+    if (await rateLimited(env, "order", clientIp(request), 5, 60)) return err("Prea multe comenzi într-un timp scurt. Încearcă din nou în câteva minute.", 429);
     const f = await request.json().catch(() => ({}));
     const name = String(f.name || "").trim().slice(0, 140);
     const phone = String(f.phone || "").trim().slice(0, 40);
     const email = String(f.email || "").trim().slice(0, 160);
     if (!name && !phone) return err("Completează numele și telefonul.");
+    if (!validEmail(email)) return err("Introdu o adresă de email validă.");
     const width = Math.max(0, Number(f.width) || 0);
     const meters = Math.max(0, Number(f.meters) || 0);
     const billingType = f.billingType === "pj" ? "pj" : "pf";
@@ -870,19 +927,21 @@ async function smtpSend(env, { to, from, subject, html, text, replyTo }) {
     await withTimeout(writer.write(enc.encode(line + "\r\n")), 10000, "write");
     return readReply(expect);
   }
+  // Curăță valorile ce intră în anteturi (fără CR/LF → fără injecție de anteturi).
+  const cFrom = cleanHeader(from), cTo = cleanHeader(to), cReply = cleanHeader(replyTo);
   try {
     await readReply("2");                 // 220 salut
     await cmd("EHLO mrdtf.ro", "2");
     await cmd("AUTH LOGIN", "3");
     await cmd(b64utf8(user), "3");
     await cmd(b64utf8(pass), "2");         // 235 autentificat
-    await cmd("MAIL FROM:<" + emailAddr(from) + ">", "2");
-    await cmd("RCPT TO:<" + emailAddr(to) + ">", "2");
+    await cmd("MAIL FROM:<" + emailAddr(cFrom) + ">", "2");
+    await cmd("RCPT TO:<" + emailAddr(cTo) + ">", "2");
     await cmd("DATA", "3");                // 354
     const headers =
-      "From: " + from + "\r\n" +
-      "To: " + to + "\r\n" +
-      (replyTo ? "Reply-To: " + replyTo + "\r\n" : "") +
+      "From: " + cFrom + "\r\n" +
+      "To: " + cTo + "\r\n" +
+      (cReply ? "Reply-To: " + cReply + "\r\n" : "") +
       "Subject: =?UTF-8?B?" + b64utf8(subject) + "?=\r\n" +
       "Date: " + new Date().toUTCString() + "\r\n" +
       "MIME-Version: 1.0\r\n" +
@@ -1020,6 +1079,7 @@ async function handleMessages(request, env, segs, ctx) {
   // POST /api/messages — trimitere mesaj din formularul de contact (public)
   if (!id && request.method === "POST") {
     if (!env.CONTENT) return err("Stocare neconfigurată.", 503);
+    if (await rateLimited(env, "msg", clientIp(request), 5, 60)) return err("Prea multe mesaje într-un timp scurt. Încearcă din nou în câteva minute.", 429);
     const b = await request.json().catch(() => ({}));
     const name = String(b.name || "").trim().slice(0, 120);
     const email = normEmail(b.email);
@@ -1325,16 +1385,18 @@ export default {
     const path = url.pathname;
 
     try {
-      // Preview pentru proprietar: /?preview=on setează un cookie care ocolește
+      // Preview pentru proprietar: /?preview=<token> setează un cookie care ocolește
       // mentenanța (publicul rămâne pe pagina de construcție). /?preview=off iese.
+      // Tokenul e secret (derivat din JWT_SECRET) — îl iei din admin, nu e „on".
       const pv = url.searchParams.get("preview");
-      if (pv === "on") {
-        return new Response(null, { status: 302, headers: { "Location": url.origin + path, "Set-Cookie": "mrdtf_preview=1; Path=/; Max-Age=604800; SameSite=Lax" } });
-      }
+      const ptok = await previewToken(env);
       if (pv === "off") {
         return new Response(null, { status: 302, headers: { "Location": url.origin + path, "Set-Cookie": "mrdtf_preview=; Path=/; Max-Age=0" } });
       }
-      const hasPreview = (request.headers.get("Cookie") || "").indexOf("mrdtf_preview=1") !== -1;
+      if (pv && pv === ptok) {
+        return new Response(null, { status: 302, headers: { "Location": url.origin + path, "Set-Cookie": "mrdtf_preview=" + ptok + "; Path=/; Max-Age=604800; SameSite=Lax" } });
+      }
+      const hasPreview = (request.headers.get("Cookie") || "").indexOf("mrdtf_preview=" + ptok) !== -1;
 
       // Mod mentenanță — blochează paginile publice; admin, API, asset-urile și preview rămân accesibile.
       if (request.method === "GET" && !isMaintenanceExempt(path) && !hasPreview) {
@@ -1343,6 +1405,7 @@ export default {
       }
 
       if (path.startsWith("/api/")) {
+        const apiResponse = await (async () => {
         if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
         const segs = path.replace(/^\/api\//, "").replace(/\/+$/, "").split("/");
 
@@ -1360,9 +1423,10 @@ export default {
 
         if (segs[0] === "login" && request.method === "POST") {
           if (!env.ADMIN_PASSWORD || !env.JWT_SECRET) return err("Admin neconfigurat: setează ADMIN_PASSWORD și JWT_SECRET.", 503);
+          if (await rateLimited(env, "login", clientIp(request), 8, 300)) return err("Prea multe încercări. Așteaptă câteva minute și încearcă din nou.", 429);
           const body = await request.json().catch(() => ({}));
           if (!body.password || !timingSafeEqual(body.password, env.ADMIN_PASSWORD)) return err("Parolă greșită.", 401);
-          return json({ token: await signJWT({ role: "admin" }, env.JWT_SECRET) });
+          return json({ token: await signJWT({ role: "admin" }, env.JWT_SECRET, 12 * 3600) });
         }
 
         if (segs[0] === "content") {
@@ -1399,9 +1463,17 @@ export default {
             if (!env.CONTENT) return err("Indisponibil.", 404);
             const res = await env.CONTENT.getWithMetadata(MEDIA_PREFIX + mid, { type: "arrayBuffer" });
             if (!res || !res.value) return err("Imagine inexistentă.", 404);
-            const type = (res.metadata && res.metadata.type) || "application/octet-stream";
+            let type = (res.metadata && res.metadata.type) || "application/octet-stream";
+            // Nu servim niciodată SVG ca atare (poate conține script); îl forțăm la download.
+            const isSvg = /svg/i.test(type);
             return new Response(res.value, {
-              headers: { "Content-Type": type, "Cache-Control": "public, max-age=31536000, immutable" },
+              headers: {
+                "Content-Type": isSvg ? "application/octet-stream" : type,
+                "Cache-Control": "public, max-age=31536000, immutable",
+                "X-Content-Type-Options": "nosniff",
+                "Content-Security-Policy": "default-src 'none'; sandbox",
+                "Content-Disposition": isSvg ? "attachment" : "inline",
+              },
             });
           }
           // POST /api/media — încărcare imagine (auth)
@@ -1411,11 +1483,13 @@ export default {
             const form = await request.formData();
             const file = form.get("file");
             if (!file || typeof file === "string" || !file.size) return err("Fără fișier.");
-            if (!/^image\//.test(file.type || "")) return err("Doar imagini sunt permise.");
             if (file.size > MAX_IMG_BYTES) return err("Imagine prea mare (max " + MAX_IMG_MB + " MB).");
+            const abuf = await file.arrayBuffer();
+            const realType = sniffImageType(abuf);
+            if (!realType) return err("Doar imagini PNG, JPEG, WEBP sau GIF sunt permise.");
             const id = genId();
-            await env.CONTENT.put(MEDIA_PREFIX + id, await file.arrayBuffer(),
-              { metadata: { type: file.type, name: String(file.name || "").slice(0, 80) } });
+            await env.CONTENT.put(MEDIA_PREFIX + id, abuf,
+              { metadata: { type: realType, name: String(file.name || "").slice(0, 80) } });
             return json({ ok: true, id, url: "/api/media/" + id });
           }
           return err("Endpoint inexistent.", 404);
@@ -1424,18 +1498,29 @@ export default {
         // POST /api/design — upload design client (public, doar imagini). Stocat ca media.
         if (segs[0] === "design" && !segs[1] && request.method === "POST") {
           if (!env.CONTENT) return err("Stocare neconfigurată.", 503);
+          if (await rateLimited(env, "design", clientIp(request), 12, 300)) return err("Prea multe încărcări într-un timp scurt. Încearcă din nou în câteva minute.", 429);
           const form = await request.formData();
           const file = form.get("file");
           if (!file || typeof file === "string" || !file.size) return err("Fără fișier.");
-          if (!/^image\//.test(file.type || "")) return err("Doar imagini sunt permise.");
           if (file.size > MAX_IMG_BYTES) return err("Imagine prea mare (max " + MAX_IMG_MB + " MB).");
+          const abuf = await file.arrayBuffer();
+          const realType = sniffImageType(abuf);
+          if (!realType) return err("Doar imagini PNG, JPEG, WEBP sau GIF sunt permise.");
           const id = genId();
-          await env.CONTENT.put(MEDIA_PREFIX + id, await file.arrayBuffer(),
-            { metadata: { type: file.type, name: String(file.name || "design").slice(0, 80) } });
+          await env.CONTENT.put(MEDIA_PREFIX + id, abuf,
+            { metadata: { type: realType, name: String(file.name || "design").slice(0, 80) } });
           return json({ ok: true, id, url: "/api/media/" + id });
         }
 
         return err("Endpoint inexistent.", 404);
+        })();
+        // CORS: permite doar aceeași origine (nu „*"). Răspunsurile fără antet
+        // CORS (imagini, descărcări) rămân neatinse.
+        const reqOrigin = request.headers.get("Origin");
+        const allowOrigin = (reqOrigin && reqOrigin === url.origin) ? reqOrigin : url.origin;
+        const ch = new Headers(apiResponse.headers);
+        if (ch.has("Access-Control-Allow-Origin")) { ch.set("Access-Control-Allow-Origin", allowOrigin); ch.append("Vary", "Origin"); }
+        return new Response(apiResponse.body, { status: apiResponse.status, statusText: apiResponse.statusText, headers: ch });
       }
 
       if (path === "/" || path === "/index.html") return serveHome(request, env);
@@ -1462,7 +1547,8 @@ export default {
       return serveAsset(request, env);
     } catch (e) {
       if (!path.startsWith("/api/")) return env.ASSETS.fetch(request);
-      return err("Eroare server: " + (e && e.message), 500);
+      console.error("Eroare server:", (e && (e.stack || e.message)) || e);
+      return err("A apărut o eroare internă. Încearcă din nou.", 500);
     }
   },
 
