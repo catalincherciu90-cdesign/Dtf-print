@@ -457,7 +457,8 @@ nav .btn-dark{justify-self:end}
   <p class="hint">Poți trimite grafica prin link (WeTransfer, Google Drive etc.) sau o poți atașa în e-mailul care se deschide. Formate: PDF, PNG, AI, PSD.</p>
   <p class="notice">După preluarea comenzii veți primi pe e-mail confirmarea că fișierul este în regulă, împreună cu factura. Comanda intră în print după achitarea facturii.</p>
   <p class="hint legal">Prin trimiterea comenzii accepți <a href="termeni-si-conditii.html" target="_blank" rel="noopener">Termenii și condițiile</a> și <a href="politica-de-confidentialitate.html" target="_blank" rel="noopener">Politica de confidențialitate</a>.</p>
-  <a class="go" id="go" href="mailto:comenzi@mrdtf.ro">Deschide e-mailul</a>
+  <p id="sentMsg" hidden></p>
+  <a class="go" id="go" href="mailto:comenzi@mrdtf.ro">Trimite comanda</a>
  </div>
 </div>
 
@@ -514,20 +515,31 @@ function build(){
   const body='Bună ziua,\n\nVreau să plasez o comandă transfer DTF.\n\nNume: '+F.n.value+'\nTelefon: '+F.t.value+'\nLățime: '+w+' cm\nMetri liniari: '+m+'\nDetalii: '+F.d.value+'\n\nFacturare ('+(bt.dataset.v==='pj'?'persoană juridică':'persoană fizică')+'):\n'+F.b.value+'\n\nLink grafică: '+F.l.value+'\n\n(Dacă grafica nu e la link, o atașez în acest e-mail.)';
   go.href='mailto:'+MAIL+'?subject='+encodeURIComponent(sub)+'&body='+encodeURIComponent(body);
 }
-// La „Deschide e-mailul" trimitem comanda și în backend (apare în Admin → Comenzi),
-// pe lângă deschiderea clientului de email. keepalive => supraviețuiește navigării mailto.
-let orderSent=false;
-go.addEventListener('click',()=>{
-  if(orderSent)return; orderSent=true; setTimeout(()=>orderSent=false,4000);
-  try{
-    const payload={name:F.n.value,phone:F.t.value,width:F.w.value,meters:F.m.value,
-      billingType:(bt.dataset.v==='pj'?'pj':'pf'),billing:F.b.value,graphicsLink:F.l.value,note:F.d.value};
-    if(!payload.name&&!payload.phone)return;
-    fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),keepalive:true}).catch(()=>{});
-  }catch(e){}
+// Comanda se trimite pe SERVER: se salvează în admin ȘI pleacă emailul automat
+// (Resend, din worker) — fără să deschidem clientul de mail. Dacă serverul nu
+// răspunde, cădem pe rezerva mailto ca să nu se piardă comanda.
+let orderBusy=false;
+function setSent(txt,ok){var m=document.getElementById('sentMsg');if(!m)return;m.textContent=txt;m.hidden=false;m.style.cssText='margin:8px 0 0;font-size:14px;font-weight:600;color:'+(ok===false?'#c0392b':'#1b8a5a');}
+function resetSent(){var m=document.getElementById('sentMsg');if(m)m.hidden=true;go.textContent='Trimite comanda';delete go.dataset.done;}
+go.addEventListener('click',e=>{
+  e.preventDefault();
+  if(go.dataset.done){closeM();return;}
+  if(orderBusy)return;
+  const payload={name:F.n.value.trim(),phone:F.t.value.trim(),width:F.w.value,meters:F.m.value.trim(),
+    billingType:(bt.dataset.v==='pj'?'pj':'pf'),billing:F.b.value,graphicsLink:F.l.value,note:F.d.value};
+  if(!payload.name||!payload.phone){setSent('Completează numele și telefonul.',false);F.n.focus();return;}
+  orderBusy=true;const old=go.textContent;go.textContent='Se trimite…';
+  fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+    .then(r=>r.json().catch(()=>({})).then(d=>({ok:r.ok,d:d})))
+    .then(res=>{
+      orderBusy=false;
+      if(res.ok){setSent('✓ Comanda a fost trimisă! Te contactăm în cel mai scurt timp.',true);go.textContent='Închide';go.dataset.done='1';}
+      else{go.textContent=old;build();window.location.href=go.href;}
+    })
+    .catch(()=>{orderBusy=false;go.textContent=old;build();window.location.href=go.href;});
 });
 ov.inert=true;
-function openM(){build();ov.inert=false;ov.classList.add('open');ov.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';setTimeout(()=>F.n.focus(),250)}
+function openM(){build();resetSent();ov.inert=false;ov.classList.add('open');ov.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';setTimeout(()=>F.n.focus(),250)}
 function closeM(){ov.classList.remove('open');ov.setAttribute('aria-hidden','true');ov.inert=true;document.body.style.overflow=''}
 document.querySelectorAll('button.btn-dark,.cta').forEach(b=>b.onclick=openM);
 document.getElementById('x').onclick=closeM;
