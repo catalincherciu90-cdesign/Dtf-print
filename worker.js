@@ -1197,14 +1197,14 @@ class PwaHead {
 
 // Banner legal ANPC + ANPC SAL (obligatoriu pentru magazine online în RO).
 // Injectat pe toate paginile publice (nu în admin), o singură dată.
-const ANPC_BAR = '<div style="position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:center;max-width:1100px;margin:0 auto;padding:10px 20px 30px">' +
+const ANPC_BAR = '<div style="position:relative;z-index:1;max-width:1100px;margin:30px auto 0;padding:0 20px"><div style="border-top:1px solid rgba(0,0,0,.08);padding:20px 0 30px;display:flex;justify-content:center">' +
   '<a href="https://reclamatiisal.anpc.ro" target="_blank" rel="noopener noreferrer" aria-label="ANPC SAL - Soluționarea Alternativă a Litigiilor"><img src="/assets/img/anpc-sal-oficial.png" alt="ANPC SAL - Soluționarea Alternativă a Litigiilor" width="205" height="50" style="display:block;height:50px;width:auto"></a>' +
-  '</div>';
+  '</div></div>';
 class AnpcBar {
   element(el) { el.append(ANPC_BAR, { html: true }); }
 }
 
-async function serveAsset(request, env) {
+async function serveAsset(request, env, injectAnpc = true) {
   const res = await env.ASSETS.fetch(request);
   const ct = res.headers.get("Content-Type") || "";
   if (/text\/html/.test(ct)) {
@@ -1213,7 +1213,7 @@ async function serveAsset(request, env) {
     headers.set("Cache-Control", "no-cache");
     const out = new Response(res.body, { status: res.status, statusText: res.statusText, headers });
     let rw = new HTMLRewriter().on("head", new PwaHead(isAdmin));
-    if (!isAdmin) rw = rw.on("body", new AnpcBar());
+    if (!isAdmin && injectAnpc) rw = rw.on("body", new AnpcBar());
     return rw.transform(out);
   }
   if (/text\/css|javascript/.test(ct)) {
@@ -1234,7 +1234,8 @@ function absUrlW(u) {
 // Servește homepage-ul injectând imaginea hero (LCP) direct în HTML + un
 // <link rel=preload>, ca browserul s-o descopere imediat (nu după ce rulează JS).
 async function serveHome(request, env) {
-  const res = await serveAsset(request, env);
+  // Homepage are bannerul ANPC direct în footer-ul paginii, deci nu-l mai injectăm aici.
+  const res = await serveAsset(request, env, false);
   if (!/text\/html/.test(res.headers.get("Content-Type") || "")) return res;
   // Injectăm conținutul editabil (contact, firmă, prețuri, TikTok, galerie) direct
   // în <head>, ca pagina să-l aibă imediat (fără request suplimentar / fără FOUC).
