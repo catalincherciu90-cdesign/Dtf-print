@@ -334,10 +334,10 @@ nav .btn-dark{justify-self:end}
 /* desktop: layout orizontal (ca în mockup) */
 @media(min-width:760px){
   .cfmts{margin:16px 0 0}
-  .cwrap{display:grid;grid-template-columns:1fr minmax(260px,42%);grid-template-rows:auto 1fr auto;grid-template-areas:"chips sheet" "num sheet" "price cta";gap:16px 48px;align-items:start;text-align:left}
-  .cwrap .cfmts{grid-area:chips;margin:0;justify-content:flex-start;align-self:start}
-  .cwrap .csheet{grid-area:sheet;align-self:center;justify-self:center;width:min(330px,100%);margin:0}
-  .cwrap .cnumwrap{grid-area:num;align-self:center;margin:0}
+  .cwrap{display:grid;grid-template-columns:minmax(160px,210px) 1fr minmax(230px,38%);grid-template-rows:1fr auto;grid-template-areas:"chips num sheet" "price num cta";gap:22px 34px;align-items:start;text-align:left}
+  .cwrap .cfmts{grid-area:chips;margin:0;align-content:flex-start;align-self:start}
+  .cwrap .cnumwrap{grid-area:num;align-self:center;justify-self:center;text-align:center}
+  .cwrap .csheet{grid-area:sheet;align-self:start;justify-self:center;width:min(320px,100%);margin:22px 0 0}
   .cwrap .cpw{grid-area:price;align-self:end;margin:0}
   .cwrap .cta{grid-area:cta;align-self:end;justify-self:end;width:auto;margin:0}
 }
