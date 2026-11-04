@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="170" height="50" viewBox="0 0 170 50" role="img" aria-label="ANPC - Protecția Consumatorilor">
+  <rect width="170" height="50" rx="8" fill="#123a7a"/>
+  <text x="16" y="29" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="800" fill="#ffffff" letter-spacing="1.5">ANPC</text>
+  <text x="17" y="42" font-family="Arial, Helvetica, sans-serif" font-size="7.6" fill="#c7d8f5" letter-spacing=".2">Protecția consumatorilor</text>
+  <circle cx="148" cy="25" r="13" fill="#ffc800"/>
+  <path d="M141.5 25.5 l4.2 4.2 l8.3 -9.2" fill="none" stroke="#123a7a" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
