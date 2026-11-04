@@ -307,14 +307,15 @@ nav .btn-dark{justify-self:end}
 .capbtn:hover{filter:brightness(1.15);transform:translateY(-1px)}
 .capback{display:inline-flex;align-items:center;gap:8px;background:rgba(0,0,0,.05);border:1px solid rgba(15,15,16,.12);border-radius:999px;padding:8px 16px;font:inherit;font-weight:600;font-size:14px;cursor:pointer;margin-bottom:14px}
 .capback:hover{background:rgba(0,0,0,.09)}
-.cfmts{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 20px}
+.cfmts{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px}
 .cfmt{background:var(--glass2);border:1px solid var(--edge2);border-radius:999px;padding:8px 14px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;color:var(--ink);transition:background .15s,border-color .15s}
 .cfmt:hover{border-color:var(--y)}
 .cfmt.on{background:var(--y);border-color:transparent;color:#1a1a1a}
 .cfmt .cx{opacity:.65;font-weight:700;margin-left:3px}
-.cwrap{display:grid;grid-template-columns:auto 1fr;gap:30px;align-items:center}
-@media(max-width:620px){.cwrap{grid-template-columns:1fr;gap:18px}}
-.csheet{position:relative;width:min(258px,62vw);aspect-ratio:87/100;background:#fff;border:2px solid #e0b949;border-radius:8px;padding:5px;margin:24px 0 8px 36px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+/* mobil: stivuit, centrat */
+.cwrap{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px}
+.cwrap .cfmts{justify-content:center}
+.csheet{position:relative;width:min(258px,62vw);aspect-ratio:87/100;background:#fff;border:2px solid #e0b949;border-radius:8px;padding:5px;margin:24px auto 12px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
 .cdim{position:absolute;color:var(--mute);font-size:11px;font-weight:600;white-space:nowrap}
 .cdim-w{top:-20px;left:0;right:0;text-align:center}
 .cdim-h{left:-32px;top:0;bottom:0;display:flex;align-items:center;writing-mode:vertical-rl;transform:rotate(180deg)}
@@ -322,15 +323,24 @@ nav .btn-dark{justify-self:end}
 .ccell{background:linear-gradient(160deg,#ffe488,#ffcf47);border:1px solid rgba(190,140,10,.35);border-radius:3px;display:grid;place-items:center;overflow:hidden;min-height:0;min-width:0}
 .ccell.ca{font-size:clamp(5px,1.5vw,10px);font-weight:800;color:#7a5e00;line-height:1}
 .cgrid.dots .ccell i{width:38%;height:38%;border-radius:50%;background:rgba(150,110,0,.6);display:block}
-.cinfo{min-width:0;text-align:left}
-@media(max-width:620px){.cinfo{text-align:center}.csheet{margin-left:auto;margin-right:auto}}
+.cnumwrap{margin-top:2px}
 .cnum{font-weight:800;font-size:clamp(44px,13vw,64px);line-height:1;letter-spacing:-.03em;color:var(--ink)}
 .clbl{font-size:18px;font-weight:700;margin-top:2px}
-.cprice{margin:14px 0 0;color:var(--mute);font-size:14px;line-height:1.7}
+.cpw{max-width:440px}
+.cprice{margin:12px 0 0;color:var(--mute);font-size:14px;line-height:1.7}
 .cprice b{color:var(--ink)}
-.cnote2{font-size:12.5px;margin-top:12px!important}
-.cinfo .cta{margin-top:16px;font-size:17px;padding:15px 24px;gap:14px}
-@media(max-width:620px){.cinfo .cta{width:100%;justify-content:center}}
+.cnote2{font-size:12.5px;margin-top:10px!important}
+.cwrap .cta{margin-top:16px;font-size:17px;padding:15px 24px;gap:14px;width:100%;justify-content:center}
+/* desktop: layout orizontal (ca în mockup) */
+@media(min-width:760px){
+  .cfmts{margin:16px 0 0}
+  .cwrap{display:grid;grid-template-columns:1fr minmax(260px,42%);grid-template-rows:auto 1fr auto;grid-template-areas:"chips sheet" "num sheet" "price cta";gap:16px 48px;align-items:start;text-align:left}
+  .cwrap .cfmts{grid-area:chips;margin:0;justify-content:flex-start;align-self:start}
+  .cwrap .csheet{grid-area:sheet;align-self:center;justify-self:center;width:min(330px,100%);margin:0}
+  .cwrap .cnumwrap{grid-area:num;align-self:center;margin:0}
+  .cwrap .cpw{grid-area:price;align-self:end;margin:0}
+  .cwrap .cta{grid-area:cta;align-self:end;justify-self:end;width:auto;margin:0}
+}
 </style>
 </head>
 <body>
@@ -386,17 +396,13 @@ nav .btn-dark{justify-self:end}
    <div id="pSlide2" hidden>
     <button class="capback" id="toPrices" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M19 12H5m6 6-6-6 6-6"/></svg>Prețuri</button>
     <div class="head"><h2>Ce încape pe 1 ml de folie?</h2></div>
-    <p class="note">1 ml înseamnă 100 cm lungime × 87 cm lățime printabilă. Alege un format și vezi câte bucăți intră.</p>
-    <div class="cfmts" id="cFmts"></div>
+    <p class="note capintro">1 ml înseamnă 100 cm lungime × 87 cm lățime printabilă. Alege un format și vezi câte bucăți intră.</p>
     <div class="cwrap">
+     <div class="cfmts" id="cFmts"></div>
      <div class="csheet"><span class="cdim cdim-w">87 cm</span><span class="cdim cdim-h">100 cm = 1 ml</span><div class="cgrid" id="cGrid"></div></div>
-     <div class="cinfo">
-      <div class="cnum" id="cNum">24</div>
-      <div class="clbl" id="cLbl">de coli A5</div>
-      <p class="cprice" id="cPrice"></p>
-      <p class="note cnote2">Calcul teoretic, fără spații între modele. În practică încap puțin mai puține bucăți. Prețurile nu includ TVA.</p>
-      <button class="cta" type="button"><svg class="i"><use href="#up"/></svg>Trimite comanda<svg class="i"><use href="#arr"/></svg></button>
-     </div>
+     <div class="cnumwrap"><div class="cnum" id="cNum">24</div><div class="clbl" id="cLbl">de coli A5</div></div>
+     <div class="cpw"><p class="cprice" id="cPrice"></p><p class="note cnote2">Calcul teoretic, fără spații între modele. În practică încap puțin mai puține bucăți. Prețurile nu includ TVA.</p></div>
+     <button class="cta" type="button"><svg class="i"><use href="#up"/></svg>Trimite comanda<svg class="i"><use href="#arr"/></svg></button>
     </div>
    </div>
   </section>
