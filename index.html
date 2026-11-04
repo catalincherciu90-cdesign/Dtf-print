@@ -332,12 +332,12 @@ nav .btn-dark{justify-self:end}
 .cwrap .cta{margin-top:16px;font-size:17px;padding:15px 24px;gap:14px;width:100%;justify-content:center}
 /* desktop: layout orizontal (ca în mockup) */
 @media(min-width:760px){
-  .cwrap{display:grid;grid-template-columns:minmax(175px,215px) 1fr minmax(320px,46%);grid-template-rows:auto auto;grid-template-areas:"chips num sheet" "price price cta";gap:28px 34px;align-items:center;text-align:left}
-  .cwrap .cfmts{grid-area:chips;margin:0;max-width:none;align-self:center}
-  .cwrap .cnumwrap{grid-area:num;align-self:center;justify-self:center;text-align:center;margin:0}
-  .cwrap .csheet{grid-area:sheet;align-self:center;justify-self:end;width:min(460px,100%);margin:22px 0 0}
+  .cwrap{display:grid;grid-template-columns:230px auto minmax(250px,285px);grid-template-areas:"chips num sheet" "price num sheet" "price num cta";gap:8px 30px;align-items:center;justify-content:center;text-align:left;max-width:860px;margin:0 auto}
+  .cwrap .cfmts{grid-area:chips;margin:0;max-width:none;align-self:start}
   .cwrap .cpw{grid-area:price;align-self:start;margin:0}
-  .cwrap .cta{grid-area:cta;align-self:center;justify-self:end;width:auto;margin:0}
+  .cwrap .cnumwrap{grid-area:num;align-self:center;justify-self:center;text-align:center;margin:0}
+  .cwrap .csheet{grid-area:sheet;align-self:center;justify-self:end;width:min(285px,100%);margin:16px 0 0}
+  .cwrap .cta{grid-area:cta;align-self:end;justify-self:end;width:auto;margin:6px 0 0}
 }
 </style>
 </head>
