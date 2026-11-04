@@ -1195,6 +1195,16 @@ class PwaHead {
   element(el) { el.append(this.admin ? PWA_HEAD_ADMIN : PWA_HEAD, { html: true }); }
 }
 
+// Banner legal ANPC + ANPC SAL (obligatoriu pentru magazine online în RO).
+// Injectat pe toate paginile publice (nu în admin), o singură dată.
+const ANPC_BAR = '<div style="position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:center;max-width:1100px;margin:0 auto;padding:10px 20px 30px">' +
+  '<a href="https://anpc.ro" target="_blank" rel="noopener noreferrer" aria-label="ANPC"><img src="/assets/img/anpc.svg" alt="ANPC - Protecția Consumatorilor" width="170" height="50" style="display:block;height:50px;width:auto"></a>' +
+  '<a href="https://reclamatiisal.anpc.ro" target="_blank" rel="noopener noreferrer" aria-label="ANPC SAL - Soluționarea Alternativă a Litigiilor"><img src="/assets/img/anpc-sal.svg" alt="ANPC SAL - Soluționarea Alternativă a Litigiilor" width="250" height="50" style="display:block;height:50px;width:auto"></a>' +
+  '</div>';
+class AnpcBar {
+  element(el) { el.append(ANPC_BAR, { html: true }); }
+}
+
 async function serveAsset(request, env) {
   const res = await env.ASSETS.fetch(request);
   const ct = res.headers.get("Content-Type") || "";
@@ -1203,7 +1213,9 @@ async function serveAsset(request, env) {
     const headers = new Headers(res.headers);
     headers.set("Cache-Control", "no-cache");
     const out = new Response(res.body, { status: res.status, statusText: res.statusText, headers });
-    return new HTMLRewriter().on("head", new PwaHead(isAdmin)).transform(out);
+    let rw = new HTMLRewriter().on("head", new PwaHead(isAdmin));
+    if (!isAdmin) rw = rw.on("body", new AnpcBar());
+    return rw.transform(out);
   }
   if (/text\/css|javascript/.test(ct)) {
     const headers = new Headers(res.headers);

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="250" height="50" viewBox="0 0 250 50" role="img" aria-label="ANPC SAL - Soluționarea Alternativă a Litigiilor">
+  <rect width="250" height="50" rx="8" fill="#123a7a"/>
+  <text x="16" y="31" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="800" fill="#ffffff" letter-spacing="1">ANPC</text>
+  <line x1="80" y1="12" x2="80" y2="38" stroke="#43609e" stroke-width="1.4"/>
+  <text x="92" y="24" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="800" fill="#ffc800" letter-spacing="1.5">SAL</text>
+  <text x="92" y="40" font-family="Arial, Helvetica, sans-serif" font-size="7.6" fill="#dbe6fa" letter-spacing=".1">Soluționarea Alternativă a Litigiilor</text>
+</svg>
