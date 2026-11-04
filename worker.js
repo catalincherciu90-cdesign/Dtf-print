@@ -1615,6 +1615,30 @@ export default {
         if (path === oldp || path === oldp + "/") return Response.redirect(url.origin + legalMap[oldp], 301);
       }
 
+      // Negociere WebP: dacă browserul acceptă image/webp ȘI există un sibling .webp,
+      // servim versiunea WebP (mai mică). Browserele vechi și scraperele de social
+      // (fără Accept: image/webp) primesc originalul JPG/PNG — preview-urile rămân intacte.
+      if (/\.(jpe?g|png)$/i.test(path)) {
+        if ((request.headers.get("Accept") || "").includes("image/webp")) {
+          const wu = new URL(request.url);
+          wu.pathname = path.replace(/\.(jpe?g|png)$/i, ".webp");
+          try {
+            const wres = await env.ASSETS.fetch(new Request(wu.toString(), { method: "GET" }));
+            if (wres.ok) {
+              const headers = new Headers(wres.headers);
+              headers.set("Content-Type", "image/webp");
+              headers.set("Cache-Control", "public, max-age=31536000, immutable");
+              headers.set("Vary", "Accept");
+              return new Response(wres.body, { status: 200, statusText: "OK", headers });
+            }
+          } catch (e) { /* cade pe original */ }
+        }
+        const ores = await env.ASSETS.fetch(request);
+        const headers = new Headers(ores.headers);
+        headers.set("Vary", "Accept");
+        return new Response(ores.body, { status: ores.status, statusText: ores.statusText, headers });
+      }
+
       return serveAsset(request, env);
     } catch (e) {
       if (!path.startsWith("/api/")) return env.ASSETS.fetch(request);
