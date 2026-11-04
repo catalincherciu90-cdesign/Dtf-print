@@ -711,9 +711,10 @@ REELS.forEach((r,i)=>{
   let loaded=false;
   const play=(mute)=>{if(loaded||!id)return;loaded=true;const f=document.createElement('iframe');f.src='https://www.tiktok.com/player/v1/'+id+'?autoplay=1&loop=1&controls=0&progress_bar=0&play_button=0&volume_control=0&fullscreen_button=0&timestamp=0&music_info=0&description=0&native_context_menu=0&rel=0'+(mute?'&muted=1':'');f.allow='autoplay; fullscreen; encrypted-media';f.allowFullscreen=true;f.title=r.t||'Reel TikTok';s.replaceChildren(f);if(r.u){const ov=document.createElement('a');ov.href=r.u;ov.target='_blank';ov.rel='noopener';ov.setAttribute('aria-label','Deschide pe TikTok');ov.style.cssText='position:absolute;inset:0;z-index:2';s.appendChild(ov);}};
   if(id){
-    b.onclick=()=>play(false); /* click = pornire cu sunet (gest utilizator) */
-    if('IntersectionObserver' in window){const io2=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){play(true);io2.disconnect();}}),{threshold:.55});io2.observe(c);}
-    else play(true);
+    /* Pornire DOAR la click (gest utilizator). Fără autoplay la scroll, ca să nu
+       se încarce toate iframe-urile TikTok deodată și să apară bannerul de cookies
+       TikTok pe fiecare video. Astfel se văd thumbnail-uri curate, cu buton de play. */
+    b.onclick=()=>play(false);
   } else if(r.u){b.onclick=()=>window.open(r.u,'_blank','noopener');}
   if(r.u){const im=document.createElement('img');im.alt=r.t||('Reel '+(i+1));im.loading='lazy';im.decoding='async';im.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .45s';s.appendChild(im);fetch('/api/tiktok/thumb?u='+encodeURIComponent(r.u)).then(x=>x.ok?x.json():null).then(d=>{if(d&&d.thumbnail){im.onload=()=>{im.style.opacity='1';b.style.background='linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.52))'};im.src=d.thumbnail;}if(d&&d.title&&!r.t){const cp=b.querySelector('.cap2');if(cp)cp.textContent=d.title;}}).catch(()=>{});}
   s.appendChild(b);c.appendChild(s);row.appendChild(c);
