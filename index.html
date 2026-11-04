@@ -307,18 +307,17 @@ nav .btn-dark{justify-self:end}
 .capbtn:hover{filter:brightness(1.15);transform:translateY(-1px)}
 .capback{display:inline-flex;align-items:center;gap:8px;background:rgba(0,0,0,.05);border:1px solid rgba(15,15,16,.12);border-radius:999px;padding:8px 16px;font:inherit;font-weight:600;font-size:14px;cursor:pointer;margin-bottom:14px}
 .capback:hover{background:rgba(0,0,0,.09)}
-.cfmts{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px}
-.cfmt{background:var(--glass2);border:1px solid var(--edge2);border-radius:999px;padding:8px 14px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;color:var(--ink);transition:background .15s,border-color .15s}
+.cfmts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px auto 4px;max-width:330px;width:100%}
+.cfmt{background:var(--glass2);border:1px solid var(--edge2);border-radius:14px;padding:10px 8px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;color:var(--ink);text-align:center;transition:background .15s,border-color .15s}
 .cfmt:hover{border-color:var(--y)}
 .cfmt.on{background:var(--y);border-color:transparent;color:#1a1a1a}
 .cfmt .cx{opacity:.65;font-weight:700;margin-left:3px}
 /* mobil: stivuit, centrat */
 .cwrap{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px}
-.cwrap .cfmts{justify-content:center}
-.csheet{position:relative;width:min(258px,62vw);aspect-ratio:87/100;background:#fff;border:2px solid #e0b949;border-radius:8px;padding:5px;margin:24px auto 12px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.csheet{position:relative;width:min(300px,78vw);aspect-ratio:100/87;background:#fff;border:2px solid #e0b949;border-radius:8px;padding:5px;margin:30px auto 12px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
 .cdim{position:absolute;color:var(--mute);font-size:11px;font-weight:600;white-space:nowrap}
-.cdim-w{top:-20px;left:0;right:0;text-align:center}
-.cdim-h{left:-32px;top:0;bottom:0;display:flex;align-items:center;writing-mode:vertical-rl;transform:rotate(180deg)}
+.cdim-w{top:-20px;left:0;right:0;text-align:right}
+.cdim-h{left:-30px;top:0;bottom:0;display:flex;align-items:center;writing-mode:vertical-rl;transform:rotate(180deg)}
 .cgrid{width:100%;height:100%;display:grid;gap:2px}
 .ccell{background:linear-gradient(160deg,#ffe488,#ffcf47);border:1px solid rgba(190,140,10,.35);border-radius:3px;display:grid;place-items:center;overflow:hidden;min-height:0;min-width:0}
 .ccell.ca{font-size:clamp(5px,1.5vw,10px);font-weight:800;color:#7a5e00;line-height:1}
@@ -333,13 +332,12 @@ nav .btn-dark{justify-self:end}
 .cwrap .cta{margin-top:16px;font-size:17px;padding:15px 24px;gap:14px;width:100%;justify-content:center}
 /* desktop: layout orizontal (ca în mockup) */
 @media(min-width:760px){
-  .cfmts{margin:16px 0 0}
-  .cwrap{display:grid;grid-template-columns:minmax(160px,210px) 1fr minmax(230px,38%);grid-template-rows:1fr auto;grid-template-areas:"chips num sheet" "price num cta";gap:22px 34px;align-items:start;text-align:left}
-  .cwrap .cfmts{grid-area:chips;margin:0;align-content:flex-start;align-self:start}
-  .cwrap .cnumwrap{grid-area:num;align-self:center;justify-self:center;text-align:center}
-  .cwrap .csheet{grid-area:sheet;align-self:start;justify-self:center;width:min(320px,100%);margin:22px 0 0}
-  .cwrap .cpw{grid-area:price;align-self:end;margin:0}
-  .cwrap .cta{grid-area:cta;align-self:end;justify-self:end;width:auto;margin:0}
+  .cwrap{display:grid;grid-template-columns:minmax(175px,215px) 1fr minmax(320px,46%);grid-template-rows:auto auto;grid-template-areas:"chips num sheet" "price price cta";gap:28px 34px;align-items:center;text-align:left}
+  .cwrap .cfmts{grid-area:chips;margin:0;max-width:none;align-self:center}
+  .cwrap .cnumwrap{grid-area:num;align-self:center;justify-self:center;text-align:center;margin:0}
+  .cwrap .csheet{grid-area:sheet;align-self:center;justify-self:end;width:min(460px,100%);margin:22px 0 0}
+  .cwrap .cpw{grid-area:price;align-self:start;margin:0}
+  .cwrap .cta{grid-area:cta;align-self:center;justify-self:end;width:auto;margin:0}
 }
 </style>
 </head>
@@ -396,11 +394,10 @@ nav .btn-dark{justify-self:end}
    <div id="pSlide2" hidden>
     <button class="capback" id="toPrices" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M19 12H5m6 6-6-6 6-6"/></svg>Prețuri</button>
     <div class="head"><h2>Ce încape pe 1 ml de folie?</h2></div>
-    <p class="note capintro">1 ml înseamnă 100 cm lungime × 87 cm lățime printabilă. Alege un format și vezi câte bucăți intră.</p>
     <div class="cwrap">
      <div class="cfmts" id="cFmts"></div>
-     <div class="csheet"><span class="cdim cdim-w">87 cm</span><span class="cdim cdim-h">100 cm = 1 ml</span><div class="cgrid" id="cGrid"></div></div>
      <div class="cnumwrap"><div class="cnum" id="cNum">24</div><div class="clbl" id="cLbl">de coli A5</div></div>
+     <div class="csheet"><span class="cdim cdim-w">100 cm = 1 ml</span><span class="cdim cdim-h">87 cm</span><div class="cgrid" id="cGrid"></div></div>
      <div class="cpw"><p class="cprice" id="cPrice"></p><p class="note cnote2">Calcul teoretic, fără spații între modele. În practică încap puțin mai puține bucăți. Prețurile nu includ TVA.</p></div>
      <button class="cta" type="button"><svg class="i"><use href="#up"/></svg>Trimite comanda<svg class="i"><use href="#arr"/></svg></button>
     </div>
@@ -629,8 +626,10 @@ tiers.forEach(t=>{
   function render(f){
     const c=cols(f), r=rows(f), total=c*r;
     fmts.querySelectorAll('.cfmt').forEach(b=>b.classList.toggle('on',b.dataset.k===f.k));
-    grid.style.gridTemplateColumns='repeat('+c+',1fr)';
-    grid.style.gridTemplateRows='repeat('+r+',1fr)';
+    /* Desen pe orizontală (landscape): 100 cm lățime × 87 cm înălțime.
+       Rotim grila 90° (coloane↔rânduri). Numărul total rămâne identic. */
+    grid.style.gridTemplateColumns='repeat('+r+',1fr)';
+    grid.style.gridTemplateRows='repeat('+c+',1fr)';
     let cells='';
     for(let i=0;i<total;i++) cells += isA(f) ? '<span class="ccell ca">'+f.n+'</span>' : '<span class="ccell"><i></i></span>';
     grid.innerHTML=cells;
@@ -641,7 +640,7 @@ tiers.forEach(t=>{
   }
   FMT.forEach(f=>{
     const b=document.createElement('button'); b.type='button'; b.className='cfmt'; b.dataset.k=f.k;
-    b.innerHTML=f.n+' <span class="cx">×'+cnt(f)+'</span>';
+    b.textContent=f.n;
     b.onclick=()=>render(f);
     fmts.appendChild(b);
   });
