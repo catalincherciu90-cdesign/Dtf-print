@@ -24,6 +24,8 @@ const MAX_FILE_MB = 20;
 const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
 const MAX_IMG_MB = 5;
 const MAX_IMG_BYTES = MAX_IMG_MB * 1024 * 1024;
+const MAX_VIDEO_MB = 20; // limită KV ~25MB/valoare; ținem clipuri scurte, comprimate
+const MAX_VIDEO_BYTES = MAX_VIDEO_MB * 1024 * 1024;
 const STATUSES = ["Nouă", "În lucru", "Trimisă", "Finalizată", "Anulată"];
 
 // ---- Conținut implicit (folosit dacă KV e gol) ----
@@ -301,6 +303,17 @@ function sniffImageType(buf) {
   if (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x38) return "image/gif";
   if (b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 &&
       b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50) return "image/webp";
+  return null;
+}
+
+// Validare video după magic bytes: MP4/MOV (box „ftyp"), WebM (EBML).
+function sniffVideoType(buf) {
+  const b = new Uint8Array(buf);
+  if (b.length < 12) return null;
+  // MP4 / MOV: bytes 4-7 = "ftyp"
+  if (b[4] === 0x66 && b[5] === 0x74 && b[6] === 0x79 && b[7] === 0x70) return "video/mp4";
+  // WebM / Matroska: EBML header 1A 45 DF A3
+  if (b[0] === 0x1a && b[1] === 0x45 && b[2] === 0xdf && b[3] === 0xa3) return "video/webm";
   return null;
 }
 
@@ -1541,14 +1554,42 @@ export default {
 
         if (segs[0] === "media") {
           const mid = segs[1];
-          // GET /api/media/:id — public (imaginea încărcată)
+          // GET /api/media/:id — public (imagine sau video încărcat).
+          // URL-ul de video poate avea extensie (…/:id.mp4); o ignorăm la căutare.
           if (mid && request.method === "GET") {
             if (!env.CONTENT) return err("Indisponibil.", 404);
-            const res = await env.CONTENT.getWithMetadata(MEDIA_PREFIX + mid, { type: "arrayBuffer" });
-            if (!res || !res.value) return err("Imagine inexistentă.", 404);
+            const key = MEDIA_PREFIX + mid.replace(/\.(mp4|webm|mov|m4v)$/i, "");
+            const res = await env.CONTENT.getWithMetadata(key, { type: "arrayBuffer" });
+            if (!res || !res.value) return err("Fișier inexistent.", 404);
             let type = (res.metadata && res.metadata.type) || "application/octet-stream";
-            // Nu servim niciodată SVG ca atare (poate conține script); îl forțăm la download.
             const isSvg = /svg/i.test(type);
+            const isVideo = /^video\//i.test(type);
+            if (isVideo) {
+              // Video: Content-Type corect, Accept-Ranges și suport Range (necesar pe iOS/Safari).
+              const buf = res.value;
+              const total = buf.byteLength;
+              const range = request.headers.get("Range");
+              const base = {
+                "Content-Type": type,
+                "Accept-Ranges": "bytes",
+                "Cache-Control": "public, max-age=31536000, immutable",
+                "X-Content-Type-Options": "nosniff",
+              };
+              const m = range && range.match(/bytes=(\d*)-(\d*)/);
+              if (m) {
+                let start = m[1] ? parseInt(m[1], 10) : 0;
+                let end = m[2] ? parseInt(m[2], 10) : total - 1;
+                if (isNaN(start) || start < 0) start = 0;
+                if (isNaN(end) || end >= total) end = total - 1;
+                if (start > end) return new Response(null, { status: 416, headers: { ...base, "Content-Range": "bytes */" + total } });
+                return new Response(buf.slice(start, end + 1), {
+                  status: 206,
+                  headers: { ...base, "Content-Range": "bytes " + start + "-" + end + "/" + total, "Content-Length": String(end - start + 1) },
+                });
+              }
+              return new Response(buf, { headers: { ...base, "Content-Length": String(total) } });
+            }
+            // Imagine (SVG forțat la download, poate conține script).
             return new Response(res.value, {
               headers: {
                 "Content-Type": isSvg ? "application/octet-stream" : type,
@@ -1558,6 +1599,23 @@ export default {
                 "Content-Disposition": isSvg ? "attachment" : "inline",
               },
             });
+          }
+          // POST /api/media/video — încărcare filmuleț propriu (auth). Stocat în KV.
+          if (mid === "video" && request.method === "POST") {
+            if (!(await requireAuth(request, env))) return err("Neautorizat.", 401);
+            if (!env.CONTENT) return err("KV neconfigurat.", 503);
+            const form = await request.formData();
+            const file = form.get("file");
+            if (!file || typeof file === "string" || !file.size) return err("Fără fișier.");
+            if (file.size > MAX_VIDEO_BYTES) return err("Filmuleț prea mare (max " + MAX_VIDEO_MB + " MB). Comprimă-l sau scurtează-l.");
+            const abuf = await file.arrayBuffer();
+            const vType = sniffVideoType(abuf);
+            if (!vType) return err("Doar fișiere video MP4 sau WebM sunt permise.");
+            const id = genId();
+            await env.CONTENT.put(MEDIA_PREFIX + id, abuf,
+              { metadata: { type: vType, name: String(file.name || "").slice(0, 80) } });
+            const ext = vType === "video/webm" ? ".webm" : ".mp4";
+            return json({ ok: true, id, url: "/api/media/" + id + ext });
           }
           // POST /api/media — încărcare imagine (auth)
           if (!mid && request.method === "POST") {
