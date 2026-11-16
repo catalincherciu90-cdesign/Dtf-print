@@ -240,7 +240,52 @@
     section.appendChild(h);
     buildInto(section, content.tiktok, "tiktok");
     form.appendChild(section);
+    form.appendChild(buildVideoUpload());
     loadTiktokStatus();
+  }
+
+  /* Upload filmuleț propriu (mp4) → KV, URL adăugat în lista de video. */
+  function buildVideoUpload() {
+    var sec = document.createElement("section");
+    sec.className = "edit-section";
+    var h = document.createElement("h2");
+    h.textContent = "Filmulețe proprii (video)";
+    sec.appendChild(h);
+    var p = document.createElement("p");
+    p.style.cssText = "margin:0 0 12px;color:var(--muted,#667);font-size:13.5px;line-height:1.6";
+    p.innerHTML = "Încarcă filmulețe scurte (<b>mp4 sau webm, max 20 MB</b>) sau lipește linkuri video directe în câmpul „Linkuri video\" de mai sus. Filmulețele proprii <b>rulează automat</b> pe site, fără TikTok și fără banner de cookies. Dacă pui un link de TikTok, rămâne embed TikTok.";
+    sec.appendChild(p);
+    var btn = document.createElement("button");
+    btn.type = "button"; btn.className = "btn btn--primary";
+    btn.textContent = "⬆ Încarcă filmuleț (mp4)";
+    var file = el("input", { type: "file", accept: "video/mp4,video/webm,video/*" });
+    file.style.display = "none";
+    btn.addEventListener("click", function () { file.click(); });
+    file.addEventListener("change", function () {
+      if (!file.files || !file.files.length) return;
+      var f = file.files[0];
+      if (f.size > 20 * 1024 * 1024) { alert("Filmuleț prea mare (max 20 MB). Comprimă-l sau scurtează-l."); file.value = ""; return; }
+      btn.disabled = true; btn.textContent = "Se încarcă… (nu închide pagina)";
+      var fd = new FormData(); fd.append("file", f, f.name);
+      fetch("/api/media/video", { method: "POST", headers: { Authorization: "Bearer " + token }, body: fd })
+        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+        .then(function (res) {
+          btn.disabled = false; btn.textContent = "⬆ Încarcă filmuleț (mp4)"; file.value = "";
+          if (!res.ok) { alert(res.d.error || "Eroare la încărcare."); return; }
+          if (!content.tiktok) content.tiktok = {};
+          if (!Array.isArray(content.tiktok.videos)) content.tiktok.videos = [];
+          content.tiktok.videos.push(res.d.url);
+          content.tiktok.enabled = true;
+          buildTiktok();
+          var m = $("tiktokMsg");
+          if (m) { m.textContent = "✓ Filmuleț încărcat. Apasă „Salvează” ca să apară pe site."; m.className = "form-msg is-ok"; }
+        })
+        .catch(function () { btn.disabled = false; btn.textContent = "⬆ Încarcă filmuleț (mp4)"; alert("Eroare de rețea."); });
+    });
+    var row = document.createElement("div"); row.className = "media-row";
+    row.appendChild(btn);
+    sec.appendChild(row); sec.appendChild(file);
+    return sec;
   }
 
   function buildSocial() {
